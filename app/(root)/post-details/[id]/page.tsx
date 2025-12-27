@@ -1,0 +1,50 @@
+import { Metadata } from 'next';
+import PostList from './_components/post-list';
+import PageHeader from '@/components/shared/page-header';
+import NavbarHeight from '@/components/shared/navbar-height';
+import PostDetails from './_components/post-details';
+import { feedPost } from '@/data';
+
+type ParamsProps = {
+  params: Promise<{ id: string }>;
+};
+
+export async function generateMetadata({
+  params,
+}: ParamsProps): Promise<Metadata> {
+  const { id } = await params;
+
+  const post = feedPost.find((o) => String(o.id) == id);
+
+  return {
+    title: post ? `${post.title}` : 'Post Details',
+  };
+}
+
+const PostDetailsPage = async ({ params }: ParamsProps) => {
+  const { id } = await params;
+
+  const post = feedPost.find((o) => String(o.id) == id);
+
+  if (!post) {
+    return;
+  }
+  return (
+    <div>
+      <NavbarHeight />
+      <PageHeader
+        title="Find your best workout instructions here..."
+        subTitle="Updates each week on Sunday!"
+      />
+
+      <div className="container mb-10">
+        <div className="grid items-start gap-10 lg:grid-cols-[5fr_7fr]">
+          <PostDetails post={post} />
+          <PostList />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PostDetailsPage;
