@@ -19,6 +19,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
+import { usePathname } from 'next/navigation';
 
 export default function PostCard({
   post,
@@ -27,6 +28,7 @@ export default function PostCard({
   post: PostCardProp;
   layout?: 'fixed' | 'auto';
 }) {
+  const pathname = usePathname();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [curActiveImg, setCurActiveImg] = useState(1);
 
@@ -65,7 +67,7 @@ export default function PostCard({
       onMouseLeave={handleMouseLeave}
       className={cn(
         'group relative z-1 block overflow-hidden rounded-2xl border text-white transition-all duration-300 after:absolute after:inset-0 after:-z-1 after:bg-[linear-gradient(180deg,rgba(0,0,0,0.00)_40%,rgba(0,0,0,0.60)_80%)] md:rounded-3xl lg:rounded-4xl',
-        layout && 'mb-4',
+        layout && pathname !== '/' && 'mb-4',
       )}
     >
       {post.media.type === 'image' ? (

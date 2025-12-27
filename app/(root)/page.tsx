@@ -7,7 +7,7 @@ const HomePage = () => {
   return (
     <>
       <HeroSection />
-      <div className="space-y-11">
+      <div className="space-y-10">
         <ExclusiveDrops />
         <TrendingSessions />
         <HotDeals />
