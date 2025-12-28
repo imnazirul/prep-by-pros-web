@@ -25,15 +25,15 @@ export default function TrackingPage() {
             subTitle="Updates appear in real time as it moves!"
           />
 
-          <div className="container mx-auto px-4 py-8">
-            <div className="grid gap-8 lg:grid-cols-[5fr_7fr] lg:gap-10">
-              <div>
+          <div className="container mb-10">
+            <div className="grid gap-8 lg:gap-10 xl:grid-cols-12">
+              <div className="xl:col-span-5">
                 <h3 className="text-black-10 mb-6 text-2xl font-medium md:text-3xl lg:w-4xl">
                   Tracking Order Summary
                 </h3>
                 <TrackingList />
               </div>
-              <div>
+              <div className="xl:col-span-7">
                 <h3 className="text-black-10 mb-6 text-2xl font-medium md:text-3xl lg:w-4xl">
                   Order ID: #492KILAP2
                 </h3>

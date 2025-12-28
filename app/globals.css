@@ -169,6 +169,10 @@ html body[data-scroll-locked] {
   margin-right: 0 !important;
 }
 
+body {
+  @apply overflow-x-hidden;
+}
+
 .prose {
   @apply prose prose-headings:font-semibold! prose-headings:text-black-10! prose-h3:text-[1.5rem]! prose-h2:text-[1.75rem] prose-p:text-black-7 prose-p:text-[1.25rem] prose-img:rounded-3xl mx-auto max-w-full text-base;
 }
