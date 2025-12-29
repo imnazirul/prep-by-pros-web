@@ -26,15 +26,15 @@ export default function TrackingCard({
   const statusConfig = {
     ongoing: {
       label: 'Ongoing',
-      className: `bg-[#FB923C] text-black-4 group-hover:bg-[#FFEDD5] group-hover:text-[#FB923C] ${isActive && 'bg-[#FFEDD5]! text-[#FB923C]!'}`,
+      className: `bg-[#FB923C] text-black-4 group-hover:bg-[#FFEDD5] group-hover:text-[#F97316] ${isActive && 'bg-[#FFEDD5]! text-[#F97316]!'}`,
     },
     completed: {
       label: 'Completed',
-      className: `bg-[#16A34A] text-black-4 group-hover:bg-[#FFEDD5] group-hover:text-[#16A34A] ${isActive && 'bg-[#FFEDD5]! text-[#16A34A]!'}`,
+      className: `bg-[#16A34A] text-black-4 group-hover:bg-[#DCFCE7] group-hover:text-[#16A34A] ${isActive && 'bg-[#DCFCE7]! text-[#16A34A]!'}`,
     },
     cancelled: {
       label: 'Cancelled',
-      className: `bg-[#DC2626] text-black-4 group-hover:bg-[#FFEDD5] group-hover:text-[#DC2626] ${isActive && 'bg-[#FFEDD5]! text-[#DC2626]!'}`,
+      className: `bg-[#DC2626] text-black-4 group-hover:bg-[#FEE2E2] group-hover:text-[#DC2626] ${isActive && 'bg-[#FEE2E2]! text-[#DC2626]!'}`,
     },
   };
 

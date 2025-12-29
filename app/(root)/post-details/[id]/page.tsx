@@ -1,9 +1,8 @@
 import { Metadata } from 'next';
-import PostList from './_components/post-list';
+import { feedPost } from '@/data';
 import PageHeader from '@/components/shared/page-header';
 import NavbarHeight from '@/components/shared/navbar-height';
-import PostDetails from './_components/post-details';
-import { feedPost } from '@/data';
+import PostGridContainer from './_components/post-grid-container';
 
 type ParamsProps = {
   params: Promise<{ id: string }>;
@@ -38,10 +37,7 @@ const PostDetailsPage = async ({ params }: ParamsProps) => {
       />
 
       <div className="container mb-10">
-        <div className="grid items-start gap-10 lg:grid-cols-[5fr_7fr]">
-          <PostDetails post={post} />
-          <PostList />
-        </div>
+        <PostGridContainer post={post} />
       </div>
     </div>
   );

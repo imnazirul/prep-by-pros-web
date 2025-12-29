@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import Image, { type ImageProps } from "next/image";
-import { useState } from "react";
+import Image, { type ImageProps } from 'next/image';
+import { useState } from 'react';
 
 export interface CustomImageProps extends ImageProps {
-  fallbackSrc?: ImageProps["src"];
+  fallbackSrc?: ImageProps['src'];
 }
 
 const CustomImage = ({
   src,
-  fallbackSrc = "/images/fallback.jpeg",
+  fallbackSrc = '/images/fallback.jpeg',
   alt,
   onError,
   ...props
 }: CustomImageProps) => {
-  const [currentSrc, setCurrentSrc] = useState<ImageProps["src"]>(src);
+  const [currentSrc, setCurrentSrc] = useState<ImageProps['src']>(src);
 
   return (
     <Image
@@ -27,6 +27,7 @@ const CustomImage = ({
         }
         onError?.(e);
       }}
+      loading="lazy"
     />
   );
 };

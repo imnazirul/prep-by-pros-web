@@ -10,6 +10,7 @@ import PostCard from '@/components/shared/post-card';
 const PostList = () => {
   const [tab, setTab] = useState<'ALL' | 'FEED' | 'TRENDING'>('ALL');
 
+  const filteredData = feedPost.filter((post) => !post.is_lock);
   return (
     <section>
       <div className="container">
@@ -53,7 +54,7 @@ const PostList = () => {
           </div>
 
           <div className="mb-10 gap-4 sm:columns-2 md:columns-3 xl:columns-4 2xl:columns-5">
-            {feedPost.map((post) => (
+            {filteredData.map((post) => (
               <PostCard key={post.id} layout="auto" post={post} />
             ))}
           </div>

@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
   CustomCountryBox,
   CustomInputBox,
+  CustomNumberBox,
   CustomRadioBox,
   CustomSelectBox,
 } from '@/components/shared/custom-input';
@@ -90,7 +91,7 @@ const ProfileForm = () => {
             },
           ]}
         />
-        <CustomCountryBox
+        <CustomNumberBox
           icon="call"
           label="Phone Number"
           placeholder="Enter Name"

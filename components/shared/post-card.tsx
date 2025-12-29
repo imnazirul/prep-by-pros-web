@@ -76,7 +76,8 @@ export default function PostCard({
             <img
               src={post.media.images[0]}
               alt={post.title}
-              className="h-full w-full object-cover"
+              className="relative -z-1 h-full w-full object-cover"
+              loading="lazy"
             />
           ) : (
             <div className="relative -z-1 aspect-432/320">
@@ -102,7 +103,10 @@ export default function PostCard({
 
       <div className="absolute inset-0 flex flex-col justify-between p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 rounded-full bg-[#A3A3A33D] p-1.5 pr-3 backdrop-blur-2xl">
+          <Link
+            href={`/instructor/${post.id}`}
+            className="flex items-center gap-2 rounded-full bg-[#A3A3A33D] p-1.5 pr-3 backdrop-blur-[20px]"
+          >
             <Avatar className="size-10">
               <AvatarImage src={post.profile.image} className="bg-cover" />
               <AvatarFallback className="bg-primary text-xs">
@@ -115,13 +119,13 @@ export default function PostCard({
                 {timeAgoShort(post.profile.last_active)}
               </span>
             </div>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-1">
             {post.has_subscribe && (
               <Button
                 variant="secondary"
-                className="text-black-4 border-0 bg-[#A3A3A3]/25 text-base backdrop-blur-2xl hover:bg-[#A3A3A3]/35 hover:text-white"
+                className="text-black-4 border-0 bg-[#A3A3A33D] text-base backdrop-blur-[20px] hover:bg-[#A3A3A3]/35 hover:text-white"
               >
                 Subscribe
               </Button>
@@ -130,7 +134,7 @@ export default function PostCard({
           </div>
         </div>
 
-        <div className="flex items-end gap-10">
+        <div className="flex items-end gap-6">
           <div className="flex-1">
             <div className="mb-3 flex items-center gap-4 text-base">
               <div className="flex items-center gap-1.5">
@@ -155,8 +159,6 @@ export default function PostCard({
                 post.description
               )}
             </p>
-
-            {/* <Description text={post.description} /> */}
 
             {post.tags && post.tags.length > 0 && (
               <p className="text-black-4 line-clamp-1 text-sm">
@@ -275,7 +277,7 @@ const OptionButton = () => {
         <Button
           size={'icon'}
           variant={'outline'}
-          className="border-0 bg-[#A3A3A3]/25 backdrop-blur-2xl hover:bg-[#A3A3A3]/35 hover:text-white"
+          className="border-0 bg-[#A3A3A33D] backdrop-blur-[20px] hover:bg-[#A3A3A3]/35 hover:text-white"
         >
           <Icon name="more_vertical" height={24} width={24} />
         </Button>

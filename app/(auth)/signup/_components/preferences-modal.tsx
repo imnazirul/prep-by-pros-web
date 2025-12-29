@@ -77,10 +77,25 @@ const PreferenceModal = ({
             onSelect={setSelectedPosition}
           />
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             <h3 className="text-black-12 text-xl font-semibold md:text-2xl">
               Teams
             </h3>
+
+            <div className="border-black-5 flex h-14 items-center gap-1.5 rounded-full border p-4">
+              <Icon
+                name="search"
+                height={24}
+                width={24}
+                className="text-black-6 shrink-0"
+              />
+              <input
+                type="text"
+                className="text-black-10 placeholder:text-black-6 flex-1 border-0 text-base outline-0"
+                placeholder="Search by team name or loaction"
+              />
+            </div>
+
             <div className="flex flex-wrap gap-4">
               {teams.map((team) => {
                 return (
@@ -135,7 +150,7 @@ const FilterGroup = <T extends string>({
   onSelect,
 }: FilterGroupProps<T>) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <h3 className="text-black-12 text-xl font-semibold md:text-2xl">
         {title}
       </h3>

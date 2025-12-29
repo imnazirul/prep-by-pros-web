@@ -15,7 +15,7 @@ const settingsMenu = [
     icon: 'user_2' as IconName,
   },
   {
-    label: 'My orders',
+    label: 'Order History',
     href: '/order-history',
     icon: 'shopping_bag' as IconName,
   },

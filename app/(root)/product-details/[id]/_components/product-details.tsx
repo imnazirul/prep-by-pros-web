@@ -165,7 +165,7 @@ const ProductDetails = ({ product }: { product: ProductCardProp }) => {
                 }}
                 className="w-full rounded-full py-6 text-base font-semibold"
               >
-                Buy Now
+                Add to cart
               </Button>
             </div>
           </div>

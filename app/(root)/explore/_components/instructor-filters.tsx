@@ -30,7 +30,7 @@ export default function InstructorFilters() {
                   width={24}
                 />
               }
-              className="w-fit border-0 p-0 text-lg font-medium shadow-none focus-visible:ring-0"
+              className="w-fit cursor-pointer border-0 p-0 text-lg font-medium shadow-none focus-visible:ring-0"
             >
               <SelectValue placeholder="Sports" />
             </SelectTrigger>
@@ -58,7 +58,7 @@ export default function InstructorFilters() {
                   width={24}
                 />
               }
-              className="w-fit border-0 p-0 text-lg font-medium shadow-none focus-visible:ring-0"
+              className="w-fit cursor-pointer border-0 p-0 text-lg font-medium shadow-none focus-visible:ring-0"
             >
               <SelectValue placeholder="Gender" />
             </SelectTrigger>
@@ -85,7 +85,7 @@ export default function InstructorFilters() {
                   width={24}
                 />
               }
-              className="w-fit border-0 p-0 text-lg font-medium shadow-none focus-visible:ring-0"
+              className="w-fit cursor-pointer border-0 p-0 text-lg font-medium shadow-none focus-visible:ring-0"
             >
               <SelectValue placeholder="Position" />
             </SelectTrigger>
@@ -93,34 +93,6 @@ export default function InstructorFilters() {
               <SelectGroup>
                 <SelectItem value="Mid">Mid</SelectItem>
                 <SelectItem value="Top">Top</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </Button>
-
-        <Button variant="secondary" className="p-1.5 pr-3.5">
-          <Avatar className="size-9">
-            <AvatarImage src="/images/level.png" />
-          </Avatar>
-          <Select>
-            <SelectTrigger
-              arrowIcon={
-                <Icon
-                  name="arrow_down"
-                  className="text-black-8 size-6"
-                  height={24}
-                  width={24}
-                />
-              }
-              className="w-fit border-0 p-0 text-lg font-medium shadow-none focus-visible:ring-0"
-            >
-              <SelectValue placeholder="Level" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="Junior">Junior</SelectItem>
-                <SelectItem value="Medium">Medium</SelectItem>
-                <SelectItem value="Senior">Senior</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>

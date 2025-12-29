@@ -9,6 +9,7 @@ import VideoPlayer from '@/components/shared/video-player';
 import { useHeaderHeight } from '@/hooks/use-header-height';
 import PostImageSlider from '@/components/shared/PostImageSlider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Link from 'next/link';
 
 const PostDetails = ({ post }: { post: PostCardProp }) => {
   const headerHeight = useHeaderHeight();
@@ -22,10 +23,13 @@ const PostDetails = ({ post }: { post: PostCardProp }) => {
       style={{
         top: `calc(${headerHeight + 12}px)`,
       }}
-      className={cn('lg:sticky')}
+      className={cn('transition-all duration-300')}
     >
       <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <Link
+          href={`/instructor/${post.id}`}
+          className="flex items-center gap-3"
+        >
           <Avatar className="size-16">
             <AvatarImage src={post.profile.image} className="object-cover" />
             <AvatarFallback className="bg-primary text-xs">
@@ -40,7 +44,7 @@ const PostDetails = ({ post }: { post: PostCardProp }) => {
               {timeAgoShort(post.profile.last_active)}
             </span>
           </div>
-        </div>
+        </Link>
 
         <Button
           variant={'secondary'}

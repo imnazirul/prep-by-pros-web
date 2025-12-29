@@ -8,7 +8,6 @@ import {
 import Icon from '@/lib/icon';
 import { cn } from '@/lib/utils';
 import { Dispatch, SetStateAction, useRef, useState } from 'react';
-import { PlayCircle } from 'lucide-react';
 import { Dialog, DialogContent } from '../ui/dialog';
 
 const VideoPlayer = ({
@@ -107,9 +106,9 @@ const VideoPlayer = ({
       {!isPlaying && isModal && (
         <button
           onClick={togglePlay}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+          className="absolute top-1/2 left-1/2 flex size-24 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/25 backdrop-blur-[20px]"
         >
-          <Icon name="play" className="text-white" height={96} width={96} />
+          <Icon name="play" className="text-white" height={31} width={28} />
         </button>
       )}
 
@@ -120,18 +119,26 @@ const VideoPlayer = ({
           {isPlaying ? (
             <Icon
               name={'pause_circle'}
-              height={34}
-              width={34}
+              height={isModal ? 44 : 34}
+              width={isModal ? 44 : 34}
               className="text-white"
             />
           ) : (
-            <PlayCircle className="size-8.5 text-white" />
+            <Icon
+              name={'play_circle'}
+              height={isModal ? 44 : 34}
+              width={isModal ? 44 : 34}
+              className="text-white"
+            />
           )}
         </button>
 
         {/* Progress Bar */}
         <div
-          className="relative h-2 flex-1 cursor-pointer rounded-[10px] bg-[#BFBFBF]"
+          className={cn(
+            'relative flex-1 cursor-pointer rounded-[10px] bg-[#BFBFBF]',
+            isModal ? 'h-2.5' : 'h-2',
+          )}
           onClick={handleSeek}
         >
           <div
@@ -155,8 +162,8 @@ const VideoPlayer = ({
               <button className="shrink-0 cursor-pointer">
                 <Icon
                   name={isMuted || volume === 0 ? 'volume_mute' : 'volume_high'}
-                  height={34}
-                  width={34}
+                  height={isModal ? 44 : 34}
+                  width={isModal ? 44 : 34}
                   className="text-white"
                 />
               </button>
@@ -166,20 +173,24 @@ const VideoPlayer = ({
               className="flex h-70 w-fit min-w-fit flex-col items-center justify-center gap-4 overflow-hidden rounded-full bg-[#A3A3A33D] px-3 py-4 backdrop-blur-[20px]"
               align="center"
               alignOffset={60}
+              side="top"
             >
               {/* Volume Icon */}
               <button onClick={toggleMute} className="shrink-0">
                 <Icon
                   name={isMuted || volume === 0 ? 'volume_mute' : 'volume_high'}
-                  height={44}
-                  width={44}
+                  height={isModal ? 44 : 34}
+                  width={isModal ? 44 : 34}
                   className="text-white"
                 />
               </button>
 
               {/* Vertical Volume Slider */}
               <div
-                className="relative flex h-full w-2.5 cursor-pointer items-end rounded-[10px] bg-black/20"
+                className={cn(
+                  'relative flex h-full cursor-pointer items-end rounded-[10px] bg-black/20',
+                  isModal ? 'w-2.5' : 'w-2',
+                )}
                 onClick={handleVolumeChange}
               >
                 <div
@@ -198,8 +209,8 @@ const VideoPlayer = ({
           >
             <Icon
               name={isModal ? 'circle_arrow_shrink' : 'circle_arrow_expand'}
-              height={34}
-              width={34}
+              height={isModal ? 44 : 34}
+              width={isModal ? 44 : 34}
               className="text-white"
             />
           </button>

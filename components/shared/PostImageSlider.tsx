@@ -3,6 +3,8 @@
 
 import 'swiper/css';
 import 'swiper/css/pagination';
+import 'swiper/css/effect-fade';
+
 import type { Swiper as SwiperType } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, EffectFade, Autoplay } from 'swiper/modules';
@@ -16,41 +18,52 @@ const PostImageSlider = ({ images }: { images: string[] }) => {
   const swiperRef = useRef<SwiperType | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
+  const canLoop = images.length > 1;
+
   return (
     <>
       <div className="group relative grid aspect-708/611 overflow-hidden rounded-2xl md:rounded-3xl">
         <Swiper
-          onSwiper={(swiper) => (swiperRef.current = swiper)}
-          onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
           modules={[Pagination, EffectFade, Autoplay]}
           effect="fade"
+          fadeEffect={{ crossFade: true }}
           slidesPerView={1}
+          loop={canLoop}
+          autoplay={
+            canLoop ? { delay: 3000, disableOnInteraction: false } : false
+          }
+          onBeforeInit={(swiper) => {
+            swiperRef.current = swiper;
+          }}
+          onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
           pagination={{
             el: '.custom-pagination',
             clickable: true,
             renderBullet: (_, className) =>
               `<span class="${className} custom-bullet size-3! bg-white! opacity-50! cursor-pointer! [&.swiper-pagination-bullet-active]:opacity-100! rounded-full"></span>`,
           }}
-          autoplay={{
-            delay: 3000,
-            disableOnInteraction: false,
-          }}
           className="h-full w-full"
         >
           {images.map((img, index) => (
-            <SwiperSlide key={index} onClick={() => setOpen(true)}>
+            <SwiperSlide
+              key={index}
+              onClick={() => setOpen(true)}
+              className="relative"
+            >
               <img
                 src={img}
                 alt={`Post image ${index + 1}`}
-                className="h-full w-full object-cover"
+                className="absolute size-full h-full w-full object-cover"
               />
             </SwiperSlide>
           ))}
         </Swiper>
 
-        {/* Custom Navigation */}
+        {/* Prev */}
         <button
-          onClick={() => {
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
             swiperRef.current?.slidePrev();
           }}
           className="absolute top-1/2 left-4 z-10 -translate-y-1/2 cursor-pointer"
@@ -65,7 +78,11 @@ const PostImageSlider = ({ images }: { images: string[] }) => {
 
         {/* Next */}
         <button
-          onClick={() => swiperRef.current?.slideNext()}
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            swiperRef.current?.slideNext();
+          }}
           className="absolute top-1/2 right-4 z-10 -translate-y-1/2 cursor-pointer"
         >
           <Icon
@@ -79,6 +96,7 @@ const PostImageSlider = ({ images }: { images: string[] }) => {
         <div className="custom-pagination absolute bottom-5! z-50 mx-auto flex w-full justify-center" />
       </div>
 
+      {/* your modal stays same */}
       <PostSliderModal
         activeIndex={activeIndex}
         images={images}
@@ -154,7 +172,7 @@ const PostSliderModal = ({
       >
         <div
           ref={containerRef}
-          className="relative mx-auto grid aspect-1039/1200 h-[85vh] overflow-hidden rounded-2xl md:rounded-3xl"
+          className="relative mx-auto grid aspect-1039/1200 max-lg:w-[70vw] lg:h-[85vh]"
         >
           {/* Slides */}
           {images.map((img, idx) => (
@@ -167,7 +185,7 @@ const PostSliderModal = ({
               <img
                 src={img}
                 alt={`Slide ${idx + 1}`}
-                className="h-full w-full cursor-pointer object-cover"
+                className="mx-auto cursor-pointer rounded-2xl object-cover max-lg:h-auto max-lg:w-full md:rounded-3xl lg:h-full lg:w-auto"
                 onClick={() => console.log('Image clicked', idx)}
               />
             </div>

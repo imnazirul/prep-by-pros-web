@@ -5,6 +5,7 @@ import Icon, { IconName } from '@/lib/icon';
 import { CountryDropdown } from '../ui/country-dropdown';
 import CustomSelectModal from '../ui/custom-select-modal';
 import { Eye } from 'lucide-react';
+import { PhoneInput } from '../ui/phone-input';
 
 function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
   return (
@@ -336,6 +337,59 @@ export function CustomTextareaBox({
           className="text-black-10 placeholder:text-black-10 min-h-40 text-lg outline-0"
           data-slot="input"
           {...props}
+        />
+      </div>
+    </div>
+  );
+}
+
+type CustomNumberBoxProps = {
+  label: string;
+  icon: IconName;
+  placeholder: string;
+  disabled?: boolean;
+  isRequired?: boolean;
+  isOptional?: boolean;
+};
+
+export function CustomNumberBox({
+  icon,
+  label,
+  disabled,
+  isRequired = false,
+  isOptional = false,
+}: CustomNumberBoxProps) {
+  const [phoneNumber, setPhoneNumber] = React.useState('');
+
+  return (
+    <div
+      className={cn(
+        'has-[input:focus]:ring-ring/50 flex h-16 items-center rounded-full border border-[#D9D9D9] px-4 py-3 has-[input:focus]:ring-0',
+        disabled && 'pointer-events-none opacity-65',
+      )}
+    >
+      <div className="mr-2 shrink-0 border-r border-[#F0F0F0] pr-2">
+        <Icon
+          name={icon}
+          height={24}
+          width={24}
+          className={cn('text-black-8')}
+        />
+      </div>
+      <div className="grid flex-1 space-y-0.5">
+        <label className="text-black-7 text-sm">
+          {label}{' '}
+          {(isRequired || isOptional) && (
+            <span className="text-black-6">
+              ({isOptional ? 'Optional' : 'Required'})
+            </span>
+          )}
+        </label>
+        <PhoneInput
+          value={phoneNumber}
+          onChange={setPhoneNumber}
+          international
+          defaultCountry="US"
         />
       </div>
     </div>

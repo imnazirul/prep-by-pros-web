@@ -115,6 +115,9 @@ const ChangePassword = () => {
             <DialogHeader>
               <DialogTitle>Enter the OTP</DialogTitle>
               <DialogDescription>
+                We’ve sent an email to{' '}
+                <span className="text-[#3B82F6]">fssakib7@gmail.com</span>.{' '}
+                <br />
                 Verify your identity to reset your password
               </DialogDescription>
             </DialogHeader>

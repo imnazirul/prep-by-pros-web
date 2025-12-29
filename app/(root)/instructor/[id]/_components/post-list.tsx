@@ -55,10 +55,12 @@ const PostList = () => {
         </Button>
       </div>
 
-      <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filterList.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
+      <div className="mb-10 gap-4 sm:columns-2 lg:columns-3">
+        {filterList
+          .filter((post) => !post.is_lock)
+          .map((post) => (
+            <PostCard layout="auto" key={post.id} post={post} />
+          ))}
       </div>
     </div>
   );

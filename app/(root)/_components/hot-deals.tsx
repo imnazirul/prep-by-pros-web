@@ -9,9 +9,93 @@ import { ProductCard } from '@/components/shared/product-card';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import type { Swiper as SwiperType } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import { useEffect, useRef } from 'react';
 
 export function HotDeals() {
+  const swiperRef = useRef<SwiperType | null>(null);
+
+  useEffect(() => {
+    const swiper = swiperRef.current;
+    if (!swiper) return;
+
+    const el = swiper.el as HTMLElement;
+
+    // Tune these:
+    const STEP = 80; // smaller = more sensitive (trackpad), larger = less sensitive (mouse wheel)
+    const RESET_AFTER_MS = 140; // reset accumulation after user stops scrolling
+    const MAX_PER_FRAME = 2; // prevents jumping too many slides in one burst
+
+    let acc = 0; // accumulated delta
+    let rafId: number | null = null;
+    let resetTimer: number | null = null;
+
+    const normalizeDelta = (e: WheelEvent) => {
+      // Some browsers use deltaX on shift+wheel
+      let d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+
+      // Normalize delta based on deltaMode:
+      // 0 = pixels, 1 = lines, 2 = pages
+      if (e.deltaMode === 1) d *= 16; // approx px/line
+      if (e.deltaMode === 2) d *= window.innerHeight; // approx px/page
+
+      return d;
+    };
+
+    const process = () => {
+      rafId = null;
+
+      if (!swiperRef.current) return;
+
+      let moved = 0;
+
+      // Trigger slides while we have enough accumulated delta
+      while (Math.abs(acc) >= STEP && moved < MAX_PER_FRAME) {
+        // If Swiper is animating, wait for next frame (prevents jitter)
+        if (swiper.animating) break;
+
+        if (acc > 0) swiper.slideNext();
+        else swiper.slidePrev();
+
+        acc -= Math.sign(acc) * STEP;
+        moved += 1;
+      }
+
+      // If still enough delta left, continue next frame
+      if (Math.abs(acc) >= STEP && rafId === null) {
+        rafId = window.requestAnimationFrame(process);
+      }
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      if (!e.shiftKey) return;
+
+      // Only block scroll when shift is held
+      e.preventDefault();
+
+      const d = normalizeDelta(e);
+      acc += d;
+
+      // reset accumulation after a short pause
+      if (resetTimer) window.clearTimeout(resetTimer);
+      resetTimer = window.setTimeout(() => {
+        acc = 0;
+      }, RESET_AFTER_MS);
+
+      if (rafId === null) {
+        rafId = window.requestAnimationFrame(process);
+      }
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      if (rafId) window.cancelAnimationFrame(rafId);
+      if (resetTimer) window.clearTimeout(resetTimer);
+    };
+  }, []);
   return (
     <section className="mb-11">
       <div className="container">
@@ -32,8 +116,13 @@ export function HotDeals() {
         <Swiper
           spaceBetween={10}
           slidesPerView={1.3}
-          // wrapperClass="relative [@media(min-width:1860px)]:pl-[70px] [@media(min-width:1820px)]:pl-10 [@media(min-width:1920px)]:pl-20 [@media(min-width:2133px)]:pl-[96px] container mx-auto pb-1"
           wrapperClass="relative max-w-[1744px]! container"
+          mousewheel={true}
+          keyboard={{ enabled: true, onlyInViewport: true }}
+          onSwiper={(s) => {
+            swiperRef.current = s;
+          }}
+          loop={true}
           breakpoints={{
             400: {
               slidesPerView: 1.3,
@@ -55,9 +144,6 @@ export function HotDeals() {
               <ProductCard key={product.id} product={product} />
             </SwiperSlide>
           ))}
-          <SwiperSlide>
-            <div className="aspect-240/320"></div>
-          </SwiperSlide>
         </Swiper>
       </div>
     </section>

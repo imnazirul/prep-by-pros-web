@@ -6,6 +6,10 @@ import Filter from './_components/filter';
 import CateogoryBanner from './_components/cateogory-banner';
 import { categories } from '@/data';
 import { CategoryProp } from '@/lib/types';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
+import Icon from '@/lib/icon';
 
 export const metadata: Metadata = {
   title: 'Shop',
@@ -37,9 +41,24 @@ const ShopCategoryPage = async ({
 
       <section className="container">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <h3 className="text-black-10 text-2xl font-medium md:text-3xl lg:text-4xl">
-            {cateogory.value}
-          </h3>
+          <div className="flex items-center gap-4">
+            <Link
+              href={'/shop'}
+              className={cn(
+                buttonVariants({
+                  variant: 'default',
+                  size: 'icon',
+                }),
+                'size-13',
+              )}
+            >
+              <Icon height={24} width={24} name="arrow_left" />
+            </Link>
+
+            <h3 className="text-black-10 text-2xl font-medium md:text-3xl lg:text-4xl">
+              {cateogory.value}
+            </h3>
+          </div>
           <Filter />
         </div>
       </section>

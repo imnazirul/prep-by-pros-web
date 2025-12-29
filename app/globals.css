@@ -209,3 +209,22 @@ body {
     opacity: 1;
   }
 }
+
+/* .corner-shape {
+  corner-shape: squircle;
+} */
+
+/* Chrome, Edge, Safari */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Firefox */
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+
+/* IE / old Edge */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+}

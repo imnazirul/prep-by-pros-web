@@ -476,7 +476,7 @@ export const feedPost: PostCardProp[] = [
     media: {
       type: 'image',
       images: [
-        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        '/images/posts/1.png',
         'https://images.unsplash.com/photo-1570498839593-e565b39455fc?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       ],
     },
@@ -491,6 +491,50 @@ export const feedPost: PostCardProp[] = [
   },
   {
     id: 2,
+    title: 'Forehand domination at a pitch drill',
+    description:
+      'Learn essential tennis techniques as a pro coach breaks down form, footwork, and swing tips to boost your game. Perfect for beginners and intermediate players! 🎾️',
+    views: '1.2k',
+    media: {
+      type: 'image',
+      images: [
+        '/images/posts/2.png',
+        'https://images.unsplash.com/photo-1570498839593-e565b39455fc?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      ],
+    },
+    profile: {
+      image:
+        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      name: 'Brooke Mason',
+      last_active: new Date(new Date().getTime() - 23 * 60 * 1000),
+    },
+    category: 'Tennis',
+    share: '36',
+  },
+  {
+    id: 3,
+    title: 'Forehand domination at a pitch drill',
+    description:
+      'Learn essential tennis techniques as a pro coach breaks down form, footwork, and swing tips to boost your game. Perfect for beginners and intermediate players! 🎾️',
+    views: '1.2k',
+    media: {
+      type: 'image',
+      images: [
+        '/images/posts/3.png',
+        'https://images.unsplash.com/photo-1570498839593-e565b39455fc?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      ],
+    },
+    profile: {
+      image:
+        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      name: 'Brooke Mason',
+      last_active: new Date(new Date().getTime() - 23 * 60 * 1000),
+    },
+    category: 'Tennis',
+    share: '36',
+  },
+  {
+    id: 4,
     title: "Explosive Q's and power at its pitch lab",
     description: 'Shape your core 6 times 🔥',
     tags: ['football', 'EPL', 'derby', 'Turkish', 'kl8'],
@@ -510,7 +554,7 @@ export const feedPost: PostCardProp[] = [
     share: '36',
   },
   {
-    id: 3,
+    id: 5,
     title: 'Learn the rhythm in every mid-tempo strike',
     description: 'Strike the right rhythm 🎾',
     views: '1k',
@@ -528,8 +572,9 @@ export const feedPost: PostCardProp[] = [
     category: 'Soccer',
     share: '36',
   },
+
   {
-    id: 4,
+    id: 6,
     title: 'Learn how to ignite power at a beach',
     description: 'Key drills to quick on 5 waves',
     views: '1.5k',
@@ -548,67 +593,24 @@ export const feedPost: PostCardProp[] = [
     share: '36',
   },
   {
-    id: 5,
-    title: "Explosive Q's and power at its pitch lab",
-    description: 'Shape your core 6 times 🔥',
-    tags: ['football', 'EPL', 'derby', 'Turkish', 'kl8'],
-    views: '1k',
-    media: {
-      type: 'video',
-      src: '/videos/video.mp4',
-      duration: '5:34',
-    },
-    profile: {
-      image:
-        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      name: 'Jonathan Baker',
-      last_active: new Date(new Date().getTime() - 2 * 60 * 60 * 1000),
-    },
-    category: 'Basketball',
-    share: '36',
-  },
-  {
-    id: 6,
-    title: "Explosive Q's and power at its pitch lab",
-    description: 'Shape your core 6 times 🔥',
-    tags: ['football', 'EPL', 'derby', 'Turkish', 'kl8'],
-    views: '1k',
-    media: {
-      type: 'video',
-      src: '/videos/video.mp4',
-      duration: '5:34',
-    },
-    profile: {
-      image:
-        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      name: 'Jonathan Baker',
-      last_active: new Date(new Date().getTime() - 2 * 60 * 60 * 1000),
-    },
-    category: 'Basketball',
-    share: '36',
-  },
-  {
     id: 7,
-    title: 'Forehand domination at a pitch drill',
-    description:
-      'Learn essential tennis techniques as a pro coach breaks down form, footwork, and swing tips to boost your game. Perfect for beginners and intermediate players! 🎾️',
-    views: '1.2k',
+    title: "Explosive Q's and power at its pitch lab",
+    description: 'Shape your core 6 times 🔥',
+    tags: ['football', 'EPL', 'derby', 'Turkish', 'kl8'],
+    views: '1k',
     media: {
-      type: 'image',
-      images: [
-        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-        'https://images.unsplash.com/photo-1570498839593-e565b39455fc?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      ],
+      type: 'video',
+      src: '/videos/video.mp4',
+      duration: '5:34',
     },
     profile: {
       image:
         'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      name: 'Brooke Mason',
-      last_active: new Date(new Date().getTime() - 23 * 60 * 1000),
+      name: 'Jonathan Baker',
+      last_active: new Date(new Date().getTime() - 2 * 60 * 60 * 1000),
     },
-    category: 'Tennis',
+    category: 'Basketball',
     share: '36',
-    is_lock: true,
   },
   {
     id: 8,
@@ -632,84 +634,6 @@ export const feedPost: PostCardProp[] = [
   },
   {
     id: 9,
-    title: 'Learn the rhythm in every mid-tempo strike',
-    description: 'Strike the right rhythm 🎾',
-    views: '1k',
-    media: {
-      type: 'video',
-      src: '/videos/movie.mp4',
-      duration: '5:34',
-    },
-    profile: {
-      image:
-        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      name: 'Jasmine Bell',
-      last_active: new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000),
-    },
-    category: 'Soccer',
-    share: '36',
-  },
-  {
-    id: 10,
-    title: 'Learn how to ignite power at a beach',
-    description: 'Key drills to quick on 5 waves',
-    views: '1.5k',
-    media: {
-      type: 'video',
-      src: '/videos/video-2.mp4',
-      duration: '5:34',
-    },
-    profile: {
-      image:
-        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      name: 'Michelle James',
-      last_active: new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000),
-    },
-    category: 'Fitness',
-    share: '36',
-  },
-  {
-    id: 11,
-    title: "Explosive Q's and power at its pitch lab",
-    description: 'Shape your core 6 times 🔥',
-    tags: ['football', 'EPL', 'derby', 'Turkish', 'kl8'],
-    views: '1k',
-    media: {
-      type: 'video',
-      src: '/videos/video.mp4',
-      duration: '5:34',
-    },
-    profile: {
-      image:
-        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      name: 'Jonathan Baker',
-      last_active: new Date(new Date().getTime() - 2 * 60 * 60 * 1000),
-    },
-    category: 'Basketball',
-    share: '36',
-  },
-  {
-    id: 12,
-    title: "Explosive Q's and power at its pitch lab",
-    description: 'Shape your core 6 times 🔥',
-    tags: ['football', 'EPL', 'derby', 'Turkish', 'kl8'],
-    views: '1k',
-    media: {
-      type: 'video',
-      src: '/videos/video.mp4',
-      duration: '5:34',
-    },
-    profile: {
-      image:
-        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      name: 'Jonathan Baker',
-      last_active: new Date(new Date().getTime() - 2 * 60 * 60 * 1000),
-    },
-    category: 'Basketball',
-    share: '36',
-  },
-  {
-    id: 13,
     title: 'Forehand domination at a pitch drill',
     description:
       'Learn essential tennis techniques as a pro coach breaks down form, footwork, and swing tips to boost your game. Perfect for beginners and intermediate players! 🎾️',
@@ -728,6 +652,85 @@ export const feedPost: PostCardProp[] = [
       last_active: new Date(new Date().getTime() - 23 * 60 * 1000),
     },
     category: 'Tennis',
+    share: '36',
+    is_lock: true,
+  },
+  {
+    id: 10,
+    title: "Explosive Q's and power at its pitch lab",
+    description: 'Shape your core 6 times 🔥',
+    tags: ['football', 'EPL', 'derby', 'Turkish', 'kl8'],
+    views: '1k',
+    media: {
+      type: 'video',
+      src: '/videos/video.mp4',
+      duration: '5:34',
+    },
+    profile: {
+      image:
+        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      name: 'Jonathan Baker',
+      last_active: new Date(new Date().getTime() - 2 * 60 * 60 * 1000),
+    },
+    category: 'Basketball',
+    share: '36',
+  },
+  {
+    id: 11,
+    title: 'Learn the rhythm in every mid-tempo strike',
+    description: 'Strike the right rhythm 🎾',
+    views: '1k',
+    media: {
+      type: 'video',
+      src: '/videos/movie.mp4',
+      duration: '5:34',
+    },
+    profile: {
+      image:
+        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      name: 'Jasmine Bell',
+      last_active: new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000),
+    },
+    category: 'Soccer',
+    share: '36',
+  },
+  {
+    id: 12,
+    title: 'Learn how to ignite power at a beach',
+    description: 'Key drills to quick on 5 waves',
+    views: '1.5k',
+    media: {
+      type: 'video',
+      src: '/videos/video-2.mp4',
+      duration: '5:34',
+    },
+    profile: {
+      image:
+        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      name: 'Michelle James',
+      last_active: new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000),
+    },
+    category: 'Fitness',
+    share: '36',
+  },
+  {
+    id: 13,
+    title: "Explosive Q's and power at its pitch lab",
+    description: 'Shape your core 6 times 🔥',
+    tags: ['football', 'EPL', 'derby', 'Turkish', 'kl8'],
+    views: '1k',
+    media: {
+      type: 'video',
+      src: '/videos/video.mp4',
+      duration: '5:34',
+    },
+    profile: {
+      image:
+        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      name: 'Jonathan Baker',
+      last_active: new Date(new Date().getTime() - 2 * 60 * 60 * 1000),
+    },
+    category: 'Basketball',
     share: '36',
   },
   {
@@ -752,6 +755,48 @@ export const feedPost: PostCardProp[] = [
   },
   {
     id: 15,
+    title: 'Forehand domination at a pitch drill',
+    description:
+      'Learn essential tennis techniques as a pro coach breaks down form, footwork, and swing tips to boost your game. Perfect for beginners and intermediate players! 🎾️',
+    views: '1.2k',
+    media: {
+      type: 'image',
+      images: [
+        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        'https://images.unsplash.com/photo-1570498839593-e565b39455fc?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      ],
+    },
+    profile: {
+      image:
+        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      name: 'Brooke Mason',
+      last_active: new Date(new Date().getTime() - 23 * 60 * 1000),
+    },
+    category: 'Tennis',
+    share: '36',
+  },
+  {
+    id: 16,
+    title: "Explosive Q's and power at its pitch lab",
+    description: 'Shape your core 6 times 🔥',
+    tags: ['football', 'EPL', 'derby', 'Turkish', 'kl8'],
+    views: '1k',
+    media: {
+      type: 'video',
+      src: '/videos/video.mp4',
+      duration: '5:34',
+    },
+    profile: {
+      image:
+        'https://images.unsplash.com/photo-1695203063441-9042bcecbdf3?q=80&w=1025&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      name: 'Jonathan Baker',
+      last_active: new Date(new Date().getTime() - 2 * 60 * 60 * 1000),
+    },
+    category: 'Basketball',
+    share: '36',
+  },
+  {
+    id: 17,
     title: 'Learn the rhythm in every mid-tempo strike',
     description: 'Strike the right rhythm 🎾',
     views: '1k',

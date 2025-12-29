@@ -8,11 +8,12 @@ export function HeroSection() {
   const headerHeight = useHeaderHeight();
   return (
     <section
-      className="after:to-background before:bg-background/20 relative z-1 overflow-hidden bg-linear-to-b bg-cover bg-position-[center_17%] before:absolute before:inset-0 before:-z-2 after:absolute after:inset-x-0 after:bottom-0 after:-z-1 after:h-1/2 after:bg-linear-to-b after:from-transparent"
+      className="relative z-1 overflow-hidden bg-cover bg-position-[center_17%]"
       style={{
-        backgroundImage: "url('/images/hero-bg.jpg')",
+        backgroundImage: "url('/images/hero-bg.png')",
       }}
     >
+      <div className="absolute inset-0 -z-1 bg-[radial-gradient(175.06%_219.48%_at_50%_5.52%,rgba(254,253,244,0.16)_26.14%,rgba(254,253,244,0.50)_35.5%,#FEFDF4_42.58%)]"></div>
       <div
         className="container pb-16 sm:pb-28 md:pb-36 lg:pb-46.25"
         style={{
@@ -52,7 +53,7 @@ export function HeroSection() {
             <Button
               size="lg"
               variant="outline"
-              className="text-primary hover:text-primary hover:bg-black-4 border-0 bg-white"
+              className="text-primary hover:text-primary hover:bg-black-4 border-black-5 bg-white"
             >
               Subscribe to view all
             </Button>

@@ -18,6 +18,11 @@ const slides = [
     title: 'Train Like a Champion',
     description: 'Access elite-level training programs',
   },
+  {
+    image: '/images/auth-bg-3.jpg',
+    title: 'Train Like a Champion',
+    description: 'Access elite-level training programs',
+  },
 ];
 
 const AuthRightSlider = () => {
