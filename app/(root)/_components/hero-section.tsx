@@ -8,14 +8,19 @@ export function HeroSection() {
   const headerHeight = useHeaderHeight();
   return (
     <section
-      className="relative z-1 overflow-hidden bg-cover bg-position-[center_17%]"
+      className="relative z-1 overflow-hidden bg-cover bg-position-[center_27%]"
       style={{
         backgroundImage: "url('/images/hero-bg.png')",
       }}
     >
-      <div className="absolute inset-0 -z-1 bg-[radial-gradient(175.06%_219.48%_at_50%_5.52%,rgba(254,253,244,0.16)_26.14%,rgba(254,253,244,0.50)_35.5%,#FEFDF4_42.58%)]"></div>
       <div
-        className="container pb-16 sm:pb-28 md:pb-36 lg:pb-46.25"
+        className="absolute inset-0 -z-1"
+        style={{
+          background: `linear-gradient(88deg, rgba(254, 253, 244, 0.00) 70.95%, rgba(254, 253, 244, 0.40) 82.93%, rgba(254, 253, 244, 0.72) 99.61%), linear-gradient(265deg, rgba(254, 253, 244, 0.00) 43.97%, rgba(254, 253, 244, 0.32) 60.03%, rgba(254, 253, 244, 0.60) 71.86%, rgba(254, 253, 244, 0.80) 88.81%), radial-gradient(150.5% 78.98% at 50% 21.02%, rgba(254, 253, 244, 0.00) 36.65%, rgba(254, 253, 244, 0.70) 66.99%, #FEFDF4 94.01%)`,
+        }}
+      ></div>
+      <div
+        className="container pb-16 md:pb-20 lg:pb-27"
         style={{
           paddingTop: `calc(${headerHeight + 96}px)`,
         }}

@@ -97,7 +97,7 @@ export function HotDeals() {
     };
   }, []);
   return (
-    <section className="mb-11">
+    <section>
       <div className="container">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-black-12 text-2xl font-medium md:text-[32px]">

@@ -7,7 +7,7 @@ const HomePage = () => {
   return (
     <>
       <HeroSection />
-      <div className="grid gap-10">
+      <div className="grid gap-10 py-10 lg:py-18">
         <ExclusiveDrops />
         <TrendingSessions />
         <HotDeals />
