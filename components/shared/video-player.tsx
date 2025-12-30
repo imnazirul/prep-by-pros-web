@@ -7,7 +7,7 @@ import {
 } from '../ui/dropdown-menu';
 import Icon from '@/lib/icon';
 import { cn } from '@/lib/utils';
-import { Dispatch, SetStateAction, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent } from '../ui/dialog';
 
 const VideoPlayer = ({
@@ -15,15 +15,18 @@ const VideoPlayer = ({
   className,
   setIsModal,
   isModal,
+  isPlaying,
+  setIsPlaying,
 }: {
   src: string;
   className?: string;
   isModal: boolean;
   setIsModal: Dispatch<SetStateAction<boolean>>;
+  isPlaying: boolean;
+  setIsPlaying: Dispatch<SetStateAction<boolean>>;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(1);
@@ -88,6 +91,16 @@ const VideoPlayer = ({
     setIsMuted(newVolume === 0);
   };
 
+  /** Pause inline video when modal opens */
+  useEffect(() => {
+    if (!videoRef.current) return;
+
+    if (isModal) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    }
+  }, [isModal, setIsPlaying]);
+
   return (
     <div
       className={cn(
@@ -116,21 +129,12 @@ const VideoPlayer = ({
       <div className="absolute inset-x-0 bottom-0 z-10 flex items-center gap-6 bg-[#A3A3A33D] p-4 backdrop-blur-[20px]">
         {/* Play / Pause */}
         <button className="shrink-0 cursor-pointer" onClick={togglePlay}>
-          {isPlaying ? (
-            <Icon
-              name={'pause_circle'}
-              height={isModal ? 44 : 34}
-              width={isModal ? 44 : 34}
-              className="text-white"
-            />
-          ) : (
-            <Icon
-              name={'play_circle'}
-              height={isModal ? 44 : 34}
-              width={isModal ? 44 : 34}
-              className="text-white"
-            />
-          )}
+          <Icon
+            name={isPlaying ? 'pause_circle' : 'play_circle'}
+            height={isModal ? 44 : 34}
+            width={isModal ? 44 : 34}
+            className="text-white"
+          />
         </button>
 
         {/* Progress Bar */}
@@ -228,6 +232,7 @@ const VideoWrapper = ({
   className?: string;
 }) => {
   const [isModal, setIsModal] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   return (
     <>
@@ -236,6 +241,8 @@ const VideoWrapper = ({
         className={className}
         setIsModal={setIsModal}
         isModal={isModal}
+        isPlaying={isPlaying}
+        setIsPlaying={setIsPlaying}
       />
 
       <Dialog open={isModal} onOpenChange={setIsModal}>
@@ -248,6 +255,8 @@ const VideoWrapper = ({
             className={`aspect-1200/817`}
             setIsModal={setIsModal}
             isModal={isModal}
+            isPlaying={isPlaying}
+            setIsPlaying={setIsPlaying}
           />
         </DialogContent>
       </Dialog>
