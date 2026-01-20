@@ -1,29 +1,37 @@
-import Icon, { IconName } from '@/lib/icon';
+'use client';
+
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import Icon, { IconName } from '@/lib/icon';
+import { usePathname } from 'next/navigation';
 import { Button, buttonVariants } from '@/components/ui/button';
 
 export default function InstructorDetails({
-  isSubscribe,
+  isSubscribe = false,
 }: {
-  isSubscribe: boolean;
+  isSubscribe?: boolean;
 }) {
+  const pathname = usePathname();
+  const isCreator = pathname.startsWith('/creator');
+
   return (
     <div>
-      <div className="mb-5.5">
-        <Link
-          href={'/explore'}
-          className={cn(
-            buttonVariants({
-              variant: 'default',
-              size: 'icon',
-            }),
-            'size-13',
-          )}
-        >
-          <Icon height={24} width={24} name="arrow_left" />
-        </Link>
-      </div>
+      {!isCreator && (
+        <div className="mb-5.5">
+          <Link
+            href={'/explore'}
+            className={cn(
+              buttonVariants({
+                variant: 'default',
+                size: 'icon',
+              }),
+              'size-13',
+            )}
+          >
+            <Icon height={24} width={24} name="arrow_left" />
+          </Link>
+        </div>
+      )}
 
       <div
         style={{
@@ -56,25 +64,57 @@ export default function InstructorDetails({
       </div>
 
       <div className="grid grid-cols-[4.5fr_7.5fr] items-center gap-4 text-center">
-        <Button
-          className="bg-primary-200 text-primary hover:bg-primary-300 font-semibold"
-          variant={'secondary'}
-          size={'lg'}
-        >
-          {isSubscribe ? 'Unfollow' : 'Follow'}
-        </Button>
-        {isSubscribe ? (
+        {isCreator ? (
+          <Link
+            href={'/creator/profile'}
+            className={cn(
+              buttonVariants({
+                variant: 'secondary',
+                size: 'lg',
+              }),
+              'bg-primary-200 text-primary hover:bg-primary-300 font-semibold',
+            )}
+          >
+            Edit profile
+          </Link>
+        ) : (
           <Button
-            className="bg-black-8 hover:bg-black-10 font-semibold text-white"
+            className="bg-primary-200 text-primary hover:bg-primary-300 font-semibold"
             variant={'secondary'}
             size={'lg'}
           >
-            Unsubscribe now
+            Follow
           </Button>
+        )}
+
+        {isCreator ? (
+          <Link
+            href={'/creator/dashboard'}
+            className={cn(
+              buttonVariants({
+                variant: 'default',
+                size: 'lg',
+              }),
+            )}
+          >
+            Go to dashboard
+          </Link>
         ) : (
-          <Button variant={'default'} size={'lg'}>
-            Subscribe only for $9.9/month
-          </Button>
+          <>
+            {isSubscribe ? (
+              <Button
+                className="bg-black-8 hover:bg-black-10 font-semibold text-white"
+                variant={'secondary'}
+                size={'lg'}
+              >
+                Unsubscribe now
+              </Button>
+            ) : (
+              <Button variant={'default'} size={'lg'}>
+                Subscribe only for $9.9/month
+              </Button>
+            )}
+          </>
         )}
       </div>
 

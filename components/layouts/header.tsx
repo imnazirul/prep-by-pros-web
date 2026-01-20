@@ -9,19 +9,31 @@ import HeaderProfile from './header-profile';
 import HeaderSearch from './header-search';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/contexts/cart-context';
+import { usePostDialog } from '@/contexts/post-dialog-context';
+import { NotificationDropdown } from './header-notification';
 
-const navItems = [
+const playerNavItems = [
   { label: 'Home', href: '/' },
   { label: 'My feed', href: '/feed' },
   { label: 'Explore', href: '/explore' },
   { label: 'Shop', href: '/shop' },
 ];
 
+const creatorNavItems = [
+  { label: 'Home', href: '/creator' },
+  { label: 'Dashboard', href: '/creator/dashboard' },
+  { label: 'Subscribers', href: '/my-subscriptions' },
+  { label: 'Shop', href: '/shop' },
+];
+
 export function Header() {
   const { items, openCart } = useCart();
-
+  const { openPostDialog } = usePostDialog();
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+
+  // Logic to check if the user is in the creator section
+  const isCreatorSection = pathname.startsWith('/creator');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,6 +42,8 @@ export function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const navItems = isCreatorSection ? creatorNavItems : playerNavItems;
 
   return (
     <header
@@ -92,9 +106,14 @@ export function Header() {
         <div className="flex items-center gap-4">
           <HeaderSearch />
 
-          <Button variant={'default'} size={'icon'} className={cn('size-13')}>
-            <Icon name="notification" height={24} width={24} />
-          </Button>
+          {isCreatorSection && (
+            <Button onClick={openPostDialog} className="h-13">
+              <Icon name="plus_sign" height={24} width={24} />
+              Add new post
+            </Button>
+          )}
+
+          <NotificationDropdown />
 
           <HeaderProfile />
         </div>

@@ -105,10 +105,7 @@ export function ExclusiveDrops() {
           <h2 className="text-black-12 text-2xl font-medium md:text-[32px]">
             Exclusive drops from your pros
           </h2>
-          <Link
-            href={'/feed'}
-            className={cn(buttonVariants({ variant: 'default' }))}
-          >
+          <Link href={'/feed'} className={cn(buttonVariants({ variant: 'default' }))}>
             Go to feed
           </Link>
         </div>
@@ -117,7 +114,7 @@ export function ExclusiveDrops() {
       <div>
         <Swiper
           spaceBetween={10}
-          slidesPerView={1.15}
+          slidesPerView="auto"
           wrapperClass="relative max-w-[1744px]! container"
           mousewheel={true}
           keyboard={{ enabled: true, onlyInViewport: true }}
@@ -127,22 +124,12 @@ export function ExclusiveDrops() {
           loop={true}
           breakpoints={{
             400: {
-              slidesPerView: 1.3,
               spaceBetween: 16,
-            },
-            640: {
-              slidesPerView: 2,
-            },
-            1024: {
-              slidesPerView: 3,
-            },
-            1280: {
-              slidesPerView: 4.3,
             },
           }}
         >
           {filteredData.map((post) => (
-            <SwiperSlide key={post.id}>
+            <SwiperSlide key={post.id} className="w-108!">
               <PostCard layout="fixed" post={post} />
             </SwiperSlide>
           ))}

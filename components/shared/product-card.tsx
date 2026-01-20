@@ -26,14 +26,12 @@ export function ProductCard({
       }}
       className={cn(
         'group bg-card relative z-1 flex aspect-240/320 items-end overflow-hidden rounded-2xl bg-cover p-4 transition-all duration-300 after:absolute after:inset-0 after:-z-1 after:bg-[linear-gradient(180deg,rgba(0,0,0,0.00)_40%,rgba(0,0,0,0.40)_70%)]',
-        className,
+        className
       )}
     >
       <div className="grid w-full gap-1.5">
         <div className="flex items-center justify-between">
-          <h3 className="text-[26px] font-semibold text-white">
-            ${product.price}
-          </h3>
+          <h3 className="text-[26px] font-semibold text-white">${product.price}</h3>
           <Button
             onClick={(e) => {
               e.preventDefault();
@@ -57,9 +55,7 @@ export function ProductCard({
           </Button>
         </div>
 
-        <p className="text-black-5 line-clamp-1 text-sm">
-          {product.description}
-        </p>
+        <p className="text-black-5 line-clamp-1 text-sm">{product.description}</p>
       </div>
     </Link>
   );

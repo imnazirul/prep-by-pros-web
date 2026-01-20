@@ -228,3 +228,9 @@ body {
 .hide-scrollbar {
   -ms-overflow-style: none;
 }
+
+.recharts-wrapper *:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}

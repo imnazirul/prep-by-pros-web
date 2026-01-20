@@ -10,10 +10,11 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, EffectFade, Autoplay } from 'swiper/modules';
 
 import Icon from '@/lib/icon';
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { Dialog, DialogContent } from '../ui/dialog';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
-const PostImageSlider = ({ images }: { images: string[] }) => {
+const PostImageSlider = ({ images, className }: { images: string[]; className?: string }) => {
   const [open, setOpen] = useState(false);
   const swiperRef = useRef<SwiperType | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -22,16 +23,19 @@ const PostImageSlider = ({ images }: { images: string[] }) => {
 
   return (
     <>
-      <div className="group relative grid aspect-708/611 overflow-hidden rounded-2xl md:rounded-3xl">
+      <div
+        className={cn(
+          'group relative grid aspect-708/611 overflow-hidden rounded-2xl md:rounded-3xl',
+          className
+        )}
+      >
         <Swiper
           modules={[Pagination, EffectFade, Autoplay]}
           effect="fade"
           fadeEffect={{ crossFade: true }}
           slidesPerView={1}
           loop={canLoop}
-          autoplay={
-            canLoop ? { delay: 3000, disableOnInteraction: false } : false
-          }
+          autoplay={canLoop ? { delay: 3000, disableOnInteraction: false } : false}
           onBeforeInit={(swiper) => {
             swiperRef.current = swiper;
           }}
@@ -45,11 +49,7 @@ const PostImageSlider = ({ images }: { images: string[] }) => {
           className="h-full w-full"
         >
           {images.map((img, index) => (
-            <SwiperSlide
-              key={index}
-              onClick={() => setOpen(true)}
-              className="relative"
-            >
+            <SwiperSlide key={index} onClick={() => setOpen(true)} className="relative">
               <img
                 src={img}
                 alt={`Post image ${index + 1}`}
@@ -68,12 +68,7 @@ const PostImageSlider = ({ images }: { images: string[] }) => {
           }}
           className="absolute top-1/2 left-4 z-10 -translate-y-1/2 cursor-pointer"
         >
-          <Icon
-            name="circle_arrow_left"
-            width={44}
-            height={44}
-            className="text-white"
-          />
+          <Icon name="circle_arrow_left" width={44} height={44} className="text-white" />
         </button>
 
         {/* Next */}
@@ -85,24 +80,14 @@ const PostImageSlider = ({ images }: { images: string[] }) => {
           }}
           className="absolute top-1/2 right-4 z-10 -translate-y-1/2 cursor-pointer"
         >
-          <Icon
-            name="circle_arrow_right"
-            width={44}
-            height={44}
-            className="text-white"
-          />
+          <Icon name="circle_arrow_right" width={44} height={44} className="text-white" />
         </button>
 
         <div className="custom-pagination absolute bottom-5! z-50 mx-auto flex w-full justify-center" />
       </div>
 
       {/* your modal stays same */}
-      <PostSliderModal
-        activeIndex={activeIndex}
-        images={images}
-        open={open}
-        setOpen={setOpen}
-      />
+      <PostSliderModal activeIndex={activeIndex} images={images} open={open} setOpen={setOpen} />
     </>
   );
 };
@@ -166,10 +151,7 @@ const PostSliderModal = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent
-        className="border-0 bg-transparent p-0 sm:max-w-full"
-        showCloseButton={false}
-      >
+      <DialogContent className="border-0 bg-transparent p-0 sm:max-w-full" showCloseButton={false}>
         <div
           ref={containerRef}
           className="relative mx-auto grid aspect-1039/1200 max-lg:w-[70vw] lg:h-[85vh]"
@@ -212,12 +194,7 @@ const PostSliderModal = ({
             onClick={prevSlide}
             className="absolute top-1/2 left-4 z-20 -translate-y-1/2 cursor-pointer"
           >
-            <Icon
-              name="circle_arrow_left"
-              width={72}
-              height={72}
-              className="text-white"
-            />
+            <Icon name="circle_arrow_left" width={72} height={72} className="text-white" />
           </div>
 
           {/* Next Button */}
@@ -226,12 +203,7 @@ const PostSliderModal = ({
             onClick={nextSlide}
             className="absolute top-1/2 right-4 z-20 -translate-y-1/2 cursor-pointer"
           >
-            <Icon
-              name="circle_arrow_right"
-              width={72}
-              height={72}
-              className="text-white"
-            />
+            <Icon name="circle_arrow_right" width={72} height={72} className="text-white" />
           </div>
         </div>
       </DialogContent>

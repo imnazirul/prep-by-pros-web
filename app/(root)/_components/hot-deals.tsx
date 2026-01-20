@@ -100,22 +100,17 @@ export function HotDeals() {
     <section>
       <div className="container">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-black-12 text-2xl font-medium md:text-[32px]">
-            Hot deals right now
-          </h2>
-          <Link
-            href={'/shop'}
-            className={cn(buttonVariants({ variant: 'default' }))}
-          >
-            Shop
+          <h2 className="text-black-12 text-2xl font-medium md:text-[32px]">Hot deals right now</h2>
+          <Link href={'/shop'} className={cn(buttonVariants({ variant: 'default' }))}>
+            Go to shop
           </Link>
         </div>
       </div>
 
-      <div>
+      <div className="grid">
         <Swiper
           spaceBetween={10}
-          slidesPerView={1.3}
+          slidesPerView="auto"
           wrapperClass="relative max-w-[1744px]! container"
           mousewheel={true}
           keyboard={{ enabled: true, onlyInViewport: true }}
@@ -125,22 +120,12 @@ export function HotDeals() {
           loop={true}
           breakpoints={{
             400: {
-              slidesPerView: 1.3,
               spaceBetween: 16,
-            },
-            640: {
-              slidesPerView: 2,
-            },
-            1024: {
-              slidesPerView: 3,
-            },
-            1280: {
-              slidesPerView: 7.3,
             },
           }}
         >
           {products.map((product) => (
-            <SwiperSlide key={product.id}>
+            <SwiperSlide key={product.id} className="w-60!">
               <ProductCard key={product.id} product={product} />
             </SwiperSlide>
           ))}

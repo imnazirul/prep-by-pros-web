@@ -1,10 +1,12 @@
-import { CartProvider } from '@/contexts/cart-context';
 import './globals.css';
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Radio_Canada_Big } from 'next/font/google';
 import CartModal from '@/components/shared/cart-modal';
+import { CartProvider } from '@/contexts/cart-context';
+import { PostDialogProvider } from '@/contexts/post-dialog-context';
 import RedirectingModal from '@/components/shared/redirecting-modal';
-import { Suspense } from 'react';
+import { PostDialog } from '@/app/(root)/creator/_components/post-dialog';
 
 const radioCanadaBig = Radio_Canada_Big({
   variable: '--font-radio-canada-big',
@@ -32,7 +34,11 @@ export default function RootLayout({
       <body className={`${radioCanadaBig.variable} antialiased`}>
         <Suspense fallback={<></>}>
           <CartProvider>
-            {children}
+            <PostDialogProvider>
+              {children}
+
+              <PostDialog />
+            </PostDialogProvider>
 
             <CartModal />
             <RedirectingModal />

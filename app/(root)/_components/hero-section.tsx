@@ -1,11 +1,17 @@
 'use client';
 
 import Icon from '@/lib/icon';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { useHeaderHeight } from '@/hooks/use-header-height';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export function HeroSection() {
   const headerHeight = useHeaderHeight();
+  const pathname = usePathname();
+
+  const isCreatorSection = pathname.startsWith('/creator');
   return (
     <section
       className="relative z-1 overflow-hidden bg-cover bg-position-[center_27%]"
@@ -55,13 +61,18 @@ export function HeroSection() {
               />
               Play now
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="text-primary hover:text-primary hover:bg-black-4 border-black-5 bg-white"
+            <Link
+              href={isCreatorSection ? '/creator/profile' : '/'}
+              className={cn(
+                buttonVariants({
+                  variant: 'outline',
+                  size: 'lg',
+                }),
+                'text-primary hover:text-primary hover:bg-black-4 border-black-5 bg-white',
+              )}
             >
-              Subscribe to view all
-            </Button>
+              {isCreatorSection ? 'Go to profile' : 'Subscribe to view all'}
+            </Link>
           </div>
         </div>
       </div>

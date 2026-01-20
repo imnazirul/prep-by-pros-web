@@ -1,18 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from '../ui/dialog';
 import Icon from '@/lib/icon';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
-import { CustomInputBox, CustomSelectBox } from './custom-input';
 import ConfirmModal from './confirm-modal';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { CustomInputBox, CustomSelectBox } from './custom-input';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '../ui/dialog';
 
 type StepProp = 'LOADING' | 'ACCOUNT_TYPE' | 'VERIFY';
 
@@ -38,6 +33,7 @@ const RedirectingModal = () => {
         setStep('ACCOUNT_TYPE');
       }
     }, 3000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -47,25 +43,19 @@ const RedirectingModal = () => {
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent
-          showCloseButton={false}
-          className="w-full gap-0 sm:max-w-170"
-        >
+        <DialogContent showCloseButton={false} className="w-full gap-0 sm:max-w-170">
           {step === 'LOADING' ? (
             <div className="flex flex-col items-center justify-center lg:py-6">
               <Icon name={'logo'} height={88} width={155} />
-              <div className="mx-auto mt-8 mb-15 max-w-120.5 space-y-3 text-center">
+              <div className="mx-auto mt-8 max-w-120.5 space-y-3 text-center">
                 <DialogTitle>One more step</DialogTitle>
                 <DialogDescription>
                   Just a minute! We are redirecting you to our webapp...
                 </DialogDescription>
               </div>
 
-              <div className="flex items-center justify-center gap-3">
-                <span className="size-5 animate-bounce rounded-full bg-[#85DA96] [animation-duration:1.2s] [animation-timing-function:ease-in-out]"></span>
-                <span className="size-5 animate-bounce rounded-full bg-[#2CBC8C] [animation-delay:0.15s] [animation-duration:1.2s] [animation-timing-function:ease-in-out]"></span>
-                <span className="size-5 animate-bounce rounded-full bg-[#096F4D] [animation-delay:0.3s] [animation-duration:1.2s] [animation-timing-function:ease-in-out]"></span>
-                <span className="size-5 animate-bounce rounded-full bg-[#171717] [animation-delay:0.45s] [animation-duration:1.2s] [animation-timing-function:ease-in-out]"></span>
+              <div className="w-62.5 mx-auto">
+                <img src={'/images/loader.gif'} alt="Loader" className="w-full h-auto" />
               </div>
             </div>
           ) : step === 'ACCOUNT_TYPE' ? (
@@ -78,26 +68,18 @@ const RedirectingModal = () => {
                     Are you the player in action or the coach in charge?
                   </DialogDescription>
                 </div>
-                <div className="grid grid-cols-2 items-center gap-4 lg:h-[360px]">
+                <div className="grid grid-cols-2 items-center gap-4 lg:h-90">
                   <label
                     style={{
                       backgroundImage: `url('/images/player.png')`,
                     }}
                     className="relative z-1 flex aspect-280/300 cursor-pointer flex-col justify-end gap-3 overflow-hidden rounded-4xl bg-cover p-5 transition-all duration-300 after:absolute after:inset-0 after:-z-1 after:bg-[linear-gradient(180deg,rgba(0,0,0,0.00)_45.54%,rgba(0,0,0,0.60)_84.6%)] has-[input:checked]:aspect-304/360"
                   >
-                    <h3 className="text-[28px] font-semibold text-white">
-                      Player
-                    </h3>
+                    <h3 className="text-[28px] font-semibold text-white">Player</h3>
                     <p className="text-black-5">
-                      Sharpen your skills, track your progress & rise through
-                      the ranks
+                      Sharpen your skills, track your progress & rise through the ranks
                     </p>
-                    <input
-                      type="radio"
-                      hidden
-                      defaultChecked={true}
-                      name="type"
-                    />
+                    <input type="radio" hidden defaultChecked={true} name="type" />
                   </label>
 
                   <label
@@ -106,12 +88,9 @@ const RedirectingModal = () => {
                     }}
                     className="relative z-1 flex aspect-280/300 cursor-pointer flex-col justify-end gap-3 overflow-hidden rounded-4xl bg-cover p-5 transition-all duration-300 after:absolute after:inset-0 after:-z-1 after:bg-[linear-gradient(180deg,rgba(0,0,0,0.00)_45.54%,rgba(0,0,0,0.60)_84.6%)] has-[input:checked]:aspect-304/360"
                   >
-                    <h3 className="text-[28px] font-semibold text-white">
-                      Coach
-                    </h3>
+                    <h3 className="text-[28px] font-semibold text-white">Coach</h3>
                     <p className="text-black-5">
-                      Show your game, build legacy & lead next generation of
-                      champions
+                      Show your game, build legacy & lead next generation of champions
                     </p>
                     <input type="radio" hidden name="type" />
                   </label>
@@ -215,9 +194,7 @@ const RedirectingModal = () => {
                       <Icon name="upload" height={24} width={24} />
                     </div>
                     <ul className="text-black-7 list-inside list-disc text-sm">
-                      <li>
-                        Upload only 3 images that can confirm your identity
-                      </li>
+                      <li>Upload only 3 images that can confirm your identity</li>
                       <li>Only JPG, JPEG & PNG formats are supported</li>
                     </ul>
                   </div>
@@ -230,28 +207,21 @@ const RedirectingModal = () => {
                       <h4 className="text-black-10 max-w-58 text-base font-medium">
                         Choose image from device or drag them here
                       </h4>
-                      <p className="text-black-7 text-xs">
-                        Maximum file size: 10 MB
-                      </p>
+                      <p className="text-black-7 text-xs">Maximum file size: 10 MB</p>
                     </div>
                   </div>
 
                   <div className="mt-5 flex flex-wrap gap-3">
-                    {[
-                      '/images/upload-file-1.png',
-                      '/images/upload-file-2.png',
-                    ].map((file, index) => (
-                      <div key={index} className="relative h-35">
-                        <img
-                          src={file}
-                          className="h-full w-auto rounded-3xl"
-                          alt=""
-                        />
-                        <div className="bg-black-5 hover:bg-black-6 hover:text-red outline-background text-black-9 absolute top-1 right-1 flex size-6 translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full outline-2">
-                          <Icon name="close" height={13} width={13} />
+                    {['/images/upload-file-1.png', '/images/upload-file-2.png'].map(
+                      (file, index) => (
+                        <div key={index} className="relative h-35">
+                          <img src={file} className="h-full w-auto rounded-3xl" alt="" />
+                          <div className="bg-black-5 hover:bg-black-6 hover:text-red outline-background text-black-9 absolute top-1 right-1 flex size-6 translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full outline-2">
+                            <Icon name="close" height={13} width={13} />
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
                 </div>
               </div>
@@ -328,8 +298,7 @@ const RedirectingModal = () => {
         }}
         subTitle={
           <>
-            Congratulations{' '}
-            <span className="text-black-10 font-medium">Andrerw</span>, we’ve
+            Congratulations <span className="text-black-10 font-medium">Andrerw</span>, we’ve
             confirmed your details. Now you can go further to sign up
           </>
         }

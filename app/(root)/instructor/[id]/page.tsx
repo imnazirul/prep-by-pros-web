@@ -1,8 +1,7 @@
-import NavbarHeight from '@/components/shared/navbar-height';
+import PostList from '@/components/shared/post-list';
 import PageHeader from '@/components/shared/page-header';
-import React from 'react';
-import PostList from './_components/post-list';
-import InstructorDetails from './_components/instructor-details';
+import NavbarHeight from '@/components/shared/navbar-height';
+import InstructorDetails from '@/components/shared/instructor-details';
 
 const page = () => {
   return (

@@ -60,9 +60,15 @@ export default function PostCard({
     .map((n) => n[0])
     .join('');
 
+  const isCreator = pathname.startsWith('/creator');
+
   return (
     <Link
-      href={`/post-details/${post.id}`}
+      href={
+        isCreator
+          ? `/creator/profile/post/${post.id}`
+          : `/post-details/${post.id}`
+      }
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(

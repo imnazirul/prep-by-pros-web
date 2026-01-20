@@ -1,19 +1,12 @@
 'use client';
 
-import Link from 'next/link';
-import { cn } from '@/lib/utils';
 import { feedPost } from '@/data';
-import { buttonVariants } from '@/components/ui/button';
+import { useEffect, useRef } from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import type { Swiper as SwiperType } from 'swiper';
 import PostCard from '@/components/shared/post-card';
 
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import { useEffect, useRef } from 'react';
-import type { Swiper as SwiperType } from 'swiper';
-import { Swiper, SwiperSlide } from 'swiper/react';
-
-export function TrendingSessions() {
+const RecentUploads = () => {
   const swiperRef = useRef<SwiperType | null>(null);
 
   useEffect(() => {
@@ -96,26 +89,14 @@ export function TrendingSessions() {
       if (resetTimer) window.clearTimeout(resetTimer);
     };
   }, []);
-
-  const filteredData = feedPost.filter((post) => !post.is_lock);
   return (
-    <section>
-      <div className="container">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-black-12 text-2xl font-medium md:text-[32px]">
-            Trending sessions shaping the game
-          </h2>
-          <Link href={'/feed'} className={cn(buttonVariants({ variant: 'default' }))}>
-            Go to feed
-          </Link>
-        </div>
-      </div>
-
-      <div>
+    <div className="space-y-4">
+      <h4 className="text-2xl font-medium text-black-10">Recent uploads</h4>
+      <div className="grid">
         <Swiper
           spaceBetween={10}
           slidesPerView="auto"
-          wrapperClass="relative max-w-[1744px]! container"
+          wrapperClass="relative max-w-[1744px]! container px-0"
           mousewheel={true}
           keyboard={{ enabled: true, onlyInViewport: true }}
           onSwiper={(s) => {
@@ -128,13 +109,15 @@ export function TrendingSessions() {
             },
           }}
         >
-          {filteredData.map((post) => (
+          {feedPost.map((post) => (
             <SwiperSlide key={post.id} className="w-108!">
-              <PostCard layout="fixed" post={post} />
+              <PostCard layout="fixed" key={post.id} post={post} />
             </SwiperSlide>
           ))}
         </Swiper>
       </div>
-    </section>
+    </div>
   );
-}
+};
+
+export default RecentUploads;
