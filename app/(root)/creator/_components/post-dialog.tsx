@@ -91,8 +91,8 @@ export function PostDialog() {
       <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent showCloseButton={false} className="sm:max-w-265">
           <DialogHeader className="mb-8 flex items-center flex-row justify-between">
-            {imageConfirmed && <DialogTitle>Create New Post</DialogTitle>}
-            <PostSchedule />
+            <DialogTitle>Create New Post</DialogTitle>
+            {imageConfirmed && <PostSchedule />}
           </DialogHeader>
 
           {files.length === 0 ? (
