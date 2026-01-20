@@ -111,7 +111,7 @@ export function TrendingSessions() {
         </div>
       </div>
 
-      <div>
+      <div className='max-w-full'>
         <Swiper
           spaceBetween={10}
           slidesPerView="auto"

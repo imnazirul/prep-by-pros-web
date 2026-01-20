@@ -99,7 +99,7 @@ export function ExclusiveDrops() {
 
   const filteredData = feedPost.filter((post) => !post.is_lock);
   return (
-    <section>
+    <section >
       <div className="container">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-black-12 text-2xl font-medium md:text-[32px]">
@@ -111,7 +111,7 @@ export function ExclusiveDrops() {
         </div>
       </div>
 
-      <div>
+      <div className='max-w-full'>
         <Swiper
           spaceBetween={10}
           slidesPerView="auto"
@@ -135,6 +135,6 @@ export function ExclusiveDrops() {
           ))}
         </Swiper>
       </div>
-    </section>
+    </section >
   );
 }

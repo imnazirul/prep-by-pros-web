@@ -22,6 +22,8 @@ import { DiscardAlert } from './discard-alert';
 import ZoomSliderPopup from './zoom-slider-popup';
 import { DropzoneArea } from './post-dropzone-area';
 import PostImageOrdering from './post-image-ordering';
+import PostSchedule from './post-schedule';
+import ConfirmModal from '@/components/shared/confirm-modal';
 
 interface FileWithPreview extends File {
   preview: string;
@@ -35,6 +37,10 @@ export function PostDialog() {
   const [showZoomSlider, setShowZoomSlider] = useState(false);
   const [showPostImgOrdering, setShowPostImgOrdering] = useState(false);
   const [zoomValue, setZoomValue] = useState([1]);
+
+  const [imageConfirmed, setImageConfirmed] = useState(false);
+
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map((file) =>
@@ -70,6 +76,7 @@ export function PostDialog() {
     } else {
       closePostDialog();
     }
+    setImageConfirmed(false);
   };
 
   const handleDiscardConfirm = () => {
@@ -83,8 +90,9 @@ export function PostDialog() {
     <>
       <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent showCloseButton={false} className="sm:max-w-265">
-          <DialogHeader className="mb-8">
-            <DialogTitle>Create New Post</DialogTitle>
+          <DialogHeader className="mb-8 flex items-center flex-row justify-between">
+            {imageConfirmed && <DialogTitle>Create New Post</DialogTitle>}
+            <PostSchedule />
           </DialogHeader>
 
           {files.length === 0 ? (
@@ -139,6 +147,7 @@ export function PostDialog() {
                 <Icon name="circle_arrow_right" width={44} height={44} className="text-white" />
               </button>
 
+              {/* Custom Pagination */}
               <div className="custom-pagination absolute bottom-5! z-9999999 mx-auto flex w-full justify-center" />
 
               {/* Action Buttons Overlay */}
@@ -151,6 +160,7 @@ export function PostDialog() {
                 />
 
                 <PostImageOrdering
+                  imageConfirmed={imageConfirmed}
                   setFiles={setFiles}
                   getInputProps={getInputProps}
                   removeFile={removeFile}
@@ -159,6 +169,20 @@ export function PostDialog() {
                   setShowPostImgOrdering={setShowPostImgOrdering}
                 />
               </div>
+            </div>
+          )}
+
+          {imageConfirmed && (
+            <div className="space-y-3 mt-8">
+              <input
+                type="text"
+                placeholder="Add a title for your post"
+                className="p-0 m-0 block w-full border-0 outline-0 placeholder:text-black-7 text-[32px] text-black-10"
+              />
+              <textarea
+                placeholder="Add a short description"
+                className="p-0 m-0 border-0 block w-full outline-0 placeholder:text-black-7 text-2xl text-black-10"
+              ></textarea>
             </div>
           )}
 
@@ -175,9 +199,29 @@ export function PostDialog() {
             {files.length === 0 ? (
               <DropzoneTrigger getInputProps={getInputProps} />
             ) : (
-              <Button size="lg" onClick={() => console.log('Upload:', files)}>
-                Next
-              </Button>
+              <>
+                {imageConfirmed ? (
+                  <Button
+                    size="lg"
+                    onClick={() => {
+                      closePostDialog();
+                      setImageConfirmed(false);
+                      setIsSubmitted(true);
+                    }}
+                  >
+                    Post now
+                  </Button>
+                ) : (
+                  <Button
+                    size="lg"
+                    onClick={() => {
+                      setImageConfirmed(true);
+                    }}
+                  >
+                    Next
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </DialogContent>
@@ -187,6 +231,23 @@ export function PostDialog() {
         isOpen={showDiscardAlert}
         onClose={() => setShowDiscardAlert(false)}
         onConfirm={handleDiscardConfirm}
+      />
+
+      <ConfirmModal
+        icon="happy_image"
+        iconWidth={398}
+        iconHeight={340}
+        open={isSubmitted}
+        setOpen={setIsSubmitted}
+        title="Post scheduled!"
+        buttonLabel="Go to home"
+        subTitle={
+          <p>
+            Your post is successfully scheduled for <br />{' '}
+            <span className="text-black-10 font-medium">12:00 PM</span> at{' '}
+            <span className="text-black-10 font-medium">13 January</span>.
+          </p>
+        }
       />
     </>
   );

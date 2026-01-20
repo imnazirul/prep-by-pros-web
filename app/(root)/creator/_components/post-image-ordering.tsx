@@ -82,6 +82,7 @@ const PostImageOrdering = ({
   removeFile,
   getInputProps,
   setFiles,
+  imageConfirmed
 }: {
   showPostImgOrdering: boolean;
   setShowPostImgOrdering: Dispatch<SetStateAction<boolean>>;
@@ -89,6 +90,7 @@ const PostImageOrdering = ({
   removeFile: (index: number) => void;
   getInputProps: any;
   setFiles: Dispatch<SetStateAction<FileWithPreview[]>>;
+  imageConfirmed: boolean
 }) => {
   // 2. Setup Sensors
   const sensors = useSensors(
@@ -158,10 +160,12 @@ const PostImageOrdering = ({
             </SortableContext>
           </DndContext>
 
-          <label className="size-25 shrink-0 rounded-2xl border bg-primary-200 border-primary-300 flex items-center justify-center cursor-pointer hover:bg-primary-300 transition-colors">
-            <input {...getInputProps()} />
-            <Icon name="plus_sign" className="text-primary" height={40} width={40} />
-          </label>
+          {
+            !imageConfirmed && <label className="size-25 shrink-0 rounded-2xl border bg-primary-200 border-primary-300 flex items-center justify-center cursor-pointer hover:bg-primary-300 transition-colors">
+              <input {...getInputProps()} />
+              <Icon name="plus_sign" className="text-primary" height={40} width={40} />
+            </label>
+          }
         </div>
       </PopoverContent>
     </Popover>

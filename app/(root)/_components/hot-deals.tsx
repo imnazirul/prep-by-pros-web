@@ -107,7 +107,7 @@ export function HotDeals() {
         </div>
       </div>
 
-      <div className="grid">
+      <div className='max-w-full'>
         <Swiper
           spaceBetween={10}
           slidesPerView="auto"

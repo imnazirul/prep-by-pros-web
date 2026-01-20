@@ -114,6 +114,7 @@ type CustomSelectBoxProps = {
   setValue: React.Dispatch<React.SetStateAction<string>>;
   isRequired?: boolean;
   isOptional?: boolean;
+  className?: string
 };
 
 export function CustomSelectBox({
@@ -126,6 +127,7 @@ export function CustomSelectBox({
   setValue,
   isRequired = false,
   isOptional = false,
+  className
 }: CustomSelectBoxProps) {
   const selectedValue = options.find((option) => option.value === value);
 
@@ -134,6 +136,7 @@ export function CustomSelectBox({
       className={cn(
         'has-[input:focus]:ring-ring/50 flex h-16 items-center rounded-full border border-[#D9D9D9] px-4 py-3 has-[input:focus]:ring-0',
         disabled && 'pointer-events-none opacity-65',
+        className
       )}
     >
       <div className="mr-2 shrink-0 border-r border-[#F0F0F0] pr-2">
@@ -163,7 +166,7 @@ export function CustomSelectBox({
           >
             <span
               className={cn(
-                'text-black-10 text-lg',
+                'text-black-10 text-lg line-clamp-1',
                 value == '' && 'text-black-10',
               )}
             >
