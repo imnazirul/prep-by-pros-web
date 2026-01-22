@@ -49,9 +49,7 @@ export function Header() {
     <header
       id="header-id"
       className={`fixed top-0 z-50 w-full transition-all duration-500 ${
-        scrolled
-          ? 'bg-background border-b py-3'
-          : 'lg::pt-12 bg-transparent pt-6 md:pt-9'
+        scrolled ? 'bg-background border-b py-3' : 'lg::pt-12 bg-transparent pt-6 md:pt-9'
       }`}
     >
       <div className="container flex items-center justify-between">
@@ -62,22 +60,20 @@ export function Header() {
 
           <nav className="hidden items-center gap-6 lg:flex">
             {navItems.map(({ label, href }) => {
-              const isActive =
-                href === '/' ? pathname === '/' : pathname.startsWith(href);
+              const isExactBase = href === '/' || href === '/creator';
+              const isActive = isExactBase ? pathname === href : pathname.startsWith(href);
 
               return (
                 <Link
                   key={href}
                   href={href}
                   className={cn(
-                    'flex items-center gap-1 text-xl text-black transition-all duration-300',
+                    'flex items-center gap-1 text-xl text-black transition-all duration-300'
                   )}
                 >
                   <span
                     className={
-                      isActive
-                        ? 'font-semibold'
-                        : 'font-medium opacity-40 hover:opacity-100'
+                      isActive ? 'font-semibold' : 'font-medium opacity-40 hover:opacity-100'
                     }
                   >
                     {' '}
@@ -90,12 +86,10 @@ export function Header() {
             <button
               onClick={openCart}
               className={cn(
-                'flex cursor-pointer items-center gap-1 text-xl text-black transition-all duration-300',
+                'flex cursor-pointer items-center gap-1 text-xl text-black transition-all duration-300'
               )}
             >
-              <span className={'font-medium opacity-40 hover:opacity-100'}>
-                My Cart
-              </span>
+              <span className={'font-medium opacity-40 hover:opacity-100'}>My Cart</span>
               <span className="bg-red flex size-4 items-center justify-center rounded-full text-xs text-white">
                 {items.length}
               </span>

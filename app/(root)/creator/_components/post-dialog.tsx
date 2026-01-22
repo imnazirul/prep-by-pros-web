@@ -92,7 +92,13 @@ export function PostDialog() {
         <DialogContent showCloseButton={false} className="sm:max-w-265">
           <DialogHeader className="mb-8 flex items-center flex-row justify-between">
             <DialogTitle>Create New Post</DialogTitle>
-            {imageConfirmed && <PostSchedule />}
+
+            <div className="flex items-center gap-3">
+              {imageConfirmed && <PostSchedule />}
+              <button className="cursor-pointer" onClick={() => handleClose()}>
+                <Icon name="close" height={32} width={32} />
+              </button>
+            </div>
           </DialogHeader>
 
           {files.length === 0 ? (
