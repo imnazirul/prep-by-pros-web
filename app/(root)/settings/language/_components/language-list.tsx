@@ -1,7 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import Icon, { IconName } from '@/lib/icon';
+import { useGetMeMutation, usePatchMeMutation } from '@/redux/api/authApi';
+import { selectCurrentUser, setCredentials } from '@/redux/features/authSlice';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { useEffect, useState } from 'react';
 
 interface Language {
   id: string;
@@ -10,22 +13,49 @@ interface Language {
 }
 
 const languages: Language[] = [
-  {
-    id: 'en-AU',
-    name: 'English (Australia)',
-    flag: 'australia_flag' as IconName,
-  },
-  { id: 'en-GB', name: 'English (UK)', flag: 'australia_flag' as IconName },
-  { id: 'en-US', name: 'English (USA)', flag: 'australia_flag' as IconName },
-  { id: 'es-ES', name: 'Spanish (Spain)', flag: 'australia_flag' as IconName },
+  { id: 'en', name: 'English', flag: 'global' as IconName }, // Using global as fallback or until specific flag is added
+  { id: 'bn', name: 'Bangla', flag: 'global' as IconName },
+  { id: 'es', name: 'Spanish', flag: 'global' as IconName },
+  { id: 'fr', name: 'French', flag: 'global' as IconName },
+  { id: 'de', name: 'German', flag: 'global' as IconName },
+  { id: 'ar', name: 'Arabic', flag: 'global' as IconName },
+  { id: 'hi', name: 'Hindi', flag: 'global' as IconName },
+  { id: 'pt', name: 'Portuguese', flag: 'global' as IconName },
+  { id: 'ru', name: 'Russian', flag: 'global' as IconName },
+  { id: 'ja', name: 'Japanese', flag: 'global' as IconName },
+  { id: 'zh', name: 'Chinese', flag: 'global' as IconName },
 ];
 
 export default function LanguageList() {
-  const [selectedLanguage, setSelectedLanguage] = useState('en-US');
+  const currentUser = useAppSelector(selectCurrentUser);
+  const dispatch = useAppDispatch();
+  const [patchMe] = usePatchMeMutation();
+  const [getMe, { data: fetchedUser }] = useGetMeMutation();
+  const token = useAppSelector((state) => state.auth.token);
 
-  const handleLanguageChange = (languageId: string) => {
+  const user = fetchedUser || currentUser;
+
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
+
+  useEffect(() => {
+    getMe({});
+  }, [getMe]);
+
+  useEffect(() => {
+    if (user && user.language) {
+      setSelectedLanguage(user.language);
+    }
+  }, [user]);
+
+  const handleLanguageChange = async (languageId: string) => {
     setSelectedLanguage(languageId);
-    console.log('Language changed to:', languageId);
+    try {
+      const payload = { language: languageId };
+      const updatedUser = await patchMe(payload).unwrap();
+      dispatch(setCredentials({ ...updatedUser, access: token }));
+    } catch (err) {
+      console.error('Failed to update language', err);
+    }
   };
 
   return (

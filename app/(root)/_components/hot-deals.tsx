@@ -2,9 +2,12 @@
 
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { products } from '@/data';
+// import { products } from '@/data';
 import { buttonVariants } from '@/components/ui/button';
 import { ProductCard } from '@/components/shared/product-card';
+import { useGetProductsQuery } from '@/redux/api/globalApi';
+import Circle3DLoader from '@/components/shared/circle-loader';
+import { ProductCardProp } from '@/lib/types';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -15,6 +18,7 @@ import { useEffect, useRef } from 'react';
 
 export function HotDeals() {
   const swiperRef = useRef<SwiperType | null>(null);
+  const { data, isLoading, error } = useGetProductsQuery({ popular: true });
 
   useEffect(() => {
     const swiper = swiperRef.current;
@@ -96,6 +100,36 @@ export function HotDeals() {
       if (resetTimer) window.clearTimeout(resetTimer);
     };
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-20">
+        <Circle3DLoader />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container py-10 text-center text-red-500">
+        Failed to load hot deals.
+      </div>
+    );
+  }
+
+  const products: ProductCardProp[] =
+    data?.results
+      .filter((product) => product.file_items && product.file_items.length > 0)
+      .map((product) => ({
+        id: product.uid,
+        name: product.title,
+        price: parseFloat(product.price),
+        images: product.file_items.map((file) => ({ src: file.file })),
+        description: product.description || '',
+      })) || [];
+
+  if (products.length === 0) return null;
+
   return (
     <section>
       <div className="container">

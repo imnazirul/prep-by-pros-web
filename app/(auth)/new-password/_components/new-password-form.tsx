@@ -1,20 +1,32 @@
 'use client';
 
-import Icon from '@/lib/icon';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 import { CustomInputBox } from '@/components/shared/custom-input';
+import { Button } from '@/components/ui/button';
+import Icon from '@/lib/icon';
+import { useResetPasswordMutation } from '@/redux/api/authApi';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 const NewPasswordForm = () => {
   const router = useRouter();
-  const [password, setPassword] = useState('************');
-  const [confirmPassword, setConfirmPassword] = useState('************');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resetPassword, { isLoading }] = useResetPasswordMutation();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('New Password attempted:');
-    router.push('/');
+    if (password !== confirmPassword) {
+      console.error('Passwords do not match');
+      return;
+    }
+    try {
+      await resetPassword({ new_password: password }).unwrap();
+      // Password updated successfully
+      router.push('/login');
+    } catch (error: any) {
+      console.error('Failed to reset password:', error);
+      // Handle error
+    }
   };
 
   return (
@@ -40,13 +52,8 @@ const NewPasswordForm = () => {
         />
       </div>
 
-      <Button
-        onClick={handleSubmit}
-        size={'lg'}
-        type="submit"
-        className="w-full justify-between"
-      >
-        Update password
+      <Button onClick={handleSubmit} size={'lg'} type="submit" className="w-full justify-between">
+        {isLoading ? 'Updating...' : 'Update password'}
         <Icon name="chevron_arrow_right" height={24} width={24} />
       </Button>
     </>

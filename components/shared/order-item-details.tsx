@@ -1,6 +1,6 @@
+import { HistoryCardProp } from '@/lib/types';
 import { format } from 'date-fns';
 import CustomImage from './custom-image';
-import { HistoryCardProp } from '@/lib/types';
 
 const OrderItemDetails = ({
   order,
@@ -14,16 +14,15 @@ const OrderItemDetails = ({
   selectedList?: {
     image: string;
     name: string;
+    price?: number;
+    quantity?: number;
+    attributes?: string;
   }[];
 }) => {
   return (
     <div className="space-y-6">
       <h2 className="text-black-10 text-2xl font-medium md:text-3xl lg:text-4xl">
-        {step == 3
-          ? 'Items for Refund'
-          : isRefund
-            ? 'Item Details'
-            : 'Order Details'}
+        {step == 3 ? 'Items for Refund' : isRefund ? 'Item Details' : 'Order Details'}
       </h2>
 
       {step == 3 ? (
@@ -31,10 +30,7 @@ const OrderItemDetails = ({
           <div className="space-y-5">
             {selectedList?.map((item, index) => {
               return (
-                <div
-                  key={index}
-                  className="bg-black-4 flex items-center gap-6 rounded-4xl p-8"
-                >
+                <div key={index} className="bg-black-4 flex items-center gap-6 rounded-4xl p-8">
                   <div
                     style={{
                       backgroundImage: `url('${item.image}')`,
@@ -45,15 +41,16 @@ const OrderItemDetails = ({
                   <div className="flex flex-1 items-start justify-between">
                     <div className="space-y-2">
                       <p className="text-black-9 max-w-100 text-[22px]">
-                        Brusia Dortmund signed tracksuit; Fan Made (2x)
+                        {item.name}{' '}
+                        {item.quantity && item.quantity > 1 ? `(${item.quantity}x)` : ''}
                       </p>
-                      <p className="text-black-8 text-[22px]">
-                        Yellow color, XXL
-                      </p>
+                      {item.attributes && (
+                        <p className="text-black-8 text-[22px]">{item.attributes}</p>
+                      )}
                     </div>
-                    <span className="text-black-10 text-[32px] font-semibold">
-                      $2,485
-                    </span>
+                    {item.price !== undefined && (
+                      <span className="text-black-10 text-[32px] font-semibold">${item.price}</span>
+                    )}
                   </div>
                 </div>
               );
@@ -80,9 +77,7 @@ const OrderItemDetails = ({
             </p>
 
             {/* Items List */}
-            <p className="text-black-8 text-lg">
-              {order.items.map((item) => item.name).join(',')}
-            </p>
+            <p className="text-black-8 text-lg">{order.items.map((item) => item.name).join(',')}</p>
 
             {/* Product Images */}
             <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3">
@@ -91,39 +86,25 @@ const OrderItemDetails = ({
                   key={index}
                   className="bg-muted relative aspect-201/240 overflow-hidden rounded-[20px]"
                 >
-                  <CustomImage
-                    src={item.image}
-                    className="size-full"
-                    alt="Order item"
-                    fill
-                  />
+                  <CustomImage src={item.image} className="size-full" alt="Order item" fill />
                 </div>
               ))}
             </div>
 
             {!isRefund && (
               <div className="mt-12 space-y-4">
-                <h3 className="text-black-10 text-xl font-medium md:text-2xl">
-                  Others Details
-                </h3>
+                <h3 className="text-black-10 text-xl font-medium md:text-2xl">Others Details</h3>
 
                 <div className="space-y-2.5 sm:space-y-4">
                   {[
-                    { label: 'Delivered to:', value: 'Andrew Whierholze' },
-                    { label: 'Contact:', value: 'andrewhierholze@gmail.com' },
-                    { label: 'Location:', value: 'New York' },
-                    { label: 'Payment Method:', value: 'Cash on Delivery' },
+                    { label: 'Delivered to:', value: order.shipping_address.name },
+                    { label: 'Contact:', value: order.shipping_address.email },
+                    { label: 'Location:', value: order.shipping_address.location },
+                    { label: 'Payment Method:', value: order.payment_details.payment_method },
                   ].map(({ label, value }) => (
-                    <div
-                      key={label}
-                      className="flex items-center justify-between"
-                    >
-                      <span className="text-black-8 text-base sm:text-lg">
-                        {label}
-                      </span>
-                      <span className="text-black-9 text-lg sm:text-xl">
-                        {value}
-                      </span>
+                    <div key={label} className="flex items-center justify-between">
+                      <span className="text-black-8 text-base sm:text-lg">{label}</span>
+                      <span className="text-black-9 text-lg sm:text-xl">{value}</span>
                     </div>
                   ))}
                 </div>

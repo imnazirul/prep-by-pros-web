@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { feedPost } from '@/data';
+// import { feedPost } from '@/data';
 import PostCard from '@/components/shared/post-card';
 import { buttonVariants } from '@/components/ui/button';
 
@@ -12,9 +12,13 @@ import 'swiper/css/pagination';
 import { useEffect, useRef } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import { useGetCoachesQuery } from '@/redux/api/globalApi';
+import Circle3DLoader from '@/components/shared/circle-loader';
+import { PostCardProp } from '@/lib/types';
 
 export function ExclusiveDrops() {
   const swiperRef = useRef<SwiperType | null>(null);
+  const { data, isLoading, error } = useGetCoachesQuery({ keywords: 'trending' });
 
   useEffect(() => {
     const swiper = swiperRef.current;
@@ -97,9 +101,50 @@ export function ExclusiveDrops() {
     };
   }, []);
 
-  const filteredData = feedPost.filter((post) => !post.is_lock);
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-20">
+        <Circle3DLoader />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container py-10 text-center text-red-500">
+        Failed to load trending coaches.
+      </div>
+    );
+  }
+
+  const coaches: PostCardProp[] =
+    data?.results
+      .filter((coach) => coach.content && coach.content.file_items?.length > 0)
+      .map((coach) => {
+        const drop = coach.content!;
+        return {
+          id: drop.slug || coach.uid,
+          title: drop.title || `${coach.first_name} ${coach.last_name}`,
+          description: drop.description || '',
+          views: String(drop.view_count || 0),
+          share: String(drop.share_count || 0),
+          media: {
+            type: 'image',
+            images: drop.file_items.map((file: any) => file.file),
+          },
+          profile: {
+            name: `${coach.first_name} ${coach.last_name}`,
+            image: coach.image || '/images/default-avatar.png', // Fallback if null
+            last_active: new Date(drop.created_at || coach.created_at),
+          },
+          category: coach.club?.[0]?.title || 'Pro Coach',
+        };
+      }) || [];
+
+  if (coaches.length === 0) return null;
+
   return (
-    <section >
+    <section>
       <div className="container">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-black-12 text-2xl font-medium md:text-[32px]">
@@ -111,7 +156,7 @@ export function ExclusiveDrops() {
         </div>
       </div>
 
-      <div className='max-w-full'>
+      <div className="max-w-full">
         <Swiper
           spaceBetween={10}
           slidesPerView="auto"
@@ -128,13 +173,14 @@ export function ExclusiveDrops() {
             },
           }}
         >
-          {filteredData.map((post) => (
-            <SwiperSlide key={post.id} className="w-108!">
-              <PostCard layout="fixed" post={post} />
+          {coaches.map((coach) => (
+            <SwiperSlide key={coach.id} className="w-108!">
+              <PostCard layout="fixed" post={coach} />
             </SwiperSlide>
           ))}
         </Swiper>
       </div>
-    </section >
+    </section>
   );
 }
+

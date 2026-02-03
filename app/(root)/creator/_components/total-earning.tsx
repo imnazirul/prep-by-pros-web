@@ -1,36 +1,52 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import Icon from '@/lib/icon';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { DashboardEarning, useGetDashboardEarningsQuery } from '@/redux/api/authApi';
+import { useMemo, useState } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
-import { useState } from 'react';
-
-const earningsData = [
-  { name: 'Jan', value: 1200 },
-  { name: 'Feb', value: 1100 },
-  { name: 'Mar', value: 1500 },
-  { name: 'Apr', value: 1300 },
-  { name: 'May', value: 1400 },
-  { name: 'Jun', value: 2476 },
-  { name: 'July', value: 1800 },
-  { name: 'Aug', value: 1900 },
-  { name: 'Sep', value: 1600 },
-  { name: 'Oct', value: 1400 },
-  { name: 'Nov', value: 1300 },
-  { name: 'Dec', value: 1500 },
-];
 
 const TotalEarning = ({ className }: { className?: string }) => {
   const [activeIndex, setActiveIndex] = useState<string | null>(null);
+  const { data: earningsDataList, isLoading } = useGetDashboardEarningsQuery({});
+
+  const earningsData = useMemo(() => {
+    if (!earningsDataList?.results || earningsDataList.results.length === 0) return [];
+    // Ensure we have all months or just map what we have.
+    // Assuming API returns list of objects with month name/index and amount.
+    return earningsDataList.results.map((item: DashboardEarning) => ({
+      name: item.month.slice(0, 3), // e.g. "January" -> "Jan"
+      value: item.amount,
+      fullMonth: item.month,
+    }));
+  }, [earningsDataList]);
+
+  const totalEarnings = useMemo(() => {
+    if (!earningsDataList?.results) return 0;
+    return earningsDataList.results.reduce((acc, curr) => acc + curr.amount, 0);
+  }, [earningsDataList]);
+
+  if (isLoading) {
+    return (
+      <div
+        className={cn(
+          'bg-primary relative flex h-122.5 flex-col overflow-hidden rounded-2xl p-6 text-white md:rounded-3xl lg:rounded-4xl xl:rounded-[40px] items-center justify-center',
+          className
+        )}
+      >
+        Loading earnings...
+      </div>
+    );
+  }
 
   return (
     <div
       className={cn(
         'bg-primary relative flex h-122.5 flex-col overflow-hidden rounded-2xl p-6 text-white md:rounded-3xl lg:rounded-4xl xl:rounded-[40px]',
-        className,
+        className
       )}
     >
       <div className="relative space-y-1">
@@ -60,7 +76,8 @@ const TotalEarning = ({ className }: { className?: string }) => {
         </div>
 
         <h2 className="text-[40px] font-medium">
-          7,204 <span className="text-black-6 text-xl font-normal">USD</span>
+          {totalEarnings.toLocaleString()}{' '}
+          <span className="text-black-6 text-xl font-normal">USD</span>
         </h2>
       </div>
 
@@ -68,9 +85,7 @@ const TotalEarning = ({ className }: { className?: string }) => {
         <ResponsiveContainer
           width="100%"
           height="100%"
-          className={
-            'outline-none focus-visible:ring-0 focus-visible:outline-none'
-          }
+          className={'outline-none focus-visible:ring-0 focus-visible:outline-none'}
         >
           <AreaChart
             data={earningsData}
@@ -137,7 +152,7 @@ const CustomTooltip = ({ active, payload }: { active: any; payload: any }) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-black-12 flex h-9 items-center rounded-[10px] rounded-tl px-3 shadow-[0px_4px_12px_0px_#00000033]">
-        <p className="text-lg text-white">${payload[0].value}</p>
+        <p className="text-lg text-white">${payload[0].value?.toLocaleString()}</p>
       </div>
     );
   }
@@ -157,7 +172,7 @@ const CustomTick = (props: any) => {
         textAnchor="middle"
         className={cn(
           'text-sm font-medium transition-colors duration-200',
-          isActive ? 'fill-white' : 'fill-black-6',
+          isActive ? 'fill-white' : 'fill-black-6'
         )}
       >
         {payload.value}
@@ -170,15 +185,7 @@ const CustomCursor = (props: any) => {
   const { points, height } = props;
   const { x, y } = points[0];
   return (
-    <line
-      x1={x}
-      y1={y}
-      x2={x}
-      y2={height}
-      stroke="#FEFDF4"
-      strokeWidth={1}
-      strokeDasharray="4 4"
-    />
+    <line x1={x} y1={y} x2={x} y2={height} stroke="#FEFDF4" strokeWidth={1} strokeDasharray="4 4" />
   );
 };
 

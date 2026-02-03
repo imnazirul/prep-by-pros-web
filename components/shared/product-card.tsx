@@ -1,11 +1,11 @@
 'use client';
 
-import Link from 'next/link';
-import Icon from '@/lib/icon';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { ProductCardProp } from '@/lib/types';
 import { useCart } from '@/contexts/cart-context';
+import Icon from '@/lib/icon';
+import { ProductCardProp } from '@/lib/types';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export function ProductCard({
   product,
@@ -20,7 +20,7 @@ export function ProductCard({
   const isInCart = items.some((item) => item.id === String(product.id));
   return (
     <Link
-      href={`/product-details/${product.id}`}
+      href={`/product-details/${product.slug || product.id}`}
       style={{
         backgroundImage: `url("${product.images[0].src}")`,
       }}
@@ -37,13 +37,13 @@ export function ProductCard({
               e.preventDefault();
               e.stopPropagation();
 
-              addItem({
-                id: String(product.id),
-                name: product.name,
-                price: product.price,
-                quantity: 1,
-                image: product.images[0].src,
-              });
+              // Construct proper payload for API
+              const payload: any = {
+                product_uid: String(product.id),
+                product_count: 1,
+              };
+
+              addItem(payload);
             }}
             size="icon-sm"
             variant="secondary"
@@ -55,7 +55,7 @@ export function ProductCard({
           </Button>
         </div>
 
-        <p className="text-black-5 line-clamp-1 text-sm">{product.description}</p>
+        <p className="text-black-5 line-clamp-1 text-sm">{product.name}</p>
       </div>
     </Link>
   );

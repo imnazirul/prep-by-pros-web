@@ -3,9 +3,9 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import Icon, { IconName } from '@/lib/icon';
 import Link from 'next/link';
 import React, { useState } from 'react';
-import Icon, { IconName } from '@/lib/icon';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 const settingsMenu = [
@@ -59,24 +59,49 @@ const settingsMenu = [
   },
 ];
 
+import { useGetMeMutation } from '@/redux/api/authApi';
+import { selectCurrentUser } from '@/redux/features/authSlice';
+import { useAppSelector } from '@/redux/hooks';
+
+import { useEffect } from 'react';
+
 export default function HeaderProfile() {
   const [open, setOpen] = useState(false);
+  const token = useAppSelector((state) => state.auth.token);
+
+  const [getMe, { data: userData, isLoading }] = useGetMeMutation();
+
+  useEffect(() => {
+    if (token) {
+      getMe({});
+    }
+  }, [token, getMe]);
+
+  // console.log('me in header', userData);
+
+  const currentUser = useAppSelector(selectCurrentUser);
+  const user = userData || currentUser;
+
+  const fullName = user?.first_name
+    ? `${user.first_name} ${user.last_name || ''}`
+    : user?.name || 'User';
+
+  const userName = user?.username ? `@${user.username}` : '';
+  const initial = user?.first_name ? user.first_name.charAt(0).toUpperCase() : 'U';
 
   return (
     <DropdownMenu modal={false} open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <div className="flex cursor-pointer items-center gap-2.5">
           <Avatar className="size-13 after:hidden">
-            <AvatarImage src="/images/profile.png" className="rounded-[14px]" />
+            <AvatarImage src={user?.image || '/images/profile.png'} className="rounded-[14px]" />
             <AvatarFallback className="text-black-8 size-13 rounded-[14px] border-0 text-lg font-medium">
-              AH
+              {initial}
             </AvatarFallback>
           </Avatar>
           <div className="hidden space-x-1 text-sm sm:block">
-            <div className="text-base font-medium text-black">
-              Andrew Helbride
-            </div>
-            <div className="text-black-8 text-xs">@andrewhelbride</div>
+            <div className="text-base font-medium text-black">{fullName}</div>
+            {userName && <div className="text-black-8 text-xs">{userName}</div>}
           </div>
         </div>
       </DropdownMenuTrigger>
@@ -126,9 +151,7 @@ export default function HeaderProfile() {
                 width={24}
                 className="text-black-10 group-hover:text-primary size-6"
               />
-              <span className="group-hover:text-primary text-base text-black">
-                Logout
-              </span>
+              <span className="group-hover:text-primary text-base text-black">Logout</span>
             </div>
             <Icon
               name="chevron_right"

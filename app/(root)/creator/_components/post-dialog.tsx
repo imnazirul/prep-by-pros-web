@@ -2,28 +2,29 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
+import { useCallback, useRef, useState } from 'react';
 import { Pagination } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
-import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { usePostDialog } from '@/contexts/post-dialog-context';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-
+import { usePostDialog } from '@/contexts/post-dialog-context';
+import { cn } from '@/lib/utils';
 // Swiper styles
+import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/pagination';
-import type { Swiper as SwiperType } from 'swiper';
 
+import ConfirmModal from '@/components/shared/confirm-modal';
 import Icon from '@/lib/icon';
+import { useCreateMeContentMutation } from '@/redux/api/authApi';
+import { useUploadFileMutation } from '@/redux/api/globalApi';
 import { useDropzone } from 'react-dropzone';
 import { DiscardAlert } from './discard-alert';
-import ZoomSliderPopup from './zoom-slider-popup';
 import { DropzoneArea } from './post-dropzone-area';
 import PostImageOrdering from './post-image-ordering';
 import PostSchedule from './post-schedule';
-import ConfirmModal from '@/components/shared/confirm-modal';
+import ZoomSliderPopup from './zoom-slider-popup';
 
 interface FileWithPreview extends File {
   preview: string;
@@ -41,6 +42,11 @@ export function PostDialog() {
   const [imageConfirmed, setImageConfirmed] = useState(false);
 
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+
+  const [createMeContent, { isLoading: isCreating }] = useCreateMeContentMutation();
+  const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map((file) =>
@@ -70,6 +76,62 @@ export function PostDialog() {
     });
   };
 
+  const handlePost = async () => {
+    try {
+      const fileSlugs: string[] = [];
+
+      // 1. Upload files
+      if (files.length > 0) {
+        for (const file of files) {
+          const formData = new FormData();
+          formData.append('file', file);
+          // formData.append('kind', 'IMAGE');
+          // formData.append('status', 'ACTIVE');
+
+          const response = await uploadFile(formData).unwrap();
+          if (response.slug) {
+            fileSlugs.push(response.slug);
+          }
+        }
+      }
+
+      // 2. Create content
+      const scheduleDate = new Date(); // Or use actual schedule state if available
+
+      await createMeContent({
+        title,
+        description,
+        schedule: scheduleDate.toISOString(),
+        file_items: fileSlugs,
+      }).unwrap();
+
+      // 3. Success handling
+      closePostDialog();
+      setImageConfirmed(false);
+      setIsSubmitted(true);
+      // Reset form
+      setTitle('');
+      setDescription('');
+      setFiles([]);
+    } catch (error: any) {
+      console.error('Failed to create post:', error);
+
+      let errorMessage = 'Failed to create post. Please try again.';
+
+      if (error?.status === 'PARSING_ERROR' && error?.originalStatus === 500) {
+        errorMessage =
+          'Server Error: The backend failed to process the request (500). Please check with the administrator.';
+      } else if (error?.data?.detail) {
+        errorMessage = error.data.detail;
+      } else if (typeof error?.data === 'string') {
+        // If the backend returned a string (like the FileNotFoundError), show it
+        errorMessage = `Server Error: ${error.data.substring(0, 100)}...`;
+      }
+
+      alert(errorMessage);
+    }
+  };
+
   const handleClose = () => {
     if (files.length > 0) {
       setShowDiscardAlert(true);
@@ -91,14 +153,8 @@ export function PostDialog() {
       <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent showCloseButton={false} className="sm:max-w-265">
           <DialogHeader className="mb-8 flex items-center flex-row justify-between">
-            <DialogTitle>Create New Post</DialogTitle>
-
-            <div className="flex items-center gap-3">
-              {imageConfirmed && <PostSchedule />}
-              <button className="cursor-pointer" onClick={() => handleClose()}>
-                <Icon name="close" height={32} width={32} />
-              </button>
-            </div>
+            <DialogTitle className={cn(!imageConfirmed && 'sr-only')}>Create New Post</DialogTitle>
+            <PostSchedule />
           </DialogHeader>
 
           {files.length === 0 ? (
@@ -184,10 +240,14 @@ export function PostDialog() {
                 type="text"
                 placeholder="Add a title for your post"
                 className="p-0 m-0 block w-full border-0 outline-0 placeholder:text-black-7 text-[32px] text-black-10"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
               />
               <textarea
                 placeholder="Add a short description"
                 className="p-0 m-0 border-0 block w-full outline-0 placeholder:text-black-7 text-2xl text-black-10"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
               ></textarea>
             </div>
           )}
@@ -207,15 +267,8 @@ export function PostDialog() {
             ) : (
               <>
                 {imageConfirmed ? (
-                  <Button
-                    size="lg"
-                    onClick={() => {
-                      closePostDialog();
-                      setImageConfirmed(false);
-                      setIsSubmitted(true);
-                    }}
-                  >
-                    Post now
+                  <Button size="lg" disabled={isCreating || isUploading} onClick={handlePost}>
+                    {isCreating || isUploading ? 'Posting...' : 'Post now'}
                   </Button>
                 ) : (
                   <Button

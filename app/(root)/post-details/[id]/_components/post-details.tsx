@@ -1,8 +1,5 @@
-'use client';
-
 import Icon from '@/lib/icon';
 import { cn } from '@/lib/utils';
-import { PostCardProp } from '@/lib/types';
 import { timeAgoShort } from '@/lib/helper';
 import { Button } from '@/components/ui/button';
 import VideoPlayer from '@/components/shared/video-player';
@@ -10,9 +7,35 @@ import { useHeaderHeight } from '@/hooks/use-header-height';
 import PostImageSlider from '@/components/shared/PostImageSlider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
+import { useGetContentBySlugQuery } from '@/redux/api/globalApi';
+import { mapContentToPostCard } from '@/lib/mapper';
+import Circle3DLoader from '@/components/shared/circle-loader';
 
-const PostDetails = ({ post }: { post: PostCardProp }) => {
+const PostDetails = ({ slug }: { slug: string }) => {
+  const { data: content, isLoading, isError } = useGetContentBySlugQuery(slug);
   const headerHeight = useHeaderHeight();
+
+  console.log('content', content);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Circle3DLoader />
+      </div>
+    );
+  }
+
+  if (isError || !content) {
+    return (
+      <div className="py-10 text-center text-red-500">
+        Failed to load post details.
+      </div>
+    );
+  }
+
+  const post = mapContentToPostCard(content);
+  console.log('Post details:', post);
+
   const initials = post.profile.name
     .split(' ')
     .map((n) => n[0])
@@ -55,7 +78,13 @@ const PostDetails = ({ post }: { post: PostCardProp }) => {
       </div>
 
       {post.media.type === 'image' ? (
-        <PostImageSlider images={post.media.images} />
+        <>
+          {post.media.images.length > 0 ? (
+            <PostImageSlider images={post.media.images} />
+          ) : (
+            <div className="aspect-708/611 w-full rounded-2xl bg-white md:rounded-3xl"></div>
+          )}
+        </>
       ) : (
         <VideoPlayer src={post.media.src} />
       )}

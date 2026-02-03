@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { feedPost } from '@/data';
+// import { feedPost } from '@/data';
 import { buttonVariants } from '@/components/ui/button';
 import PostCard from '@/components/shared/post-card';
 
@@ -12,9 +12,13 @@ import 'swiper/css/pagination';
 import { useEffect, useRef } from 'react';
 import type { Swiper as SwiperType } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import { useGetCoachesQuery } from '@/redux/api/globalApi';
+import Circle3DLoader from '@/components/shared/circle-loader';
+import { PostCardProp } from '@/lib/types';
 
 export function TrendingSessions() {
   const swiperRef = useRef<SwiperType | null>(null);
+  const { data, isLoading, error } = useGetCoachesQuery({ keywords: 'subscription' });
 
   useEffect(() => {
     const swiper = swiperRef.current;
@@ -97,7 +101,48 @@ export function TrendingSessions() {
     };
   }, []);
 
-  const filteredData = feedPost.filter((post) => !post.is_lock);
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-20">
+        <Circle3DLoader />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container py-10 text-center text-red-500">
+        Failed to load trending sessions.
+      </div>
+    );
+  }
+
+  const sessions: PostCardProp[] =
+    data?.results
+      .filter((coach) => coach.content && coach.content.file_items?.length > 0)
+      .map((coach) => {
+        const drop = coach.content!;
+        return {
+          id: drop.slug || coach.uid,
+          title: drop.title || `${coach.first_name} ${coach.last_name}`,
+          description: drop.description || '',
+          views: String(drop.view_count || 0),
+          share: String(drop.share_count || 0),
+          media: {
+            type: 'image',
+            images: drop.file_items.map((file: any) => file.file),
+          },
+          profile: {
+            name: `${coach.first_name} ${coach.last_name}`,
+            image: coach.image || '/images/default-avatar.png',
+            last_active: new Date(drop.created_at || coach.created_at),
+          },
+          category: coach.club?.[0]?.title || 'Featured Session',
+        };
+      }) || [];
+
+  if (sessions.length === 0) return null;
+
   return (
     <section>
       <div className="container">
@@ -111,7 +156,7 @@ export function TrendingSessions() {
         </div>
       </div>
 
-      <div className='max-w-full'>
+      <div className="max-w-full">
         <Swiper
           spaceBetween={10}
           slidesPerView="auto"
@@ -128,9 +173,9 @@ export function TrendingSessions() {
             },
           }}
         >
-          {filteredData.map((post) => (
-            <SwiperSlide key={post.id} className="w-108!">
-              <PostCard layout="fixed" post={post} />
+          {sessions.map((session) => (
+            <SwiperSlide key={session.id} className="w-108!">
+              <PostCard layout="fixed" post={session} />
             </SwiperSlide>
           ))}
         </Swiper>
@@ -138,3 +183,4 @@ export function TrendingSessions() {
     </section>
   );
 }
+

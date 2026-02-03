@@ -7,6 +7,7 @@ import { CartProvider } from '@/contexts/cart-context';
 import { PostDialogProvider } from '@/contexts/post-dialog-context';
 import RedirectingModal from '@/components/shared/redirecting-modal';
 import { PostDialog } from '@/app/(root)/creator/_components/post-dialog';
+import StoreProvider from './StoreProvider';
 
 const radioCanadaBig = Radio_Canada_Big({
   variable: '--font-radio-canada-big',
@@ -30,19 +31,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${radioCanadaBig.variable} antialiased`}>
         <Suspense fallback={<></>}>
-          <CartProvider>
-            <PostDialogProvider>
-              {children}
+          <StoreProvider>
+            <CartProvider>
+              <PostDialogProvider>
+                {children}
 
-              <PostDialog />
-            </PostDialogProvider>
+                <PostDialog />
+              </PostDialogProvider>
 
-            <CartModal />
-            <RedirectingModal />
-          </CartProvider>
+              <CartModal />
+              <RedirectingModal />
+            </CartProvider>
+          </StoreProvider>
         </Suspense>
       </body>
     </html>

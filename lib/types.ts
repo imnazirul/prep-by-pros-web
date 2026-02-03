@@ -26,7 +26,7 @@ export interface PostCardProp {
 }
 
 export interface InstructorCardProp {
-  id: number;
+  id: number | string;
   name: string;
   image: string;
   country: string;
@@ -37,7 +37,8 @@ export interface InstructorCardProp {
 }
 
 export interface ProductCardProp {
-  id: number;
+  id: number | string;
+  slug?: string;
   name: string;
   price: number;
   images: { src: string }[];
@@ -57,11 +58,14 @@ export interface ActivityProp {
 }
 
 interface BaseHistoryCard {
-  id: number;
+  id: number | string;
   title: string;
   items: {
     image: string;
     name: string;
+    price?: number;
+    quantity?: number;
+    attributes?: string;
   }[];
   price: number;
   date: Date;

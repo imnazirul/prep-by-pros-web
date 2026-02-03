@@ -19,7 +19,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function PostCard({
   post,
@@ -62,29 +62,40 @@ export default function PostCard({
 
   const isCreator = pathname.startsWith('/creator');
 
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    const url = isCreator
+      ? `/creator/profile/post/${post.id}`
+      : `/post-details/${post.id}`;
+    router.push(url);
+  };
+
   return (
-    <Link
-      href={
-        isCreator
-          ? `/creator/profile/post/${post.id}`
-          : `/post-details/${post.id}`
-      }
+    <div
+      onClick={handleCardClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        'group relative z-1 block overflow-hidden rounded-2xl border text-white transition-all duration-300 after:absolute after:inset-0 after:-z-1 after:bg-[linear-gradient(180deg,rgba(0,0,0,0.00)_40%,rgba(0,0,0,0.60)_80%)] md:rounded-3xl lg:rounded-4xl',
+        'group relative z-1 block cursor-pointer overflow-hidden rounded-2xl border text-white transition-all duration-300 after:absolute after:inset-0 after:-z-1 after:bg-[linear-gradient(180deg,rgba(0,0,0,0.00)_40%,rgba(0,0,0,0.60)_80%)] md:rounded-3xl lg:rounded-4xl',
         layout && pathname !== '/' && 'mb-4',
       )}
     >
       {post.media.type === 'image' ? (
         <>
           {layout == 'auto' ? (
-            <img
-              src={post.media.images[0]}
-              alt={post.title}
-              className="relative -z-1 h-full w-full object-cover"
-              loading="lazy"
-            />
+            <>
+              {post.media.images.length > 0 ? (
+                <img
+                  src={post.media.images[0]}
+                  alt={post.title}
+                  className="relative -z-1 h-full w-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="relative -z-1 w-full bg-white pb-[75%]"></div>
+              )}
+            </>
           ) : (
             <div className="relative -z-1 aspect-432/320">
               <ImageCard
@@ -111,6 +122,7 @@ export default function PostCard({
         <div className="flex items-center justify-between">
           <Link
             href={`/instructor/${post.id}`}
+            onClick={(e) => e.stopPropagation()}
             className="flex items-center gap-2 rounded-full bg-[#A3A3A33D] p-1.5 pr-3 backdrop-blur-[20px]"
           >
             <Avatar className="size-10">
@@ -121,7 +133,7 @@ export default function PostCard({
             </Avatar>
             <div className="grid gap-0.5">
               <span className="text-base font-medium">{post.profile.name}</span>
-              <span className="text-black-4 text-xs">
+              <span className="text-black-4 text-xs" suppressHydrationWarning>
                 {timeAgoShort(post.profile.last_active)}
               </span>
             </div>
@@ -131,12 +143,15 @@ export default function PostCard({
             {post.has_subscribe && (
               <Button
                 variant="secondary"
+                onClick={(e) => e.stopPropagation()}
                 className="text-black-4 border-0 bg-[#A3A3A33D] text-base backdrop-blur-[20px] hover:bg-[#A3A3A3]/35 hover:text-white"
               >
                 Subscribe
               </Button>
             )}
-            <OptionButton />
+            <div onClick={(e) => e.stopPropagation()}>
+              <OptionButton />
+            </div>
           </div>
         </div>
 
@@ -212,7 +227,7 @@ export default function PostCard({
           </div>
         </div>
       )}
-    </Link>
+    </div>
   );
 }
 

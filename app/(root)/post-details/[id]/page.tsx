@@ -23,11 +23,7 @@ export async function generateMetadata({
 const PostDetailsPage = async ({ params }: ParamsProps) => {
   const { id } = await params;
 
-  const post = feedPost.find((o) => String(o.id) == id);
-
-  if (!post) {
-    return;
-  }
+  // The 'id' in the URL is actually the slug
   return (
     <div>
       <NavbarHeight />
@@ -37,7 +33,7 @@ const PostDetailsPage = async ({ params }: ParamsProps) => {
       />
 
       <div className="container mb-10">
-        <PostGridContainer post={post} />
+        <PostGridContainer slug={id} />
       </div>
     </div>
   );

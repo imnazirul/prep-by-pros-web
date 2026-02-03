@@ -1,15 +1,21 @@
 'use client';
 
-import Link from 'next/link';
-import Icon from '@/lib/icon';
-import { useState } from 'react';
+import { CustomInputBox } from '@/components/shared/custom-input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CustomInputBox } from '@/components/shared/custom-input';
+import Icon from '@/lib/icon';
+import Link from 'next/link';
+import { useState } from 'react';
 import PreferenceModal from './preferences-modal';
+// import { setCredentials } from '@/redux/features/authSlice';
+// import { useAppDispatch } from '@/redux/hooks';
+import { useSearchParams } from 'next/navigation';
 
 const SignUpForm = () => {
   const [openPreference, setOpenPreference] = useState(false);
+
+  const searchParams = useSearchParams();
+  const role = searchParams.get('role') || 'PLAYER';
 
   const [email, setEmail] = useState('andrewhierholze@gmail.com');
   const [name, setName] = useState('andrewhierholze');
@@ -17,10 +23,21 @@ const SignUpForm = () => {
   const [rePassword, setRePassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Signup attempted:');
+  // const router = useRouter();
+  // const dispatch = useAppDispatch();
+  // const [signup, { isLoading }] = useSignupMutation();
+  const [errorMessage, setErrorMessage] = useState('');
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+
+    if (password !== rePassword) {
+      setErrorMessage('Passwords do not match');
+      return;
+    }
+
+    // Proceed to preferences
     setOpenPreference(true);
   };
 
@@ -60,6 +77,7 @@ const SignUpForm = () => {
         </div>
 
         <div className="py-5 text-center">
+          {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
           <span className="text-black-7 text-sm">Or Sign up with</span>
         </div>
 
@@ -108,15 +126,9 @@ const SignUpForm = () => {
             className="data-checked:bg-black-10 data-checked:border-black-10"
             onCheckedChange={(checked) => setRememberMe(checked as boolean)}
           />
-          <label
-            htmlFor="remember"
-            className="text-black-8 cursor-pointer text-sm"
-          >
+          <label htmlFor="remember" className="text-black-8 cursor-pointer text-sm">
             I agree to the{' '}
-            <Link
-              href={'/terms-and-conditions'}
-              className="font-medium text-[#60A5FA] underline"
-            >
+            <Link href={'/terms-and-conditions'} className="font-medium text-[#60A5FA] underline">
               terms and conditions.
             </Link>
           </label>
@@ -124,22 +136,14 @@ const SignUpForm = () => {
       </div>
 
       <div className="space-y-8">
-        <Button
-          onClick={handleSubmit}
-          size={'lg'}
-          type="submit"
-          className="w-full justify-between"
-        >
+        <Button onClick={handleSubmit} size={'lg'} type="submit" className="w-full justify-between">
           Sign up
           <Icon name="chevron_arrow_right" height={24} width={24} />
         </Button>
 
         <p className="text-black-7 text-lg">
           Already have an account?{' '}
-          <Link
-            href="/login"
-            className="text-primary font-semibold hover:underline"
-          >
+          <Link href="/login" className="text-primary font-semibold hover:underline">
             Sign in
           </Link>
         </p>
@@ -148,6 +152,8 @@ const SignUpForm = () => {
       <PreferenceModal
         setOpenPreference={setOpenPreference}
         openPreference={openPreference}
+        userData={{ name, email, password }}
+        role={role}
       />
     </>
   );

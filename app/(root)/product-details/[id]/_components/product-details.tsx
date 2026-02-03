@@ -1,32 +1,33 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ProductCardProp } from '@/lib/types';
+import { useState } from 'react';
 
+import { useCart } from '@/contexts/cart-context';
+import { useGetProductBySlugQuery } from '@/redux/api/globalApi';
 import 'swiper/css';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { useCart } from '@/contexts/cart-context';
 
-const colors = [
-  { name: 'Burgundy', value: '#6B4545' },
-  { name: 'Beige', value: '#C4B5A0' },
-  { name: 'Green', value: '#90D896' },
-  { name: 'Peach', value: '#E5A96F' },
-];
-
-const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
-
-const ProductDetails = ({ product }: { product: ProductCardProp }) => {
+const ProductDetails = ({ slug }: { slug: string }) => {
   const { openCart, addItem } = useCart();
+  const { data: product, isLoading } = useGetProductBySlugQuery(slug);
 
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(4);
+  const [selectedColorUid, setSelectedColorUid] = useState<string>('');
+  const [selectedSizeUid, setSelectedSizeUid] = useState<string>('');
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const description = product.description;
+  if (isLoading) return <div>Loading...</div>;
+  if (!product) return <div>Product not found</div>;
+
+  const description = product.description || '';
+  const images =
+    product.file_items.length > 0
+      ? product.file_items.map((f) => ({ src: f.file }))
+      : [{ src: '/images/placeholder.png' }];
+
   return (
     <>
       <section className="mb-10">
@@ -36,7 +37,7 @@ const ProductDetails = ({ product }: { product: ProductCardProp }) => {
             <div>
               <div className="bg-muted aspect-1005/812 overflow-hidden rounded-2xl lg:rounded-3xl">
                 <img
-                  src={product.images[selectedImage].src || '/placeholder.svg'}
+                  src={images[selectedImage]?.src || '/placeholder.svg'}
                   alt="Product"
                   className="h-full w-full object-cover"
                 />
@@ -45,12 +46,11 @@ const ProductDetails = ({ product }: { product: ProductCardProp }) => {
               {/* Thumbnail images */}
               <div className="mt-6 lg:hidden">
                 <Swiper spaceBetween={24} slidesPerView="auto">
-                  {product.images.map(({ src }, index) => (
+                  {images.map(({ src }, index) => (
                     <SwiperSlide
                       key={index}
                       className={`relative w-auto! cursor-pointer overflow-hidden rounded-2xl transition-colors after:visible after:absolute after:inset-0 after:bg-[linear-gradient(180deg,rgba(0,0,0,0.00)_40%,rgba(0,0,0,0.40)_70%)] after:opacity-100 after:transition-all after:duration-300 hover:after:invisible hover:after:opacity-0 ${
-                        selectedImage === index &&
-                        'after:invisible! after:opacity-0!'
+                        selectedImage === index && 'after:invisible! after:opacity-0!'
                       }`}
                       onClick={() => setSelectedImage(index)}
                     >
@@ -70,7 +70,7 @@ const ProductDetails = ({ product }: { product: ProductCardProp }) => {
               <div className="space-y-9">
                 <div className="space-y-5">
                   <h2 className="text-black-10 text-2xl font-semibold md:text-3xl lg:text-4xl">
-                    {product.name}
+                    {product.title}
                   </h2>
                   <p className="text-black-10 text-4xl font-semibold md:text-5xl lg:text-[56px]">
                     ${product.price}
@@ -80,22 +80,20 @@ const ProductDetails = ({ product }: { product: ProductCardProp }) => {
                 {/* Color selector */}
                 <div className="space-y-5">
                   <div className="space-y-4">
-                    <h3 className="text-black-12 text-xl font-medium md:text-2xl">
-                      Color
-                    </h3>
+                    <h3 className="text-black-12 text-xl font-medium md:text-2xl">Color</h3>
                     <div className="flex flex-wrap gap-4">
-                      {colors.map((color, index) => (
+                      {product.colours?.map((color, index) => (
                         <button
-                          key={index}
-                          onClick={() => setSelectedColor(index)}
+                          key={color.uid}
+                          onClick={() => {
+                            setSelectedColorUid(color.uid);
+                            setErrorMessage('');
+                          }}
                           className={`h-11.5 w-18.5 cursor-pointer rounded-full bg-(--color) transition-all ${
-                            selectedColor === index &&
-                            'ring-2 ring-(--color) ring-offset-2'
+                            selectedColorUid === color.uid && 'ring-2 ring-(--color) ring-offset-2'
                           }`}
-                          style={
-                            { '--color': color.value } as React.CSSProperties
-                          }
-                          aria-label={color.name}
+                          style={{ '--color': color.code || '#000' } as React.CSSProperties} // Assuming code exists
+                          aria-label={color.title}
                         />
                       ))}
                     </div>
@@ -103,21 +101,22 @@ const ProductDetails = ({ product }: { product: ProductCardProp }) => {
 
                   {/* Size selector */}
                   <div className="space-y-4">
-                    <h3 className="text-black-12 text-xl font-medium md:text-2xl">
-                      Size
-                    </h3>
+                    <h3 className="text-black-12 text-xl font-medium md:text-2xl">Size</h3>
                     <div className="flex flex-wrap gap-4">
-                      {sizes.map((size, index) => (
+                      {product.sizes?.map((size, index) => (
                         <button
-                          key={index}
-                          onClick={() => setSelectedSize(index)}
+                          key={size.uid}
+                          onClick={() => {
+                            setSelectedSizeUid(size.uid);
+                            setErrorMessage('');
+                          }}
                           className={`flex h-11.5 cursor-pointer items-center rounded-full px-8 text-lg transition-colors ${
-                            selectedSize === index
+                            selectedSizeUid === size.uid
                               ? 'bg-[#212121] text-white'
                               : 'bg-black-4 text-black-8 hover:bg-black-5'
                           }`}
                         >
-                          {size}
+                          {size.title}
                         </button>
                       ))}
                     </div>
@@ -126,9 +125,7 @@ const ProductDetails = ({ product }: { product: ProductCardProp }) => {
 
                 {/* Description */}
                 <div className="space-y-4">
-                  <h3 className="text-black-12 text-xl font-medium md:text-2xl">
-                    Description
-                  </h3>
+                  <h3 className="text-black-12 text-xl font-medium md:text-2xl">Description</h3>
                   <p className="text-black-7 gap-2 text-2xl">
                     <span className="mr-2">
                       {showFullDescription
@@ -139,9 +136,7 @@ const ProductDetails = ({ product }: { product: ProductCardProp }) => {
 
                     {description.split(' ').length > 15 && (
                       <button
-                        onClick={() =>
-                          setShowFullDescription(!showFullDescription)
-                        }
+                        onClick={() => setShowFullDescription(!showFullDescription)}
                         className="text-primary inline-block cursor-pointer font-medium hover:underline"
                       >
                         {showFullDescription ? 'Show less' : 'Show more'}
@@ -151,17 +146,36 @@ const ProductDetails = ({ product }: { product: ProductCardProp }) => {
                 </div>
               </div>
 
+              {/* Error Message */}
+              {errorMessage && <p className="text-red-500 font-medium">{errorMessage}</p>}
+
               {/* Buy button */}
               <Button
                 onClick={() => {
-                  addItem({
-                    id: String(product.id),
-                    name: product.name,
-                    price: product.price,
-                    quantity: 1,
-                    image: product.images[0].src,
-                  });
-                  openCart();
+                  setErrorMessage('');
+                  if (!selectedColorUid && product.colours?.length > 0) {
+                    setErrorMessage('Please select a color');
+                    return;
+                  }
+                  if (!selectedSizeUid && product.sizes?.length > 0) {
+                    setErrorMessage('Please select a size');
+                    return;
+                  }
+
+                  // Determine style_uid: use first available if exists
+                  const styleUid = product.styles?.[0]?.uid;
+
+                  // Construct payload with only defined values
+                  const payload: any = {
+                    product_uid: product.uid,
+                    product_count: 1,
+                  };
+
+                  if (selectedSizeUid) payload.size_uid = selectedSizeUid;
+                  if (selectedColorUid) payload.colour_uid = selectedColorUid;
+                  if (styleUid) payload.style_uid = styleUid;
+
+                  addItem(payload);
                 }}
                 className="w-full rounded-full py-6 text-base font-semibold"
               >
@@ -170,17 +184,12 @@ const ProductDetails = ({ product }: { product: ProductCardProp }) => {
             </div>
           </div>
           <div className="mt-6 hidden gap-8 lg:grid lg:grid-cols-[7fr_5fr] lg:gap-10">
-            <Swiper
-              spaceBetween={24}
-              slidesPerView="auto"
-              className="w-full lg:hidden"
-            >
-              {product.images.map(({ src }, index) => (
+            <Swiper spaceBetween={24} slidesPerView="auto" className="w-full lg:hidden">
+              {images.map(({ src }, index) => (
                 <SwiperSlide
                   key={index}
                   className={`relative w-auto! cursor-pointer overflow-hidden rounded-2xl transition-colors after:visible after:absolute after:inset-0 after:bg-[linear-gradient(180deg,rgba(0,0,0,0.00)_40%,rgba(0,0,0,0.40)_70%)] after:opacity-100 after:transition-all after:duration-300 hover:after:invisible hover:after:opacity-0 ${
-                    selectedImage === index &&
-                    'after:invisible! after:opacity-0!'
+                    selectedImage === index && 'after:invisible! after:opacity-0!'
                   }`}
                   onClick={() => setSelectedImage(index)}
                 >
