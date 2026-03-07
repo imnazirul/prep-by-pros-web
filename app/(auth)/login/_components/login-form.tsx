@@ -139,7 +139,6 @@ const LoginForm = () => {
           <CustomInputBox
             icon="email"
             label="Email Address"
-            placeholder="Email Address"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -147,7 +146,6 @@ const LoginForm = () => {
           <CustomInputBox
             icon="lock_password"
             label="Password"
-            placeholder="***********"
             type="password"
             value={password}
             isPassword

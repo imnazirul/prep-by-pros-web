@@ -30,7 +30,9 @@ export default function SessionList() {
 
   const handleSignOutOtherSessions = async () => {
     // Filter out current session and collect UIDs of all others
-    const otherSessionUids = sessions.filter((s) => !isCurrentSession(s)).map((s) => s.uid);
+    const otherSessionUids = sessions
+      .filter((s: Session) => !isCurrentSession(s))
+      .map((s: Session) => s.uid);
 
     if (otherSessionUids.length === 0) return;
 
@@ -144,7 +146,7 @@ export default function SessionList() {
         )}
       </div>
 
-      {sessions.some((s) => !isCurrentSession(s)) && (
+      {sessions.some((s: Session) => !isCurrentSession(s)) && (
         <div className="mt-6 flex justify-end">
           <Button
             variant="outline"

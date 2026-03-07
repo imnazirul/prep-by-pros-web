@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import { useGetMeContentSessionsQuery } from '@/redux/api/authApi';
+import { MeContentSession, useGetMeContentSessionsQuery } from '@/redux/api/authApi';
 import { format } from 'date-fns';
 
 export default function ContentSessionsList({ className }: { className?: string }) {
@@ -29,7 +29,7 @@ export default function ContentSessionsList({ className }: { className?: string 
         <div className="text-muted-foreground py-4">No recent activity found.</div>
       ) : (
         <div className="space-y-6">
-          {sessions.map((session) => (
+          {sessions.map((session: MeContentSession) => (
             <div key={session.uid} className="flex items-start gap-4">
               <Avatar className="h-10 w-10 border border-gray-100">
                 <AvatarImage src={session.user?.image} alt={session.user?.username || 'User'} />

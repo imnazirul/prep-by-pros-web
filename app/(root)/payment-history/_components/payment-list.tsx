@@ -2,7 +2,7 @@
 
 import HistoryCard from '@/components/shared/history-card';
 import { HistoryCardProp } from '@/lib/types';
-import { useGetPaymentsQuery } from '@/redux/api/authApi';
+import { Payment, useGetPaymentsQuery } from '@/redux/api/authApi';
 import { Loader2 } from 'lucide-react';
 
 const PaymentList = () => {
@@ -35,15 +35,14 @@ const PaymentList = () => {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {payments.map((payment) => {
+            {payments.map((payment: Payment) => {
               // Extract items or fallback
               let items: { image: string; name: string }[] = [];
               let title = 'Payment';
 
               if (payment.kind === 'ORDER' && payment.order) {
                 title =
-                  payment.order.title ||
-                  `Order #${payment.order.order_id || payment.uid.slice(0, 8)}`;
+                  payment.order.title || `Order #${payment.order.uid || payment.uid.slice(0, 8)}`;
                 items = (payment.order.order_items || []).map((item: any) => ({
                   image: item.product?.file_items?.[0]?.thumbnail || '/images/fallback.jpeg',
                   name: item.title || item.product?.title || 'Unknown Product',

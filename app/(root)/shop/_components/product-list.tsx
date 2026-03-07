@@ -36,7 +36,7 @@ const ProductList = ({
       product.file_items.length > 0
         ? product.file_items.map((f) => ({ src: f.file }))
         : [{ src: '/images/placeholder.png' }],
-    description: product.description,
+    description: product.description || '',
     slug: product.slug,
   }));
 

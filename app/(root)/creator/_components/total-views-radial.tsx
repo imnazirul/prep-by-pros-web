@@ -2,7 +2,7 @@
 
 import Icon from '@/lib/icon';
 import { cn } from '@/lib/utils';
-import { useGetDashboardViewsQuery } from '@/redux/api/authApi';
+import { DashboardViews, useGetDashboardViewsQuery } from '@/redux/api/authApi';
 import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts';
 
 const TotalViewsRadial = ({
@@ -28,7 +28,7 @@ const TotalViewsRadial = ({
   }
 
   const radialData = viewsData?.results || [];
-  const totalViews = radialData.reduce((acc, curr) => acc + curr.value, 0);
+  const totalViews = radialData.reduce((acc: number, curr: DashboardViews) => acc + curr.value, 0);
 
   // Sorting to match UI usually (e.g. descending)
   const sortedData = [...radialData].sort((a, b) => b.value - a.value);

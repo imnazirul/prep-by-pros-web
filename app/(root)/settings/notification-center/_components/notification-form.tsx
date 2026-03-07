@@ -9,7 +9,7 @@ import {
 import { useEffect, useState } from 'react';
 
 export default function NotificationForm() {
-  const { data: notificationSettings, refetch } = useGetNotificationSettingsQuery({});
+  const { data: notificationSettings, refetch } = useGetNotificationSettingsQuery();
   const [patchNotificationSettings] = usePatchNotificationSettingsMutation();
 
   const [activityEnabled, setActivityEnabled] = useState(true);

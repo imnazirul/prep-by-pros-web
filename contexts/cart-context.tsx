@@ -36,6 +36,9 @@ type CartContextType = {
   increaseQuantity: (id: string) => Promise<void>;
   decreaseQuantity: (id: string) => Promise<void>;
   isLoading: boolean;
+  isAdding: boolean;
+  isDeleting: boolean;
+  isUpdating: boolean;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -50,9 +53,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [isCartOpen, setCartOpen] = useState(false);
 
   const { data: cartData, isLoading } = useGetCartItemsQuery({});
-  const [addToCart] = useAddToCartMutation();
-  const [deleteCartItem] = useDeleteCartItemMutation();
-  const [updateCartItem] = useUpdateCartItemMutation();
+  const [addToCart, { isLoading: isAdding }] = useAddToCartMutation();
+  const [deleteCartItem, { isLoading: isDeleting }] = useDeleteCartItemMutation();
+  const [updateCartItem, { isLoading: isUpdating }] = useUpdateCartItemMutation();
 
   const items: CartItem[] =
     cartData?.results?.map((item: ApiCartItem) => ({
@@ -136,6 +139,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         decreaseQuantity,
         increaseQuantity,
         isLoading,
+        isAdding,
+        isDeleting,
+        isUpdating,
       }}
     >
       {children}

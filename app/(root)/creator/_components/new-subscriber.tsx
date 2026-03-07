@@ -3,7 +3,7 @@
 
 import Icon from '@/lib/icon';
 import { cn } from '@/lib/utils';
-import { useGetDashboardNewSubscribersQuery } from '@/redux/api/authApi';
+import { DashboardNewSubscriber, useGetDashboardNewSubscribersQuery } from '@/redux/api/authApi';
 import { useState } from 'react';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 
@@ -25,7 +25,10 @@ const NewSubscriber = ({ className }: { className?: string }) => {
   }
 
   const data = subscriberData?.results || [];
-  const totalSubscribers = data.reduce((acc, curr) => acc + (curr.s1 || 0) + (curr.s2 || 0), 0);
+  const totalSubscribers = data.reduce(
+    (acc: number, curr: DashboardNewSubscriber) => acc + (curr.s1 || 0) + (curr.s2 || 0),
+    0
+  );
 
   return (
     <div className={cn('flex h-122.5 flex-col space-y-16 rounded-4xl bg-[#FFF8C9] p-8', className)}>

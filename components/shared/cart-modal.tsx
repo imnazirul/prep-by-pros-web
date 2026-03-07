@@ -2,7 +2,6 @@
 'use client';
 
 import { useCart } from '@/contexts/cart-context';
-import Icon, { IconName } from '@/lib/icon';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { Button } from '../ui/button';
@@ -10,13 +9,16 @@ import { Dialog, DialogContent, DialogTitle } from '../ui/dialog';
 import ConfirmModal from './confirm-modal';
 import { CustomInputBox } from './custom-input';
 
+import Icon, { IconName } from '@/lib/icon';
 import {
+  Address,
   CreateOrderRequest,
   useCreateAddressMutation,
   useCreateOrderMutation,
   useGetAddressesQuery,
 } from '@/redux/api/authApi';
 import { useRouter } from 'next/navigation';
+import Circle3DLoader from './circle-loader';
 
 type StepProp = 'CART' | 'BUY' | 'SHIPPING';
 
@@ -45,10 +47,6 @@ const Cart = () => {
         setOpen={setConfirmed}
         title="Order Confirmed!"
         subTitle="Thank you for your purchase — your order is being processed and you'll hear from us soon!"
-        onClose={() => {
-          // Optional: navigate to order history
-          // router.push('/order-history');
-        }}
       />
 
       {/* For Error */}
@@ -75,7 +73,8 @@ const CartModal = ({ setConfirmed }: { setConfirmed: Dispatch<SetStateAction<boo
 
   // Set default address when data loads
   if (addressesData?.results?.length && !selectedAddress) {
-    const defaultAddr = addressesData.results.find((a) => a.is_default) || addressesData.results[0];
+    const defaultAddr =
+      addressesData.results.find((a: Address) => a.is_default) || addressesData.results[0];
     setSelectedAddress({
       address: defaultAddr.address,
       street: defaultAddr.street,
@@ -138,7 +137,16 @@ const CartModal = ({ setConfirmed }: { setConfirmed: Dispatch<SetStateAction<boo
 };
 
 const CartItem = ({ setStep }: { setStep: Dispatch<SetStateAction<StepProp>> }) => {
-  const { items, removeItem, decreaseQuantity, increaseQuantity } = useCart();
+  const {
+    items,
+    removeItem,
+    decreaseQuantity,
+    increaseQuantity,
+    closeCart,
+    isUpdating,
+    isDeleting,
+  } = useCart();
+  const router = useRouter();
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
 
@@ -202,12 +210,15 @@ const CartItem = ({ setStep }: { setStep: Dispatch<SetStateAction<StepProp>> }) 
 
                 <div className="flex h-35.25 flex-col items-center justify-between gap-2 rounded-xl bg-white p-2">
                   <button
+                    disabled={isUpdating || isDeleting}
                     onClick={() =>
                       item.quantity > 1 ? decreaseQuantity(item.id) : removeItem(item.id)
                     }
-                    className="hover:bg-primary text-black-7 flex size-8 cursor-pointer items-center justify-center rounded-md bg-[#F0F0F0] transition-all duration-300 hover:text-white"
+                    className="hover:bg-primary text-black-7 flex size-8 cursor-pointer items-center justify-center rounded-md bg-[#F0F0F0] transition-all duration-300 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {item.quantity > 1 ? (
+                    {isUpdating || isDeleting ? (
+                      <Circle3DLoader size={2} radius={10} depth={5} color="#000" />
+                    ) : item.quantity > 1 ? (
                       <Minus className="size-5" />
                     ) : (
                       <Trash2 className="size-5" />
@@ -217,10 +228,15 @@ const CartItem = ({ setStep }: { setStep: Dispatch<SetStateAction<StepProp>> }) 
                   <span className="text-base text-[#0D1E1C]">{item.quantity}</span>
 
                   <button
+                    disabled={isUpdating || isDeleting}
                     onClick={() => increaseQuantity(item.id)}
-                    className="hover:bg-primary text-black-7 flex size-8 cursor-pointer items-center justify-center rounded-md bg-[#F0F0F0] transition-all duration-300 hover:text-white"
+                    className="hover:bg-primary text-black-7 flex size-8 cursor-pointer items-center justify-center rounded-md bg-[#F0F0F0] transition-all duration-300 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <Plus className="size-5" />
+                    {isUpdating || isDeleting ? (
+                      <Circle3DLoader size={2} radius={10} depth={5} color="#000" />
+                    ) : (
+                      <Plus className="size-5" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -271,7 +287,15 @@ const CartItem = ({ setStep }: { setStep: Dispatch<SetStateAction<StepProp>> }) 
               ${integerPart}.<span className="text-2xl">{decimalPart}</span>
             </p>
           </div>
-          <Button className="lg:px-20" size={'lg'} onClick={() => setStep('BUY')}>
+          <Button
+            className="lg:px-20"
+            size={'lg'}
+            onClick={() => {
+              if (items.length === 0) return;
+              closeCart();
+              router.push('/checkout');
+            }}
+          >
             Checkout
           </Button>
         </div>

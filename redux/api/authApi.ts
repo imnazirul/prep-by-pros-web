@@ -1,7 +1,7 @@
 import { getDeviceInfo } from '@/lib/device-info';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../store';
-import { GlobalResponse, Option, Product } from './globalApi'; // Importing from globalApi
+import { Coach, GlobalResponse, Option, Product } from './globalApi'; // Importing from globalApi
 
 // Helper interfaces for CartItem nested objects which use 'uid' instead of 'slug'
 export interface CartOption {
@@ -53,6 +53,17 @@ export interface Address {
 }
 
 export interface CreateAddressRequest {
+  address: string;
+  street: string;
+  apartment?: string;
+  city?: string;
+  country?: string;
+  postal_code?: string;
+  label?: string;
+}
+
+export interface AddressDetails {
+  uid: string;
   address: string;
   street: string;
   apartment?: string;
@@ -240,6 +251,7 @@ export interface MeContentSession {
     updated_at: string;
   };
   file_items: MeContentFileItem;
+  user?: Player;
   created_at: string;
 }
 
@@ -512,7 +524,7 @@ export interface DashboardViews {
 
 export const authApi = createApi({
   reducerPath: 'authApi',
-  tagTypes: ['User'],
+  tagTypes: ['User', 'Coach'],
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api', // Fallback for dev
     prepareHeaders: (headers, { getState, endpoint }) => {
@@ -592,7 +604,7 @@ export const authApi = createApi({
           sport_slug: userData.sport_slug,
           playing_style_slug: userData.playing_style_slug,
           professional_level_slug: userData.professional_level_slug,
-          professional_level_slug: userData.professional_level_slug,
+
           ...getDeviceInfo(),
           location: 'unknown',
           ip_address: '0.0.0.0',
@@ -655,6 +667,13 @@ export const authApi = createApi({
       // If getMe is mutation, it cannot provide tags for caching in the same way as query.
       // But getNotificationSettings is query.
       // Let's leave getMe as is for now to avoid breaking other things, but add invalidatesTags to updates.
+    }),
+    retrieveMe: builder.query<Coach, void>({
+      query: () => ({
+        url: '/me',
+        method: 'GET',
+      }),
+      providesTags: ['User'],
     }),
     updateMe: builder.mutation({
       query: (data) => ({
@@ -774,7 +793,7 @@ export const authApi = createApi({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ['User', 'Coach'],
     }),
     getMeContents: builder.query<
       GlobalResponse<MeContent>,
@@ -911,24 +930,7 @@ export const authApi = createApi({
       }),
       invalidatesTags: ['User'],
     }),
-    getSubscriptions: builder.query<
-      GlobalResponse<Subscription>,
-      { ordering?: string; page?: number; page_size?: number; search?: string } | void
-    >({
-      query: (params) => ({
-        url: '/me/subscriptions',
-        method: 'GET',
-        params: params || undefined,
-      }),
-      providesTags: ['User'],
-    }),
-    getSubscription: builder.query<Subscription, string>({
-      query: (uid) => ({
-        url: `/me/subscriptions/${uid}`,
-        method: 'GET',
-      }),
-      providesTags: ['User'],
-    }),
+
     getCoachSubscriptions: builder.query<
       GlobalResponse<Subscription>,
       { ordering?: string; page?: number; page_size?: number; search?: string } | void
@@ -1177,77 +1179,7 @@ export const authApi = createApi({
     }),
 
     // Contents
-    getMeContents: builder.query<
-      GlobalResponse<MeContent>,
-      { ordering?: string; page?: number; page_size?: number; search?: string } | void
-    >({
-      query: (params) => ({
-        url: '/me/contents',
-        method: 'GET',
-        params: params || undefined,
-      }),
-      providesTags: ['User'],
-    }),
-    createMeContent: builder.mutation<MeContent, CreateMeContentRequest>({
-      query: (body) => ({
-        url: '/me/contents',
-        method: 'POST',
-        body,
-      }),
-      invalidatesTags: ['User'],
-    }),
-    getMeContent: builder.query<MeContent, string>({
-      query: (uid) => ({
-        url: `/me/contents/${uid}`,
-        method: 'GET',
-      }),
-      providesTags: ['User'],
-    }),
-    updateMeContent: builder.mutation<MeContent, { uid: string; body: UpdateMeContentRequest }>({
-      query: ({ uid, body }) => ({
-        url: `/me/contents/${uid}`,
-        method: 'PUT',
-        body,
-      }),
-      invalidatesTags: ['User'],
-    }),
-    patchMeContent: builder.mutation<
-      MeContent,
-      { uid: string; body: Partial<UpdateMeContentRequest> }
-    >({
-      query: ({ uid, body }) => ({
-        url: `/me/contents/${uid}`,
-        method: 'PATCH',
-        body,
-      }),
-      invalidatesTags: ['User'],
-    }),
-    deleteMeContent: builder.mutation<void, string>({
-      query: (uid) => ({
-        url: `/me/contents/${uid}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: ['User'],
-    }),
-    createMeContentSession: builder.mutation<any, string>({
-      query: (uid) => ({
-        url: `/me/contents/${uid}/sessions`,
-        method: 'POST',
-        body: {},
-      }),
-      invalidatesTags: ['User'],
-    }),
-    getMeContentSessions: builder.query<
-      GlobalResponse<MeContentSession>,
-      { ordering?: string; page?: number; page_size?: number; search?: string } | void
-    >({
-      query: (params) => ({
-        url: '/me/contents/sessions',
-        method: 'GET',
-        params: params || undefined,
-      }),
-      providesTags: ['User'],
-    }),
+
     // Sessions
     getSessions: builder.query<
       GlobalResponse<Session>,
@@ -1433,6 +1365,7 @@ export const {
   useResetPasswordMutation,
   useChangePasswordMutation,
   useGetMeMutation,
+  useRetrieveMeQuery,
   useUpdateMeMutation,
   usePatchMeMutation,
   useGetNotificationSettingsQuery,

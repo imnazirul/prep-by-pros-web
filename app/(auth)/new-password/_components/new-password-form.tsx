@@ -35,7 +35,6 @@ const NewPasswordForm = () => {
         <CustomInputBox
           icon="email"
           label="New Password"
-          placeholder="New Password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -44,7 +43,6 @@ const NewPasswordForm = () => {
         <CustomInputBox
           icon="lock_password"
           label="Re-type New Password"
-          placeholder="Re-type your new password"
           type="password"
           value={confirmPassword}
           isPassword

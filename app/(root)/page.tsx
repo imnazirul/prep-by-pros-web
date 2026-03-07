@@ -16,40 +16,12 @@ const HomePage = () => {
   const user = useAppSelector(selectCurrentUser);
   const [getMe, { data: userData }] = useGetMeMutation();
 
-  // State to track if we're waiting for potential redirect
   const [isCheckingRole, setIsCheckingRole] = React.useState(false);
 
   useEffect(() => {
-    const checkRole = async () => {
-      if (isAuthenticated) {
-        setIsCheckingRole(true);
-        try {
-          const fetchedUser = userData || (await getMe({}).unwrap());
-          const roleTitle =
-            typeof fetchedUser.role === 'string' ? fetchedUser.role : fetchedUser.role?.title;
-
-          if (roleTitle?.toUpperCase() === 'COACH') {
-            router.push('/creator');
-          } else {
-            setIsCheckingRole(false);
-          }
-        } catch (err) {
-          console.error('Failed to fetch user role', err);
-          setIsCheckingRole(false);
-        }
-      }
-    };
-    checkRole();
-  }, [isAuthenticated, router, getMe]); // Removing user dependency to rely on fresh fetch
-
-  // If authenticated and checking role, show nothing (or loader) to prevent flash
-  if (isAuthenticated && isCheckingRole) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="size-10 animate-spin rounded-full border-4 border-gray-300 border-t-primary"></div>
-      </div>
-    );
-  }
+    // We no longer redirect coaches to /creator automatically.
+    // The user prefers they stay on the home page when they navigate to '/'.
+  }, []);
 
   return (
     <>

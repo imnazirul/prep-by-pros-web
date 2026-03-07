@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import Icon from '@/lib/icon';
 import { cn } from '@/lib/utils';
-import { useGetSubscriptionsQuery } from '@/redux/api/authApi';
+import { Subscription, useGetSubscriptionsQuery } from '@/redux/api/authApi';
 import { useEffect, useState } from 'react';
 import { SubscriptionCard } from './subscription-card';
 
@@ -53,7 +53,7 @@ const SubscriptionList = () => {
               : 'md:grid-cols-2 lg:grid-cols-3'
           )}
         >
-          {subscriptionsData?.results?.map((sub) => (
+          {subscriptionsData?.results?.map((sub: Subscription) => (
             <SubscriptionCard view_type={view} key={sub.uid} subscription={sub} />
           ))}
           {subscriptionsData?.results?.length === 0 && (

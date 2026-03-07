@@ -2,7 +2,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { useGetDashboardEngagementsQuery } from '@/redux/api/authApi';
+import { DashboardEngagement, useGetDashboardEngagementsQuery } from '@/redux/api/authApi';
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 const TotalEngagement = ({ className }: { className?: string }) => {
@@ -66,7 +66,7 @@ const TotalEngagement = ({ className }: { className?: string }) => {
                 fill: '#1D6537',
               }}
             >
-              {engagementData.map((entry, index) => (
+              {engagementData.map((entry: DashboardEngagement, index: number) => (
                 <Cell key={`cell-${index}`} fill={'#9AD77C'} />
               ))}
             </Bar>

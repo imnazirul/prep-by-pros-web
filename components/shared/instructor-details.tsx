@@ -1,18 +1,85 @@
 'use client';
 
-import Link from 'next/link';
-import { cn } from '@/lib/utils';
-import Icon, { IconName } from '@/lib/icon';
-import { usePathname } from 'next/navigation';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { useGetCoachBySlugQuery } from '@/redux/api/globalApi';
-import Circle3DLoader from './circle-loader';
+import Icon, { IconName } from '@/lib/icon';
 import { API_BASE_URL } from '@/lib/mapper';
+import { cn } from '@/lib/utils';
+import {
+  useCancelSubscriptionMutation,
+  useCreateFollowMutation,
+  useCreateSubscriptionCheckoutMutation,
+  useRetrieveMeQuery,
+} from '@/redux/api/authApi';
+import { useGetCoachBySlugQuery, useGetCoachesQuery } from '@/redux/api/globalApi';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import Circle3DLoader from './circle-loader';
 
-export default function InstructorDetails({ slug }: { slug: string }) {
+export default function InstructorDetails({ slug }: { slug?: string }) {
+  console.log('InstructorDetails received slug:', slug);
   const pathname = usePathname();
+  const router = useRouter();
   const isCreator = pathname.startsWith('/creator');
-  const { data: coach, isLoading, isError } = useGetCoachBySlugQuery(slug);
+
+  const [createCheckout, { isLoading: isCheckoutLoading }] =
+    useCreateSubscriptionCheckoutMutation();
+  const [cancelSubscription, { isLoading: isCancelLoading }] = useCancelSubscriptionMutation();
+  const [toggleFollow, { isLoading: isFollowLoading }] = useCreateFollowMutation();
+
+  // Check if snake_case or camelCase UUID (simple regex for standard UUID)
+  const isUuid =
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
+      slug || ''
+    );
+
+  // Fetch using Slug (skip if UUID)
+  const {
+    data: coachBySlug,
+    isLoading: isLoadingSlug,
+    isError: isErrorSlug,
+    refetch: refetchSlug,
+  } = useGetCoachBySlugQuery(slug!, {
+    skip: !slug || isUuid,
+  });
+
+  // Fetch using UID (skip if NOT UUID) - assuming getCoaches supports uid filter
+  const {
+    data: coachesByUid,
+    isLoading: isLoadingUid,
+    isError: isErrorUid,
+    refetch: refetchUid,
+  } = useGetCoachesQuery(
+    { uid: slug },
+    {
+      skip: !slug || !isUuid,
+    }
+  );
+
+  const {
+    data: meCoach,
+    isLoading: isLoadingMe,
+    isError: isErrorMe,
+    refetch: refetchMe,
+  } = useRetrieveMeQuery();
+
+  let coach = slug ? (isUuid ? coachesByUid?.results?.[0] : coachBySlug) : meCoach;
+
+  if (!coach && meCoach) {
+    const meSlugMatches =
+      meCoach.slug === slug ||
+      meCoach.uid === slug ||
+      meCoach.username === slug ||
+      meCoach.username?.replace(/^#/, '') === slug;
+
+    if (meSlugMatches) {
+      coach = meCoach;
+    }
+  }
+  const isPrimaryLoading = slug ? (isUuid ? isLoadingUid : isLoadingSlug) : false;
+  const isPrimaryError = slug ? (isUuid ? isErrorUid : isErrorSlug) : false;
+
+  const isLoading = isPrimaryLoading || (!coach && isPrimaryError && isLoadingMe);
+  const isError = isPrimaryError && !coach;
 
   if (isLoading) {
     return (
@@ -23,11 +90,7 @@ export default function InstructorDetails({ slug }: { slug: string }) {
   }
 
   if (isError || !coach) {
-    return (
-      <div className="py-10 text-center text-red-500">
-        Failed to load instructor details.
-      </div>
-    );
+    return <div className="py-10 text-center text-red-500">Failed to load instructor details.</div>;
   }
 
   const getFullUrl = (url: string | undefined | null) => {
@@ -36,8 +99,70 @@ export default function InstructorDetails({ slug }: { slug: string }) {
     return `${API_BASE_URL}${url}`;
   };
 
-  const fullName = `${coach.first_name} ${coach.last_name}`.trim();
+  const fullName = [coach.first_name, coach.last_name].filter(Boolean).join(' ');
   const imageUrl = getFullUrl(coach.image);
+
+  const handleSubscribe = async () => {
+    if (!meCoach) {
+      alert('Please login to subscribe');
+      return;
+    }
+    if (!coach?.uid) return;
+
+    try {
+      const res = await createCheckout({ coach_uid: coach.uid }).unwrap();
+      if (res.checkout_url) {
+        router.push(res.checkout_url);
+      }
+    } catch (error) {
+      console.error('Failed to create checkout session', error);
+      alert('Failed to initiate subscription. Please try again.');
+    }
+  };
+
+  const refetchCoachData = () => {
+    if (slug) {
+      if (isUuid) refetchUid();
+      else refetchSlug();
+    } else {
+      refetchMe();
+    }
+  };
+
+  const handleUnsubscribe = async () => {
+    if (!coach?.user_subscription?.uid) {
+      alert('Subscription details not found.');
+      return;
+    }
+
+    try {
+      await cancelSubscription(coach.user_subscription.uid).unwrap();
+      refetchCoachData();
+      alert('Successfully unsubscribed.');
+    } catch (error) {
+      console.error('Failed to cancel subscription', error);
+      alert('Failed to unsubscribe. Please try again.');
+    }
+  };
+
+  const handleToggleFollow = async () => {
+    if (!meCoach) {
+      alert('Please login to follow');
+      return;
+    }
+    if (!coach?.slug && !coach?.uid) return;
+
+    try {
+      await toggleFollow({
+        coach_slug: coach.slug || coach.uid,
+        kind: 'FOLLOW_UNFOLLOW',
+      }).unwrap();
+      refetchCoachData();
+    } catch (error) {
+      console.error('Failed to toggle follow', error);
+      alert('Failed to follow/unfollow. Please try again.');
+    }
+  };
 
   return (
     <div>
@@ -50,7 +175,7 @@ export default function InstructorDetails({ slug }: { slug: string }) {
                 variant: 'default',
                 size: 'icon',
               }),
-              'size-13',
+              'size-13'
             )}
           >
             <Icon height={24} width={24} name="arrow_left" />
@@ -66,30 +191,22 @@ export default function InstructorDetails({ slug }: { slug: string }) {
       >
         <div className="grid w-full gap-2.5">
           <div className="space-y-1">
-            <h3 className="text-2xl font-semibold text-white md:text-[32px]">
-              {fullName}
-            </h3>
+            <h3 className="text-2xl font-semibold text-white md:text-[32px]">{fullName}</h3>
             <span className="text-black-4 text-sm">
               {coach.username ? `${coach.username}` : ''}
             </span>
           </div>
           <div className="flex items-center gap-5">
             <div className="flex items-center gap-1.5">
-              <span className="text-lg font-medium text-white">
-                {coach.total_subscriber || 0}
-              </span>
+              <span className="text-lg font-medium text-white">{coach.total_subscriber || 0}</span>
               <span className="text-black-5 text-sm">Subscribers</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-lg font-medium text-white">
-                {coach.total_post || 0}
-              </span>
+              <span className="text-lg font-medium text-white">{coach.total_post || 0}</span>
               <span className="text-black-5 text-sm">Posts</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-lg font-medium text-white">
-                {coach.total_vedios || 0}
-              </span>
+              <span className="text-lg font-medium text-white">{coach.total_vedios || 0}</span>
               <span className="text-black-5 text-sm">Videos</span>
             </div>
           </div>
@@ -105,18 +222,25 @@ export default function InstructorDetails({ slug }: { slug: string }) {
                 variant: 'secondary',
                 size: 'lg',
               }),
-              'bg-primary-200 text-primary hover:bg-primary-300 font-semibold',
+              'bg-primary-200 text-primary hover:bg-primary-300 font-semibold'
             )}
           >
             Edit profile
           </Link>
         ) : (
           <Button
-            className="bg-primary-200 text-primary hover:bg-primary-300 font-semibold"
-            variant={'secondary'}
+            className={cn(
+              'font-semibold text-white',
+              coach.is_followed
+                ? 'bg-black-8 hover:bg-black-10'
+                : 'bg-primary-200 text-primary hover:bg-primary-300'
+            )}
+            variant={coach.is_followed ? 'secondary' : 'default'}
             size={'lg'}
+            onClick={handleToggleFollow}
+            disabled={isFollowLoading}
           >
-            Follow
+            {isFollowLoading ? 'Processing...' : coach.is_followed ? 'Unfollow' : 'Follow'}
           </Button>
         )}
 
@@ -127,7 +251,7 @@ export default function InstructorDetails({ slug }: { slug: string }) {
               buttonVariants({
                 variant: 'default',
                 size: 'lg',
-              }),
+              })
             )}
           >
             Go to dashboard
@@ -139,12 +263,19 @@ export default function InstructorDetails({ slug }: { slug: string }) {
                 className="bg-black-8 hover:bg-black-10 font-semibold text-white"
                 variant={'secondary'}
                 size={'lg'}
+                onClick={handleUnsubscribe}
+                disabled={isCancelLoading}
               >
-                Unsubscribe now
+                {isCancelLoading ? 'Unsubscribing...' : 'Unsubscribe now'}
               </Button>
             ) : (
-              <Button variant={'default'} size={'lg'}>
-                Subscribe only for $9.9/month
+              <Button
+                variant={'default'}
+                size={'lg'}
+                onClick={handleSubscribe}
+                disabled={isCheckoutLoading}
+              >
+                {isCheckoutLoading ? 'Processing...' : 'Subscribe only for $9.9/month'}
               </Button>
             )}
           </>
@@ -179,12 +310,7 @@ export default function InstructorDetails({ slug }: { slug: string }) {
           ].map(({ label, value, icon }, index) => (
             <div key={index} className="space-y-1">
               <div className="flex items-center gap-1">
-                <Icon
-                  name={icon}
-                  height={16}
-                  width={16}
-                  className="text-black-7"
-                />
+                <Icon name={icon} height={16} width={16} className="text-black-7" />
                 <span className="text-black-7 text-base">{label}</span>
               </div>
               <span className="text-black-10 text-xl">{value}</span>

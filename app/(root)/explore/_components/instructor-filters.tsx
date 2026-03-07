@@ -1,6 +1,7 @@
 'use client';
 
-import React, { Dispatch, SetStateAction } from 'react';
+import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -10,9 +11,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import Icon from '@/lib/icon';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
 import { useGetProfessionalLevelsQuery } from '@/redux/api/globalApi';
+import { Dispatch, SetStateAction } from 'react';
 
 interface InstructorFiltersProps {
   filters: {
@@ -20,11 +21,13 @@ interface InstructorFiltersProps {
     gender?: string;
     level?: string;
   };
-  setFilters: Dispatch<SetStateAction<{
-    country?: string;
-    gender?: string;
-    level?: string;
-  }>>;
+  setFilters: Dispatch<
+    SetStateAction<{
+      country?: string;
+      gender?: string;
+      level?: string;
+    }>
+  >;
 }
 
 const COUNTRIES = [
@@ -70,11 +73,11 @@ const COUNTRIES = [
   { code: 'cf', name: 'Central African Republic' },
   { code: 'cg', name: 'Republic of the Congo' },
   { code: 'ch', name: 'Switzerland' },
-  { code: 'ci', name: 'Côte d\'Ivoire' },
+  { code: 'ci', name: "Côte d'Ivoire" },
   { code: 'ck', name: 'Cook Islands' },
   { code: 'cl', name: 'Chile' },
   { code: 'cm', name: 'Cameroon' },
-  { code: 'cn', name: 'People\'s Republic of China' },
+  { code: 'cn', name: "People's Republic of China" },
   { code: 'co', name: 'Colombia' },
   { code: 'cr', name: 'Costa Rica' },
   { code: 'cu', name: 'Cuba' },
@@ -281,7 +284,7 @@ export default function InstructorFilters({ filters, setFilters }: InstructorFil
     <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
       <div className="flex flex-wrap items-center gap-3">
         {/* Country Filter */}
-        <Button variant="secondary" className="p-1.5 pr-3.5">
+        <div className={cn(buttonVariants({ variant: 'secondary' }), 'p-1.5 pr-3.5')}>
           <Avatar className="size-9">
             <AvatarImage src="/images/sports.png" /> {/* Keeping your icons */}
           </Avatar>
@@ -291,12 +294,7 @@ export default function InstructorFilters({ filters, setFilters }: InstructorFil
           >
             <SelectTrigger
               arrowIcon={
-                <Icon
-                  name="arrow_down"
-                  className="text-black-8 size-6"
-                  height={24}
-                  width={24}
-                />
+                <Icon name="arrow_down" className="text-black-8 size-6" height={24} width={24} />
               }
               className="w-fit cursor-pointer border-0 p-0 text-lg font-medium shadow-none focus-visible:ring-0"
             >
@@ -313,10 +311,10 @@ export default function InstructorFilters({ filters, setFilters }: InstructorFil
               </SelectGroup>
             </SelectContent>
           </Select>
-        </Button>
+        </div>
 
         {/* Gender Filter */}
-        <Button variant="secondary" className="p-1.5 pr-3.5">
+        <div className={cn(buttonVariants({ variant: 'secondary' }), 'p-1.5 pr-3.5')}>
           <Avatar className="size-9">
             <AvatarImage src="/images/gender.png" />
           </Avatar>
@@ -326,12 +324,7 @@ export default function InstructorFilters({ filters, setFilters }: InstructorFil
           >
             <SelectTrigger
               arrowIcon={
-                <Icon
-                  name="arrow_down"
-                  className="text-black-8 size-6"
-                  height={24}
-                  width={24}
-                />
+                <Icon name="arrow_down" className="text-black-8 size-6" height={24} width={24} />
               }
               className="w-fit cursor-pointer border-0 p-0 text-lg font-medium shadow-none focus-visible:ring-0"
             >
@@ -346,10 +339,10 @@ export default function InstructorFilters({ filters, setFilters }: InstructorFil
               </SelectGroup>
             </SelectContent>
           </Select>
-        </Button>
+        </div>
 
         {/* Level / Position Filter */}
-        <Button variant="secondary" className="p-1.5 pr-3.5">
+        <div className={cn(buttonVariants({ variant: 'secondary' }), 'p-1.5 pr-3.5')}>
           <Avatar className="size-9">
             <AvatarImage src="/images/position.png" />
           </Avatar>
@@ -359,12 +352,7 @@ export default function InstructorFilters({ filters, setFilters }: InstructorFil
           >
             <SelectTrigger
               arrowIcon={
-                <Icon
-                  name="arrow_down"
-                  className="text-black-8 size-6"
-                  height={24}
-                  width={24}
-                />
+                <Icon name="arrow_down" className="text-black-8 size-6" height={24} width={24} />
               }
               className="w-fit cursor-pointer border-0 p-0 text-lg font-medium shadow-none focus-visible:ring-0"
             >
@@ -381,7 +369,7 @@ export default function InstructorFilters({ filters, setFilters }: InstructorFil
               </SelectGroup>
             </SelectContent>
           </Select>
-        </Button>
+        </div>
 
         {(filters.country || filters.gender || filters.level) && (
           <Button variant="ghost" onClick={clearFilters} className="text-red-500">
@@ -391,12 +379,7 @@ export default function InstructorFilters({ filters, setFilters }: InstructorFil
       </div>
 
       <Button variant="secondary" className="px-8">
-        <Icon
-          name="filter_vertical"
-          height={24}
-          width={24}
-          className="text-black-8"
-        />
+        <Icon name="filter_vertical" height={24} width={24} className="text-black-8" />
         Sort by
       </Button>
     </div>

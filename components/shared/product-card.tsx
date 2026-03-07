@@ -6,6 +6,7 @@ import Icon from '@/lib/icon';
 import { ProductCardProp } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import Circle3DLoader from './circle-loader';
 
 export function ProductCard({
   product,
@@ -14,7 +15,7 @@ export function ProductCard({
   product: ProductCardProp;
   className?: string;
 }) {
-  const { addItem, items } = useCart();
+  const { addItem, items, isAdding } = useCart();
 
   // Check if this product is already in the cart
   const isInCart = items.some((item) => item.id === String(product.id));
@@ -45,13 +46,18 @@ export function ProductCard({
 
               addItem(payload);
             }}
+            disabled={isAdding}
             size="icon-sm"
             variant="secondary"
-            className={`shrink-0 bg-[#FBFFFF] hover:bg-white ${
+            className={`shrink-0 bg-[#FBFFFF] hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 ${
               isInCart ? 'text-red' : 'text-black-10 hover:text-red'
             }`}
           >
-            <Icon name="shopping_basket" height={16} width={16} />
+            {isAdding ? (
+              <Circle3DLoader size={2} radius={10} depth={5} color="#000" />
+            ) : (
+              <Icon name="shopping_basket" height={16} width={16} />
+            )}
           </Button>
         </div>
 

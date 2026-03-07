@@ -1,5 +1,6 @@
 'use client';
 
+import Circle3DLoader from '@/components/shared/circle-loader';
 import OrderItemDetails from '@/components/shared/order-item-details';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { useCart } from '@/contexts/cart-context';
@@ -9,7 +10,7 @@ import { useGetOrderQuery } from '@/redux/api/authApi';
 import Link from 'next/link';
 
 export default function OrderDetailsPage({ orderUid }: { orderUid: string }) {
-  const { addItem, openCart } = useCart();
+  const { addItem, openCart, isAdding } = useCart();
   const { data: orderData, isLoading } = useGetOrderQuery(orderUid);
 
   if (isLoading) {
@@ -118,20 +119,27 @@ export default function OrderDetailsPage({ orderUid }: { orderUid: string }) {
               Refund
             </Link>
             <Button
-              onClick={() => {
-                addItem({
-                  id: String(order.id),
-                  name: order.title,
-                  price: order.price,
-                  quantity: 1,
-                  image: order.items[0].image,
-                });
-                openCart();
+              disabled={isAdding}
+              onClick={async () => {
+                // Add all items from the order to cart
+                if (orderData?.order_items) {
+                  for (const item of orderData.order_items) {
+                    await addItem({
+                      product_uid: item.product.uid,
+                      product_count: 1,
+                    });
+                  }
+                  openCart();
+                }
               }}
               size="lg"
-              className="lg:px-26.25"
+              className="lg:px-26.25 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Buy Again
+              {isAdding ? (
+                <Circle3DLoader size={2} radius={10} depth={5} color="#fff" />
+              ) : (
+                'Buy Again'
+              )}
             </Button>
           </div>
         </div>

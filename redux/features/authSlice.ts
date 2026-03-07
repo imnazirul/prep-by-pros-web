@@ -5,6 +5,7 @@ interface AuthState {
   user: any | null; // Replace 'any' with your User type
   token: string | null;
   isAuthenticated: boolean;
+  wishlistMap: Record<string, string>; // Maps content_slug to wishlist_uid
 }
 
 const getInitialState = (): AuthState => {
@@ -17,6 +18,7 @@ const getInitialState = (): AuthState => {
           token,
           user: JSON.parse(user),
           isAuthenticated: true,
+          wishlistMap: {},
         };
       } catch (error) {
         console.error('Failed to parse user from local storage', error);
@@ -27,6 +29,7 @@ const getInitialState = (): AuthState => {
     user: null,
     token: null,
     isAuthenticated: false,
+    wishlistMap: {},
   };
 };
 
@@ -43,7 +46,7 @@ export const authSlice = createSlice({
         refresh: string;
         uid: string;
         message: string;
-        role?: string | { title: string;[key: string]: any };
+        role?: string | { title: string; [key: string]: any };
         [key: string]: any;
       }>
     ) => {
@@ -71,10 +74,26 @@ export const authSlice = createSlice({
       state.user = action.payload.user;
       state.isAuthenticated = true;
     },
+    setWishlist: (state, action: PayloadAction<Record<string, string>>) => {
+      state.wishlistMap = action.payload;
+    },
+    addWishlistItem: (state, action: PayloadAction<{ slug: string; uid: string }>) => {
+      state.wishlistMap[action.payload.slug] = action.payload.uid;
+    },
+    removeWishlistItem: (state, action: PayloadAction<string>) => {
+      delete state.wishlistMap[action.payload];
+    },
   },
 });
 
-export const { setCredentials, logout, rehydrateAuth } = authSlice.actions;
+export const {
+  setCredentials,
+  logout,
+  rehydrateAuth,
+  setWishlist,
+  addWishlistItem,
+  removeWishlistItem,
+} = authSlice.actions;
 
 export const selectCurrentUser = (state: RootState) => state.auth.user;
 export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;

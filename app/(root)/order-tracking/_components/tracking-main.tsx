@@ -1,7 +1,7 @@
 'use client';
 
 import PageHeader from '@/components/shared/page-header';
-import { useGetAllOrderTrackingQuery } from '@/redux/api/authApi';
+import { TrackingResponse, useGetAllOrderTrackingQuery } from '@/redux/api/authApi';
 import { useEffect, useState } from 'react';
 import TrackingDetails from './tracking-details';
 import TrackingEmpty from './tracking-empty';
@@ -28,7 +28,8 @@ export default function TrackingMain() {
     return <TrackingEmpty />;
   }
 
-  const selectedTracking = trackings.find((t) => t.uid === selectedTrackingUid) || trackings[0];
+  const selectedTracking =
+    trackings.find((t: TrackingResponse) => t.uid === selectedTrackingUid) || trackings[0];
 
   return (
     <>

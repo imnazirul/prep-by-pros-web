@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '../ui/dialog';
+import Circle3DLoader from './circle-loader';
 import ConfirmModal from './confirm-modal';
 import { CustomInputBox, CustomSelectBox } from './custom-input';
 
@@ -37,14 +38,36 @@ const RedirectingModal = () => {
   const { data: playingStylesData } = useGetPlayingStylesQuery();
   const { data: professionalLevelsData } = useGetProfessionalLevelsQuery();
 
-  const [email, setEmail] = useState('andrewhierholze@gmail.com');
+  const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [name, setName] = useState('andrewhierholze');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [sport, setSport] = useState('');
   const [club, setClub] = useState('');
   const [playingStyle, setPlayingStyle] = useState('');
   const [professionalLevel, setProfessionalLevel] = useState('');
+  const [images, setImages] = useState<File[]>([]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const selectedFiles = Array.from(e.target.files);
+      const validFiles = selectedFiles.filter(
+        (file) =>
+          ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type) &&
+          file.size <= 10 * 1024 * 1024
+      );
+
+      setImages((prev) => {
+        const newImages = [...prev, ...validFiles];
+        return newImages.slice(0, 3);
+      });
+      e.target.value = '';
+    }
+  };
+
+  const removeImage = (indexToRemove: number) => {
+    setImages((prev) => prev.filter((_, index) => index !== indexToRemove));
+  };
 
   // Helper to map API options to SelectBox options
   const mapOptions = (data: any) => {
@@ -131,8 +154,8 @@ const RedirectingModal = () => {
                 </DialogDescription>
               </div>
 
-              <div className="w-62.5 mx-auto">
-                <img src={'/images/loader.gif'} alt="Loader" className="w-full h-auto" />
+              <div className="w-62.5 mx-auto flex justify-center py-10">
+                <Circle3DLoader />
               </div>
             </div>
           ) : step === 'ACCOUNT_TYPE' ? (
@@ -188,7 +211,7 @@ const RedirectingModal = () => {
 
               <Button
                 onClick={() => {
-                  if (accountType === 'coach') {
+                  if (accountType === 'player') {
                     setOpen(false);
                     router.push(`/signup?role=${accountType}`);
                   } else {
@@ -286,7 +309,15 @@ const RedirectingModal = () => {
                     </ul>
                   </div>
 
-                  <div className="bg-background border-black-5 flex flex-col items-center justify-center space-y-3 rounded-3xl border border-dashed p-8">
+                  <label className="bg-background border-black-5 flex flex-col items-center justify-center space-y-3 rounded-3xl border border-dashed p-8 cursor-pointer hover:bg-black-4 transition-colors">
+                    <input
+                      type="file"
+                      hidden
+                      multiple
+                      accept="image/jpeg, image/jpg, image/png"
+                      onChange={handleImageChange}
+                      disabled={images.length >= 3}
+                    />
                     <div className="bg-primary flex size-10.5 items-center justify-center rounded-full text-white">
                       <Icon name="upload" height={24} width={24} />
                     </div>
@@ -296,20 +327,27 @@ const RedirectingModal = () => {
                       </h4>
                       <p className="text-black-7 text-xs">Maximum file size: 10 MB</p>
                     </div>
-                  </div>
+                  </label>
 
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    {['/images/upload-file-1.png', '/images/upload-file-2.png'].map(
-                      (file, index) => (
+                  {images.length > 0 && (
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      {images.map((file, index) => (
                         <div key={index} className="relative h-35">
-                          <img src={file} className="h-full w-auto rounded-3xl" alt="" />
-                          <div className="bg-black-5 hover:bg-black-6 hover:text-red outline-background text-black-9 absolute top-1 right-1 flex size-6 translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full outline-2">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            className="h-full w-auto rounded-3xl object-cover"
+                            alt=""
+                          />
+                          <div
+                            onClick={() => removeImage(index)}
+                            className="bg-black-5 hover:bg-black-6 hover:text-red outline-background text-black-9 absolute top-1 right-1 flex size-6 translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full outline-2"
+                          >
                             <Icon name="close" height={13} width={13} />
                           </div>
                         </div>
-                      )
-                    )}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
               {errorMessage && (

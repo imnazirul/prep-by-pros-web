@@ -26,7 +26,10 @@ const TotalEarning = ({ className }: { className?: string }) => {
 
   const totalEarnings = useMemo(() => {
     if (!earningsDataList?.results) return 0;
-    return earningsDataList.results.reduce((acc, curr) => acc + curr.amount, 0);
+    return earningsDataList.results.reduce(
+      (acc: number, curr: DashboardEarning) => acc + curr.amount,
+      0
+    );
   }, [earningsDataList]);
 
   if (isLoading) {

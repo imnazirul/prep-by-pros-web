@@ -32,7 +32,6 @@ const ForgotPasswordForm = () => {
       <CustomInputBox
         icon="email"
         label="Email Address"
-        placeholder="Enter your email"
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}

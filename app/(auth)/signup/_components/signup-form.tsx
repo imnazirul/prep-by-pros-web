@@ -17,8 +17,8 @@ const SignUpForm = () => {
   const searchParams = useSearchParams();
   const role = searchParams.get('role') || 'PLAYER';
 
-  const [email, setEmail] = useState('andrewhierholze@gmail.com');
-  const [name, setName] = useState('andrewhierholze');
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [rePassword, setRePassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -85,7 +85,6 @@ const SignUpForm = () => {
           <CustomInputBox
             icon="user_2"
             label="Name"
-            placeholder="Name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -93,7 +92,6 @@ const SignUpForm = () => {
           <CustomInputBox
             icon="email"
             label="Email Address"
-            placeholder="Email Address"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -101,7 +99,6 @@ const SignUpForm = () => {
           <CustomInputBox
             icon="lock_password"
             label="Password"
-            placeholder="Re-type Password"
             type="password"
             value={password}
             isPassword
@@ -110,7 +107,6 @@ const SignUpForm = () => {
           <CustomInputBox
             icon="lock_password"
             label="Re-type Password"
-            placeholder="Re-type Password"
             type="password"
             value={rePassword}
             isPassword

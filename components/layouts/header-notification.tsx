@@ -31,7 +31,7 @@ export function NotificationDropdown() {
   const notifications = notificationsData?.results || [];
 
   // Filter logic
-  const filteredNotifications = notifications.filter((n) => {
+  const filteredNotifications = notifications.filter((n: Notification) => {
     if (activeFilter === 'ALL') return true;
     if (activeFilter === 'SUBSCRIPTION') {
       // Assuming subscription related notifications have specific model_kinds or fields
@@ -46,8 +46,8 @@ export function NotificationDropdown() {
     return true;
   });
 
-  const unreadNotifications = filteredNotifications.filter((n) => !n.is_read);
-  const readNotifications = filteredNotifications.filter((n) => n.is_read);
+  const unreadNotifications = filteredNotifications.filter((n: Notification) => !n.is_read);
+  const readNotifications = filteredNotifications.filter((n: Notification) => n.is_read);
 
   // Limit display (optional, but good for UI)
   const recentDisplay = unreadNotifications.slice(0, 5);
@@ -120,7 +120,7 @@ export function NotificationDropdown() {
                 <div className="space-y-3">
                   <p className="text-black-9 font-medium">Recent</p>
                   <div className="bg-black-4 space-y-3.5 rounded-2xl p-3">
-                    {recentDisplay.map((notification) => (
+                    {recentDisplay.map((notification: Notification) => (
                       <NotificationItem key={notification.uid} notification={notification} />
                     ))}
                   </div>
@@ -132,7 +132,7 @@ export function NotificationDropdown() {
                 <div className="space-y-3">
                   <p className="text-black-9 font-medium">Read</p>
                   <div className="bg-black-4 space-y-3.5 rounded-2xl p-3">
-                    {readDisplay.map((notification) => (
+                    {readDisplay.map((notification: Notification) => (
                       <NotificationItem key={notification.uid} notification={notification} />
                     ))}
                   </div>

@@ -1,7 +1,8 @@
 'use client';
 
 import HistoryCard from '@/components/shared/history-card';
-import { useGetOrdersQuery } from '@/redux/api/authApi';
+import { HistoryCardProp } from '@/lib/types';
+import { Order, useGetOrdersQuery } from '@/redux/api/authApi';
 
 const OrderList = () => {
   const { data: ordersData, isLoading } = useGetOrdersQuery();
@@ -16,7 +17,7 @@ const OrderList = () => {
     );
   }
 
-  const orders = ordersData?.results.map((order) => ({
+  const orders = ordersData?.results.map((order: Order) => ({
     id: order.uid,
     title: `Order #${order.uid.slice(0, 8)}`,
     items:
@@ -47,7 +48,7 @@ const OrderList = () => {
           <p>No orders found.</p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {orders.map((order) => (
+            {orders.map((order: HistoryCardProp) => (
               <HistoryCard key={order.id} history={order} />
             ))}
           </div>

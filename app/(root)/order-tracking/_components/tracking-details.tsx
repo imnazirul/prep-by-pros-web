@@ -49,7 +49,7 @@ export default function TrackingDetails({ trackingUid }: TrackingDetailsProps) {
     to: tracking.receiver_address?.country || 'Unknown',
     fromDate: tracking.created_at,
     toDate: tracking.estimated_delivery_date || 'Unknown',
-    progress: tracking.status === 'COMPLETED' ? 4 : tracking.status === 'CANCELED' ? 0 : 2, // todo: dynamic progress
+    progress: tracking.status === 'COMPLETED' ? 4 : tracking.status === 'CANCELED' ? 1 : 2, // todo: dynamic progress
     sender: tracking.sender_name || 'Store',
     receiver: tracking.receiver_name || 'User',
   };

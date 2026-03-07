@@ -1,16 +1,16 @@
 'use client';
 
-import Link from 'next/link';
-import Icon from '@/lib/icon';
-import { cn } from '@/lib/utils';
-import { Button } from '../ui/button';
-import { useEffect, useState } from 'react';
-import HeaderProfile from './header-profile';
-import HeaderSearch from './header-search';
-import { usePathname } from 'next/navigation';
 import { useCart } from '@/contexts/cart-context';
 import { usePostDialog } from '@/contexts/post-dialog-context';
+import Icon from '@/lib/icon';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Button } from '../ui/button';
 import { NotificationDropdown } from './header-notification';
+import HeaderProfile from './header-profile';
+import HeaderSearch from './header-search';
 
 const playerNavItems = [
   { label: 'Home', href: '/' },
@@ -49,9 +49,7 @@ export function Header() {
     <header
       id="header-id"
       className={`fixed top-0 z-50 w-full transition-all duration-500 ${
-        scrolled
-          ? 'bg-background border-b py-3'
-          : 'lg::pt-12 bg-transparent pt-6 md:pt-9'
+        scrolled ? 'bg-background border-b py-3' : 'lg::pt-12 bg-transparent pt-6 md:pt-9'
       }`}
     >
       <div className="container flex items-center justify-between">
@@ -62,22 +60,19 @@ export function Header() {
 
           <nav className="hidden items-center gap-6 lg:flex">
             {navItems.map(({ label, href }) => {
-              const isActive =
-                href === '/' ? pathname === '/' : pathname.startsWith(href);
+              const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
 
               return (
                 <Link
                   key={href}
                   href={href}
                   className={cn(
-                    'flex items-center gap-1 text-xl text-black transition-all duration-300',
+                    'flex items-center gap-1 text-xl text-black transition-all duration-300'
                   )}
                 >
                   <span
                     className={
-                      isActive
-                        ? 'font-semibold'
-                        : 'font-medium opacity-40 hover:opacity-100'
+                      isActive ? 'font-semibold' : 'font-medium opacity-40 hover:opacity-100'
                     }
                   >
                     {' '}
@@ -90,12 +85,10 @@ export function Header() {
             <button
               onClick={openCart}
               className={cn(
-                'flex cursor-pointer items-center gap-1 text-xl text-black transition-all duration-300',
+                'flex cursor-pointer items-center gap-1 text-xl text-black transition-all duration-300'
               )}
             >
-              <span className={'font-medium opacity-40 hover:opacity-100'}>
-                My Cart
-              </span>
+              <span className={'font-medium opacity-40 hover:opacity-100'}>My Cart</span>
               <span className="bg-red flex size-4 items-center justify-center rounded-full text-xs text-white">
                 {items.length}
               </span>
@@ -107,7 +100,7 @@ export function Header() {
           <HeaderSearch />
 
           {isCreatorSection && (
-            <Button onClick={openPostDialog} className="h-13">
+            <Button onClick={() => openPostDialog()} className="h-13">
               <Icon name="plus_sign" height={24} width={24} />
               Add new post
             </Button>

@@ -1,24 +1,24 @@
 'use client';
 
-import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 // import { feedPost } from '@/data';
 import PostCard from '@/components/shared/post-card';
 import { buttonVariants } from '@/components/ui/button';
 
+import Circle3DLoader from '@/components/shared/circle-loader';
+import { PostCardProp } from '@/lib/types';
+import { useGetCoachesQuery } from '@/redux/api/globalApi';
+import { useEffect, useRef } from 'react';
+import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useEffect, useRef } from 'react';
-import type { Swiper as SwiperType } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { useGetCoachesQuery } from '@/redux/api/globalApi';
-import Circle3DLoader from '@/components/shared/circle-loader';
-import { PostCardProp } from '@/lib/types';
 
 export function ExclusiveDrops() {
   const swiperRef = useRef<SwiperType | null>(null);
-  const { data, isLoading, error } = useGetCoachesQuery({ keywords: 'trending' });
+  const { data, isLoading, error } = useGetCoachesQuery({});
 
   useEffect(() => {
     const swiper = swiperRef.current;
@@ -110,36 +110,34 @@ export function ExclusiveDrops() {
   }
 
   if (error) {
-    return (
-      <div className="container py-10 text-center text-red-500">
-        Failed to load trending coaches.
-      </div>
-    );
+    return null;
   }
 
   const coaches: PostCardProp[] =
-    data?.results
-      .filter((coach) => coach.content && coach.content.file_items?.length > 0)
-      .map((coach) => {
-        const drop = coach.content!;
-        return {
-          id: drop.slug || coach.uid,
-          title: drop.title || `${coach.first_name} ${coach.last_name}`,
-          description: drop.description || '',
-          views: String(drop.view_count || 0),
-          share: String(drop.share_count || 0),
-          media: {
-            type: 'image',
-            images: drop.file_items.map((file: any) => file.file),
-          },
-          profile: {
-            name: `${coach.first_name} ${coach.last_name}`,
-            image: coach.image || '/images/default-avatar.png', // Fallback if null
-            last_active: new Date(drop.created_at || coach.created_at),
-          },
-          category: coach.club?.[0]?.title || 'Pro Coach',
-        };
-      }) || [];
+    data?.results.map((coach) => {
+      const drop: any = coach.content || {}; // Fallback if no content exists
+      return {
+        id: drop.slug || coach.uid,
+        title: drop.title || `${coach.first_name || ''} ${coach.last_name || ''}`.trim(),
+        description: drop.description || '',
+        views: String(drop.view_count || 0),
+        share: String(drop.share_count || 0),
+        media: {
+          type: 'image',
+          images: drop.file_items?.map((file: any) => file.file) || [],
+        },
+        profile: {
+          name: `${coach.first_name || ''} ${coach.last_name || ''}`.trim(),
+          image: coach.image || '/images/default-avatar.png',
+          last_active: new Date(drop.created_at || coach.created_at || Date.now()),
+          slug: coach.slug || coach.uid || '',
+          uid: coach.uid,
+        },
+        category: coach.club?.[0]?.title || 'Pro Coach',
+        is_saved: !!drop.wishlist_uid,
+        wishlist_uid: drop.wishlist_uid || undefined,
+      };
+    }) || [];
 
   if (coaches.length === 0) return null;
 
@@ -183,4 +181,3 @@ export function ExclusiveDrops() {
     </section>
   );
 }
-

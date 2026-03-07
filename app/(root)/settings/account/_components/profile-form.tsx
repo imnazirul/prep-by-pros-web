@@ -75,12 +75,27 @@ const ProfileForm = () => {
       setGender(user.gender || '');
 
       // Populate other fields if available in user object
-      if (user.sport_slug) setSport(user.sport_slug);
-      if (user.professional_level_slug) setLevel(user.professional_level_slug);
-      if (user.playing_style_slug) setPlayingStyle(user.playing_style_slug);
-      // Club isn't in the initial user object destructuring but might be needed.
-      // Assuming 'club_slug' or similar if it exists, but user object type isn't fully visible.
-      // For now, let's just allow selecting it.
+      const extractSlug = (val: any) => {
+        if (typeof val === 'string') return val;
+        if (Array.isArray(val) && val.length > 0) return val[0].slug || val[0].value || '';
+        return '';
+      };
+
+      setSport(user.sport_slug || extractSlug(user.sports) || extractSlug(user.sport) || '');
+      setLevel(
+        user.professional_level_slug ||
+          extractSlug(user.professional_levels) ||
+          extractSlug(user.professional_level) ||
+          ''
+      );
+      setPlayingStyle(
+        user.playing_style_slug ||
+          extractSlug(user.Playing_style) ||
+          extractSlug(user.playing_style) ||
+          ''
+      );
+      setClub(user.club_slug || extractSlug(user.clubs) || extractSlug(user.club) || '');
+
       if (user.is_currentyly_playing) setCurrentPlaying(user.is_currentyly_playing);
     }
   }, [user]);

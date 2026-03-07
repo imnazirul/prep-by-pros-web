@@ -1,24 +1,24 @@
 'use client';
 
-import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 // import { products } from '@/data';
-import { buttonVariants } from '@/components/ui/button';
-import { ProductCard } from '@/components/shared/product-card';
-import { useGetProductsQuery } from '@/redux/api/globalApi';
 import Circle3DLoader from '@/components/shared/circle-loader';
+import { ProductCard } from '@/components/shared/product-card';
+import { buttonVariants } from '@/components/ui/button';
 import { ProductCardProp } from '@/lib/types';
+import { useGetProductsQuery } from '@/redux/api/globalApi';
 
+import { useEffect, useRef } from 'react';
+import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import type { Swiper as SwiperType } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { useEffect, useRef } from 'react';
 
 export function HotDeals() {
   const swiperRef = useRef<SwiperType | null>(null);
-  const { data, isLoading, error } = useGetProductsQuery({ popular: true });
+  const { data, isLoading, error } = useGetProductsQuery({});
 
   useEffect(() => {
     const swiper = swiperRef.current;
@@ -110,11 +110,7 @@ export function HotDeals() {
   }
 
   if (error) {
-    return (
-      <div className="container py-10 text-center text-red-500">
-        Failed to load hot deals.
-      </div>
-    );
+    return null;
   }
 
   const products: ProductCardProp[] =
@@ -141,7 +137,7 @@ export function HotDeals() {
         </div>
       </div>
 
-      <div className='max-w-full'>
+      <div className="max-w-full">
         <Swiper
           spaceBetween={10}
           slidesPerView="auto"
