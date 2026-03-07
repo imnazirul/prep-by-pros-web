@@ -1,11 +1,32 @@
+'use client';
+
 import NavbarHeight from '@/components/shared/navbar-height';
 import PageHeader from '@/components/shared/page-header';
-import TotalEarning from '../_components/total-earning';
-import TotalViewsRadial from '../_components/total-views-radial';
+import {
+  useGetDashboardEarningsQuery,
+  useGetDashboardEngagementsQuery,
+  useGetDashboardNewSubscribersQuery,
+  useGetDashboardQuery,
+  useGetDashboardViewsQuery,
+} from '@/redux/api/authApi';
 import NewSubscriber from '../_components/new-subscriber';
+import TotalEarning from '../_components/total-earning';
 import TotalEngagement from '../_components/total-engagement';
+import TotalViewsRadial from '../_components/total-views-radial';
 
 const CreatorHomePage = () => {
+  const { data: dashboardData } = useGetDashboardQuery(undefined);
+  const { data: earningsData } = useGetDashboardEarningsQuery(undefined);
+  const { data: engagementsData } = useGetDashboardEngagementsQuery(undefined);
+  const { data: newSubscribersData } = useGetDashboardNewSubscribersQuery(undefined);
+  const { data: viewsData } = useGetDashboardViewsQuery(undefined);
+
+  console.log('dashboardData', dashboardData);
+  console.log('earningsData', earningsData);
+  console.log('engagementsData', engagementsData);
+  console.log('newSubscribersData', newSubscribersData);
+  console.log('viewsData', viewsData);
+
   return (
     <div className="pb-10">
       <NavbarHeight />

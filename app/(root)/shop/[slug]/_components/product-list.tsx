@@ -1,6 +1,6 @@
-import { cn } from '@/lib/utils';
-import { products } from '@/data';
 import { ProductCard } from '@/components/shared/product-card';
+import { products } from '@/data';
+import { cn } from '@/lib/utils';
 
 const ProductList = () => {
   return (

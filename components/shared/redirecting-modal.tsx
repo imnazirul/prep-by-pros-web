@@ -2,43 +2,143 @@
 'use client';
 
 import Icon from '@/lib/icon';
-import { Button } from '../ui/button';
-import ConfirmModal from './confirm-modal';
+import { useSignupMutation } from '@/redux/api/authApi';
+import {
+  useGetClubsQuery,
+  useGetPlayingStylesQuery,
+  useGetProfessionalLevelsQuery,
+  useGetSportsQuery,
+} from '@/redux/api/globalApi';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { CustomInputBox, CustomSelectBox } from './custom-input';
+import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '../ui/dialog';
+import Circle3DLoader from './circle-loader';
+import ConfirmModal from './confirm-modal';
+import { CustomInputBox, CustomSelectBox } from './custom-input';
 
 type StepProp = 'LOADING' | 'ACCOUNT_TYPE' | 'VERIFY';
+
+import { selectIsAuthenticated } from '@/redux/features/authSlice';
+import { useAppSelector } from '@/redux/hooks';
 
 const RedirectingModal = () => {
   const [step, setStep] = useState<StepProp>('LOADING');
   const [open, setOpen] = useState(false);
-  const searchParams = useSearchParams();
   const [confirmModal, setConfirmModal] = useState(false);
+  const [accountType, setAccountType] = useState<'player' | 'coach'>('player');
 
   const router = useRouter();
+  const [signup, { isLoading }] = useSignupMutation();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
-  const [email, setEmail] = useState('andrewhierholze@gmail.com');
-  const [name, setName] = useState('andrewhierholze');
+  // Dynamic Data Fetching
+  const { data: clubsData } = useGetClubsQuery();
+  const { data: sportsData } = useGetSportsQuery();
+  const { data: playingStylesData } = useGetPlayingStylesQuery();
+  const { data: professionalLevelsData } = useGetProfessionalLevelsQuery();
+
+  const [email, setEmail] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
   const [sport, setSport] = useState('');
   const [club, setClub] = useState('');
   const [playingStyle, setPlayingStyle] = useState('');
+  const [professionalLevel, setProfessionalLevel] = useState('');
+  const [images, setImages] = useState<File[]>([]);
 
-  const redirecting = searchParams.get('redirecting');
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const selectedFiles = Array.from(e.target.files);
+      const validFiles = selectedFiles.filter(
+        (file) =>
+          ['image/jpeg', 'image/jpg', 'image/png'].includes(file.type) &&
+          file.size <= 10 * 1024 * 1024
+      );
+
+      setImages((prev) => {
+        const newImages = [...prev, ...validFiles];
+        return newImages.slice(0, 3);
+      });
+      e.target.value = '';
+    }
+  };
+
+  const removeImage = (indexToRemove: number) => {
+    setImages((prev) => prev.filter((_, index) => index !== indexToRemove));
+  };
+
+  // Helper to map API options to SelectBox options
+  const mapOptions = (data: any) => {
+    return (
+      data?.results?.map((item: any) => ({
+        label: item.title,
+        value: item.slug,
+      })) || []
+    );
+  };
+
+  // Helper to extract error message
+  const parseErrorMessage = (error: any) => {
+    if (error?.data) {
+      // If data is an object with field arrays, pick one
+      const keys = Object.keys(error.data);
+      if (keys.length > 0) {
+        const firstKey = keys[0];
+        const errorVal = error.data[firstKey];
+        if (Array.isArray(errorVal) && errorVal.length > 0) {
+          return `${firstKey}: ${errorVal[0]}`;
+        }
+        if (typeof errorVal === 'string') return errorVal;
+      }
+      if (error.data.message) return error.data.message;
+    }
+    return 'Something went wrong. Please try again.';
+  };
+
+  const handleSignUp = async () => {
+    setErrorMessage('');
+    try {
+      const userData = {
+        name,
+        email,
+        password,
+        role: accountType.toUpperCase(),
+        club_slug: club, // Assuming value matches backend requirement
+        sport_slug: sport,
+        playing_style_slug: playingStyle,
+        professional_level_slug: professionalLevel,
+      };
+
+      const res = await signup(userData).unwrap();
+
+      // Persist user data for UI if needed (though global state/cookie should handle auth)
+      // For now relying on modal state variables for the success message
+
+      setOpen(false);
+      setConfirmModal(true);
+    } catch (error) {
+      console.error('Signup failed:', error);
+      setErrorMessage(parseErrorMessage(error));
+    }
+  };
 
   useEffect(() => {
+    // Open automaticallly on mount
+    if (!isAuthenticated) {
+      setOpen(true);
+    }
+
     setTimeout(() => {
       if (step == 'LOADING') {
         setStep('ACCOUNT_TYPE');
       }
     }, 3000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isAuthenticated]);
 
-  useEffect(() => {
-    setOpen(redirecting === 'true');
-  }, [redirecting]);
+  if (isAuthenticated) return null;
 
   return (
     <>
@@ -54,8 +154,8 @@ const RedirectingModal = () => {
                 </DialogDescription>
               </div>
 
-              <div className="w-62.5 mx-auto">
-                <img src={'/images/loader.gif'} alt="Loader" className="w-full h-auto" />
+              <div className="w-62.5 mx-auto flex justify-center py-10">
+                <Circle3DLoader />
               </div>
             </div>
           ) : step === 'ACCOUNT_TYPE' ? (
@@ -79,7 +179,13 @@ const RedirectingModal = () => {
                     <p className="text-black-5">
                       Sharpen your skills, track your progress & rise through the ranks
                     </p>
-                    <input type="radio" hidden defaultChecked={true} name="type" />
+                    <input
+                      type="radio"
+                      hidden
+                      name="type"
+                      checked={accountType === 'player'}
+                      onChange={() => setAccountType('player')}
+                    />
                   </label>
 
                   <label
@@ -92,18 +198,31 @@ const RedirectingModal = () => {
                     <p className="text-black-5">
                       Show your game, build legacy & lead next generation of champions
                     </p>
-                    <input type="radio" hidden name="type" />
+                    <input
+                      type="radio"
+                      hidden
+                      name="type"
+                      checked={accountType === 'coach'}
+                      onChange={() => setAccountType('coach')}
+                    />
                   </label>
                 </div>
               </div>
 
               <Button
-                onClick={() => setStep('VERIFY')}
+                onClick={() => {
+                  if (accountType === 'player') {
+                    setOpen(false);
+                    router.push(`/signup?role=${accountType}`);
+                  } else {
+                    setStep('VERIFY');
+                  }
+                }}
                 size={'lg'}
                 type="submit"
                 className="w-full justify-between"
               >
-                Continue as player
+                Continue as {accountType}
                 <Icon name="chevron_arrow_right" height={24} width={24} />
               </Button>
             </div>
@@ -134,25 +253,20 @@ const RedirectingModal = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
+                  <CustomInputBox
+                    icon="lock_password"
+                    label="Password"
+                    placeholder="Password"
+                    type="password"
+                    value={password}
+                    isPassword
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
                   <CustomSelectBox
                     icon="honour_star"
                     label="Club"
                     placeholder="Select here"
-                    options={[
-                      { label: 'Programming Club', value: 'programming_club' },
-                      { label: 'Robotics Club', value: 'robotics_club' },
-                      { label: 'Science Club', value: 'science_club' },
-                      { label: 'Math Club', value: 'math_club' },
-                      { label: 'Debate Club', value: 'debate_club' },
-                      {
-                        label: 'English Language Club',
-                        value: 'english_language_club',
-                      },
-                      { label: 'Business Club', value: 'business_club' },
-                      { label: 'Photography Club', value: 'photography_club' },
-                      { label: 'Art Club', value: 'art_club' },
-                      { label: 'Music Club', value: 'music_club' },
-                    ]}
+                    options={mapOptions(clubsData)}
                     value={club}
                     setValue={setClub}
                   />
@@ -161,14 +275,7 @@ const RedirectingModal = () => {
                     icon="busketball"
                     label="Sport"
                     placeholder="Select here"
-                    options={[
-                      { label: 'Football', value: 'Football' },
-                      { label: 'Cricket', value: 'Cricket' },
-                      { label: 'Badminton', value: 'Badminton' },
-                      { label: 'Basketball', value: 'Basketball' },
-                      { label: 'Volleyball', value: 'Volleyball' },
-                      { label: 'Tennis', value: 'Tennis' },
-                    ]}
+                    options={mapOptions(sportsData)}
                     value={sport}
                     setValue={setSport}
                   />
@@ -177,15 +284,18 @@ const RedirectingModal = () => {
                     icon="football_pitch"
                     label="Playing Style"
                     placeholder="Select here"
-                    options={[
-                      { label: 'Offensive', value: 'Offensive' },
-                      { label: 'Defensive', value: 'Defensive' },
-                      { label: 'All-Rounder', value: 'All-Rounder' },
-                      { label: 'Aggressive', value: 'Aggressive' },
-                      { label: 'Balanced', value: 'Balanced' },
-                    ]}
+                    options={mapOptions(playingStylesData)}
                     value={playingStyle}
                     setValue={setPlayingStyle}
+                  />
+
+                  <CustomSelectBox
+                    icon="honour_star" // Reusing an icon or need a new one
+                    label="Professional Level"
+                    placeholder="Select here"
+                    options={mapOptions(professionalLevelsData)}
+                    value={professionalLevel}
+                    setValue={setProfessionalLevel}
                   />
                 </div>
                 <div>
@@ -199,7 +309,15 @@ const RedirectingModal = () => {
                     </ul>
                   </div>
 
-                  <div className="bg-background border-black-5 flex flex-col items-center justify-center space-y-3 rounded-3xl border border-dashed p-8">
+                  <label className="bg-background border-black-5 flex flex-col items-center justify-center space-y-3 rounded-3xl border border-dashed p-8 cursor-pointer hover:bg-black-4 transition-colors">
+                    <input
+                      type="file"
+                      hidden
+                      multiple
+                      accept="image/jpeg, image/jpg, image/png"
+                      onChange={handleImageChange}
+                      disabled={images.length >= 3}
+                    />
                     <div className="bg-primary flex size-10.5 items-center justify-center rounded-full text-white">
                       <Icon name="upload" height={24} width={24} />
                     </div>
@@ -209,33 +327,40 @@ const RedirectingModal = () => {
                       </h4>
                       <p className="text-black-7 text-xs">Maximum file size: 10 MB</p>
                     </div>
-                  </div>
+                  </label>
 
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    {['/images/upload-file-1.png', '/images/upload-file-2.png'].map(
-                      (file, index) => (
+                  {images.length > 0 && (
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      {images.map((file, index) => (
                         <div key={index} className="relative h-35">
-                          <img src={file} className="h-full w-auto rounded-3xl" alt="" />
-                          <div className="bg-black-5 hover:bg-black-6 hover:text-red outline-background text-black-9 absolute top-1 right-1 flex size-6 translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full outline-2">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            className="h-full w-auto rounded-3xl object-cover"
+                            alt=""
+                          />
+                          <div
+                            onClick={() => removeImage(index)}
+                            className="bg-black-5 hover:bg-black-6 hover:text-red outline-background text-black-9 absolute top-1 right-1 flex size-6 translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full outline-2"
+                          >
                             <Icon name="close" height={13} width={13} />
                           </div>
                         </div>
-                      )
-                    )}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-
+              {errorMessage && (
+                <div className="rounded-md bg-red-50 p-3 text-sm text-red-500">{errorMessage}</div>
+              )}
               <Button
-                onClick={() => {
-                  setOpen(false);
-                  setConfirmModal(true);
-                }}
+                onClick={handleSignUp}
                 size={'lg'}
                 type="submit"
                 className="w-full justify-between"
+                disabled={isLoading}
               >
-                Request for verification
+                {isLoading ? 'Processing...' : 'Request for verification'}
                 <Icon name="chevron_arrow_right" height={24} width={24} />
               </Button>
             </div>
@@ -298,7 +423,7 @@ const RedirectingModal = () => {
         }}
         subTitle={
           <>
-            Congratulations <span className="text-black-10 font-medium">Andrerw</span>, we’ve
+            Congratulations <span className="text-black-10 font-medium">{name}</span>, we’ve
             confirmed your details. Now you can go further to sign up
           </>
         }

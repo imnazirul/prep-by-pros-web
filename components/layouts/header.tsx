@@ -1,16 +1,16 @@
 'use client';
 
-import Link from 'next/link';
-import Icon from '@/lib/icon';
-import { cn } from '@/lib/utils';
-import { Button } from '../ui/button';
-import { useEffect, useState } from 'react';
-import HeaderProfile from './header-profile';
-import HeaderSearch from './header-search';
-import { usePathname } from 'next/navigation';
 import { useCart } from '@/contexts/cart-context';
 import { usePostDialog } from '@/contexts/post-dialog-context';
+import Icon from '@/lib/icon';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Button } from '../ui/button';
 import { NotificationDropdown } from './header-notification';
+import HeaderProfile from './header-profile';
+import HeaderSearch from './header-search';
 
 const playerNavItems = [
   { label: 'Home', href: '/' },
@@ -60,8 +60,7 @@ export function Header() {
 
           <nav className="hidden items-center gap-6 lg:flex">
             {navItems.map(({ label, href }) => {
-              const isExactBase = href === '/' || href === '/creator';
-              const isActive = isExactBase ? pathname === href : pathname.startsWith(href);
+              const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
 
               return (
                 <Link
@@ -101,7 +100,7 @@ export function Header() {
           <HeaderSearch />
 
           {isCreatorSection && (
-            <Button onClick={openPostDialog} className="h-13">
+            <Button onClick={() => openPostDialog()} className="h-13">
               <Icon name="plus_sign" height={24} width={24} />
               Add new post
             </Button>

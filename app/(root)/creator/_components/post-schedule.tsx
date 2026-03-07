@@ -1,18 +1,33 @@
-import Icon from '@/lib/icon';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { CustomSelectBox } from '@/components/shared/custom-input';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import Icon from '@/lib/icon';
+import { useState } from 'react';
 
-const PostSchedule = () => {
+import { Dispatch, SetStateAction } from 'react';
+
+interface PostScheduleProps {
+  date: string;
+  setDate: Dispatch<SetStateAction<string>>;
+  time: string;
+  setTime: Dispatch<SetStateAction<string>>;
+  isScheduled: boolean;
+  setIsScheduled: (isScheduled: boolean) => void;
+}
+
+const PostSchedule = ({
+  date,
+  setDate,
+  time,
+  setTime,
+  isScheduled,
+  setIsScheduled,
+}: PostScheduleProps) => {
   const [open, setOpen] = useState(false);
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [isScheduled, setIsScheduled] = useState(false); // Track if saved
 
   const getFormattedDate = (fullDate: string) => {
     if (!fullDate) return '';
@@ -20,7 +35,6 @@ const PostSchedule = () => {
   };
 
   const handleSave = () => {
-    console.log('first');
     if (date && time) {
       setIsScheduled(true);
       setOpen(false); // Close the dropdown after saving
@@ -30,8 +44,9 @@ const PostSchedule = () => {
   return (
     <>
       <DropdownMenu onOpenChange={setOpen} open={open}>
-        <DropdownMenuTrigger asChild>
-          <button className="text-2xl cursor-pointer font-semibold text-[#1D4440] flex items-center gap-2 outline-none disabled:cursor-default">
+        {/* 1. Disable the trigger if already scheduled */}
+        <DropdownMenuTrigger asChild disabled={isScheduled}>
+          <button className="text-2xl font-semibold text-[#1D4440] flex items-center gap-2 outline-none disabled:cursor-default">
             {isScheduled ? (
               <>
                 <Icon name="checkmark_circle_fill" height={24} width={24} />
@@ -45,7 +60,7 @@ const PostSchedule = () => {
 
         <DropdownMenuContent
           sideOffset={20}
-          className="border-black-5 w-85.5 bg-black-4 rounded-3xl md:rounded-4xl lg:rounded-[40px] p-4 shadow-[0_12px_8px_0_rgba(0,0,0,0.16)]"
+          className="border-black-5 w-[342px] bg-black-4 rounded-3xl md:rounded-4xl lg:rounded-[40px] p-4 shadow-[0_12px_8px_0_rgba(0,0,0,0.16)]"
           align="end"
         >
           <div className="space-y-3">

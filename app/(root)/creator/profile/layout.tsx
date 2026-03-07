@@ -14,7 +14,7 @@ const ProfileLayout = ({ children }: { children: ReactNode }) => {
 
       <div className="container">
         <div className="grid gap-7 lg:grid-cols-[5fr_7fr] xl:grid-cols-[4fr_8fr] md:gap-10">
-          <InstructorDetails isSubscribe={true} />
+          <InstructorDetails />
           {children}
         </div>
       </div>

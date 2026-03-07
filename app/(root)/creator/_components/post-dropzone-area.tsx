@@ -29,10 +29,10 @@ export function DropzoneArea({
         />
       </div>
       <h4 className="text-black-10 mb-3 text-center text-2xl font-semibold">
-        Drag your photos here or upload from Computer
+        Drag your photos or videos here or upload from Computer
       </h4>
       <p className="text-black-7 text-center text-xl">
-        Only jpg, jpeg and png formats are supported
+        Images (jpg, png) and videos (mp4, mov) are supported
       </p>
     </div>
   );

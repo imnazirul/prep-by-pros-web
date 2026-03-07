@@ -3,50 +3,53 @@
 
 import Icon from '@/lib/icon';
 import { cn } from '@/lib/utils';
+import { DashboardNewSubscriber, useGetDashboardNewSubscribersQuery } from '@/redux/api/authApi';
 import { useState } from 'react';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 
-const subscriberData = [
-  { week: 'Week 1', s1: 400, s2: 240 },
-  { week: 'Week 2', s1: 700, s2: 150 },
-  { week: 'Week 3', s1: 300, s2: 794 },
-  { week: 'Week 4', s1: 450, s2: 300 },
-  { week: 'Week 5', s1: 400, s2: 500 },
-];
-
 const NewSubscriber = ({ className }: { className?: string }) => {
   const [activeIndex, setActiveIndex] = useState<string | null>(null);
+  const { data: subscriberData, isLoading } = useGetDashboardNewSubscribersQuery();
+
+  if (isLoading) {
+    return (
+      <div
+        className={cn(
+          'flex h-122.5 items-center justify-center rounded-4xl bg-[#FFF8C9] p-8',
+          className
+        )}
+      >
+        Loading...
+      </div>
+    );
+  }
+
+  const data = subscriberData?.results || [];
+  const totalSubscribers = data.reduce(
+    (acc: number, curr: DashboardNewSubscriber) => acc + (curr.s1 || 0) + (curr.s2 || 0),
+    0
+  );
 
   return (
-    <div
-      className={cn(
-        'flex h-122.5 flex-col space-y-16 rounded-4xl bg-[#FFF8C9] p-8',
-        className,
-      )}
-    >
+    <div className={cn('flex h-122.5 flex-col space-y-16 rounded-4xl bg-[#FFF8C9] p-8', className)}>
       <div>
         <div className="mb-0 flex items-center justify-between">
           <p className="text-black-8 text-2xl">New subscriber</p>
           <span className="text-black-8 flex items-center text-2xl">
             7%
-            <Icon
-              name="chevron_down_fill"
-              className="text-red"
-              height={32}
-              width={32}
-            />
+            <Icon name="chevron_down_fill" className="text-red" height={32} width={32} />
           </span>
         </div>
 
         <h2 className="text-[40px] font-medium">
-          1,594 <span className="text-black-7 text-xl">People</span>
+          {totalSubscribers} <span className="text-black-7 text-xl">People</span>
         </h2>
       </div>
 
       <div className="-mx-6 flex-1">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
-            data={subscriberData}
+            data={data}
             margin={{
               top: 15,
               left: 20,
@@ -76,13 +79,7 @@ const NewSubscriber = ({ className }: { className?: string }) => {
                 <stop offset="100%" stopColor="#1D653705" stopOpacity={1} />
               </linearGradient>
 
-              <filter
-                id="dotShadow"
-                x="-50%"
-                y="-50%"
-                width="200%"
-                height="200%"
-              >
+              <filter id="dotShadow" x="-50%" y="-50%" width="200%" height="200%">
                 <feDropShadow
                   dx="0"
                   dy="2"
@@ -145,8 +142,7 @@ const CustomTooltip = ({ active, payload }: { active: any; payload: any }) => {
     return (
       <div className="bg-black-12 flex h-9 items-center rounded-[10px] rounded-tl px-3 shadow-[0px_4px_12px_0px_#00000033]">
         <p className="text-lg text-white">
-          {payload[1].value}{' '}
-          <span className="text-xs opacity-60">subscriber</span>
+          {payload[1].value} <span className="text-xs opacity-60">subscriber</span>
         </p>
       </div>
     );

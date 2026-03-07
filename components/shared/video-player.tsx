@@ -1,14 +1,13 @@
 'use client';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
 import Icon from '@/lib/icon';
 import { cn } from '@/lib/utils';
+import { useCreateMeContentSessionMutation } from '@/redux/api/authApi';
+import { RootState } from '@/redux/store';
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
-import { Dialog, DialogContent } from '../ui/dialog';
+import { useSelector } from 'react-redux';
+import { Dialog, DialogContent, DialogTitle } from '../ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 const VideoPlayer = ({
   src,
@@ -17,6 +16,7 @@ const VideoPlayer = ({
   isModal,
   isPlaying,
   setIsPlaying,
+  contentUid,
 }: {
   src: string;
   className?: string;
@@ -24,20 +24,36 @@ const VideoPlayer = ({
   setIsModal: Dispatch<SetStateAction<boolean>>;
   isPlaying: boolean;
   setIsPlaying: Dispatch<SetStateAction<boolean>>;
+  contentUid?: string;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  if (!src) return null;
+
+  const isImage = /\.(jpeg|jpg|png|webp|gif|svg)$/i.test(src.split('?')[0]);
 
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(1);
+  const [hasViewed, setHasViewed] = useState(false);
+  const token = useSelector((state: RootState) => state.auth.token);
+
+  const [createSession] = useCreateMeContentSessionMutation();
 
   // Play / Pause
   const togglePlay = () => {
-    if (!videoRef.current) return;
+    if (!videoRef.current || isImage) return;
 
     if (videoRef.current.paused) {
       videoRef.current.play();
       setIsPlaying(true);
+
+      // Record view count if not already recorded and contentUid is present
+      // Only attempt to count view if user is logged in (token exists)
+      if (contentUid && !hasViewed && token) {
+        setHasViewed(true); // Optimistic update to prevent double triggers
+        createSession(contentUid).catch((err) => console.error('Failed to count view:', err));
+      }
     } else {
       videoRef.current.pause();
       setIsPlaying(false);
@@ -46,7 +62,7 @@ const VideoPlayer = ({
 
   // Mute / Unmute
   const toggleMute = () => {
-    if (!videoRef.current) return;
+    if (!videoRef.current || isImage) return;
 
     if (videoRef.current.muted || volume === 0) {
       videoRef.current.muted = false;
@@ -61,8 +77,7 @@ const VideoPlayer = ({
   const handleTimeUpdate = () => {
     if (!videoRef.current) return;
 
-    const current =
-      (videoRef.current.currentTime / videoRef.current.duration) * 100;
+    const current = (videoRef.current.currentTime / videoRef.current.duration) * 100;
     setProgress(current || 0);
   };
 
@@ -93,7 +108,7 @@ const VideoPlayer = ({
 
   /** Pause inline video when modal opens */
   useEffect(() => {
-    if (!videoRef.current) return;
+    if (!videoRef.current || isImage) return;
 
     if (isModal) {
       videoRef.current.pause();
@@ -105,18 +120,28 @@ const VideoPlayer = ({
     <div
       className={cn(
         'relative mx-auto aspect-708/482 max-h-[85vh] overflow-hidden rounded-2xl md:rounded-3xl',
-        className,
+        className
       )}
     >
-      <video
-        ref={videoRef}
-        src={src}
-        className="absolute inset-0 h-full w-full object-cover"
-        onTimeUpdate={handleTimeUpdate}
-        onEnded={() => setIsPlaying(false)}
-      />
+      {isImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt="Video Thumbnail"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          src={src}
+          className="absolute inset-0 h-full w-full object-cover cursor-pointer"
+          onTimeUpdate={handleTimeUpdate}
+          onEnded={() => setIsPlaying(false)}
+          onClick={togglePlay}
+        />
+      )}
 
-      {!isPlaying && isModal && (
+      {!isPlaying && !isImage && (
         <button
           onClick={togglePlay}
           className="absolute top-1/2 left-1/2 flex size-24 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/25 backdrop-blur-[20px]"
@@ -141,7 +166,7 @@ const VideoPlayer = ({
         <div
           className={cn(
             'relative flex-1 cursor-pointer rounded-[10px] bg-[#BFBFBF]',
-            isModal ? 'h-2.5' : 'h-2',
+            isModal ? 'h-2.5' : 'h-2'
           )}
           onClick={handleSeek}
         >
@@ -193,7 +218,7 @@ const VideoPlayer = ({
               <div
                 className={cn(
                   'relative flex h-full cursor-pointer items-end rounded-[10px] bg-black/20',
-                  isModal ? 'w-2.5' : 'w-2',
+                  isModal ? 'w-2.5' : 'w-2'
                 )}
                 onClick={handleVolumeChange}
               >
@@ -207,10 +232,7 @@ const VideoPlayer = ({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <button
-            className="shrink-0 cursor-pointer"
-            onClick={() => setIsModal(!isModal)}
-          >
+          <button className="shrink-0 cursor-pointer" onClick={() => setIsModal(!isModal)}>
             <Icon
               name={isModal ? 'circle_arrow_shrink' : 'circle_arrow_expand'}
               height={isModal ? 44 : 34}
@@ -227,9 +249,11 @@ const VideoPlayer = ({
 const VideoWrapper = ({
   src,
   className,
+  contentUid,
 }: {
   src: string;
   className?: string;
+  contentUid?: string;
 }) => {
   const [isModal, setIsModal] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -243,6 +267,7 @@ const VideoWrapper = ({
         isModal={isModal}
         isPlaying={isPlaying}
         setIsPlaying={setIsPlaying}
+        contentUid={contentUid}
       />
 
       <Dialog open={isModal} onOpenChange={setIsModal}>
@@ -250,6 +275,7 @@ const VideoWrapper = ({
           showCloseButton={false}
           className="border-0 bg-transparent! p-0! sm:max-w-300"
         >
+          <DialogTitle className="sr-only">Video</DialogTitle>
           <VideoPlayer
             src={src}
             className={`aspect-1200/817`}
@@ -257,6 +283,7 @@ const VideoWrapper = ({
             isModal={isModal}
             isPlaying={isPlaying}
             setIsPlaying={setIsPlaying}
+            contentUid={contentUid}
           />
         </DialogContent>
       </Dialog>

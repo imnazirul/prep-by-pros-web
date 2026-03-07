@@ -1,5 +1,6 @@
 export interface PostCardProp {
   id: number | string;
+  uid?: string;
   title: string;
   description: string;
   views: string;
@@ -18,15 +19,20 @@ export interface PostCardProp {
     image?: string;
     name: string;
     last_active: Date;
+    slug?: string;
+    uid?: string;
   };
   category: string;
   has_subscribe?: boolean;
   tags?: string[];
   is_lock?: boolean;
+  is_saved?: boolean;
+  wishlist_uid?: string;
 }
 
 export interface InstructorCardProp {
-  id: number;
+  id: number | string;
+  slug: string;
   name: string;
   image: string;
   country: string;
@@ -37,7 +43,8 @@ export interface InstructorCardProp {
 }
 
 export interface ProductCardProp {
-  id: number;
+  id: number | string;
+  slug?: string;
   name: string;
   price: number;
   images: { src: string }[];
@@ -57,11 +64,14 @@ export interface ActivityProp {
 }
 
 interface BaseHistoryCard {
-  id: number;
+  id: number | string;
   title: string;
   items: {
     image: string;
     name: string;
+    price?: number;
+    quantity?: number;
+    attributes?: string;
   }[];
   price: number;
   date: Date;

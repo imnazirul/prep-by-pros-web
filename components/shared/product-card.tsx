@@ -1,11 +1,12 @@
 'use client';
 
-import Link from 'next/link';
-import Icon from '@/lib/icon';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { ProductCardProp } from '@/lib/types';
 import { useCart } from '@/contexts/cart-context';
+import Icon from '@/lib/icon';
+import { ProductCardProp } from '@/lib/types';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import Circle3DLoader from './circle-loader';
 
 export function ProductCard({
   product,
@@ -14,13 +15,13 @@ export function ProductCard({
   product: ProductCardProp;
   className?: string;
 }) {
-  const { addItem, items } = useCart();
+  const { addItem, items, isAdding } = useCart();
 
   // Check if this product is already in the cart
   const isInCart = items.some((item) => item.id === String(product.id));
   return (
     <Link
-      href={`/product-details/${product.id}`}
+      href={`/product-details/${product.slug || product.id}`}
       style={{
         backgroundImage: `url("${product.images[0].src}")`,
       }}
@@ -37,25 +38,30 @@ export function ProductCard({
               e.preventDefault();
               e.stopPropagation();
 
-              addItem({
-                id: String(product.id),
-                name: product.name,
-                price: product.price,
-                quantity: 1,
-                image: product.images[0].src,
-              });
+              // Construct proper payload for API
+              const payload: any = {
+                product_uid: String(product.id),
+                product_count: 1,
+              };
+
+              addItem(payload);
             }}
+            disabled={isAdding}
             size="icon-sm"
             variant="secondary"
-            className={`shrink-0 bg-[#FBFFFF] hover:bg-white ${
+            className={`shrink-0 bg-[#FBFFFF] hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 ${
               isInCart ? 'text-red' : 'text-black-10 hover:text-red'
             }`}
           >
-            <Icon name="shopping_basket" height={16} width={16} />
+            {isAdding ? (
+              <Circle3DLoader size={2} radius={10} depth={5} color="#000" />
+            ) : (
+              <Icon name="shopping_basket" height={16} width={16} />
+            )}
           </Button>
         </div>
 
-        <p className="text-black-5 line-clamp-1 text-sm">{product.description}</p>
+        <p className="text-black-5 line-clamp-1 text-sm">{product.name}</p>
       </div>
     </Link>
   );

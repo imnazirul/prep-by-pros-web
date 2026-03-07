@@ -36,7 +36,7 @@ export default function MessageList({ messages }: { messages: Message[] }) {
       groups[dateKey].push(message);
       return groups;
     },
-    {} as Record<string, Message[]>,
+    {} as Record<string, Message[]>
   );
 
   if (messages.length === 0) {
@@ -47,8 +47,8 @@ export default function MessageList({ messages }: { messages: Message[] }) {
             How can we help you today?
           </p>
           <p className="text-black-7 max-w-161 text-2xl">
-            Please start the conversation by sending a message, our customer
-            support member will reach you soon
+            Please start the conversation by sending a message, our customer support member will
+            reach you soon
           </p>
         </div>
       </div>
@@ -71,11 +71,9 @@ export default function MessageList({ messages }: { messages: Message[] }) {
                 const prevMessage = dateMessages[index - 1];
                 const nextMessage = dateMessages[index + 1];
 
-                const isPrevSameSender =
-                  prevMessage && prevMessage.sender === message.sender;
+                const isPrevSameSender = prevMessage && prevMessage.sender === message.sender;
 
-                const isNextSameSender =
-                  nextMessage && nextMessage.sender === message.sender;
+                const isNextSameSender = nextMessage && nextMessage.sender === message.sender;
 
                 function getBubbleRadius() {
                   // single message
@@ -83,23 +81,17 @@ export default function MessageList({ messages }: { messages: Message[] }) {
 
                   // middle of group
                   if (isPrevSameSender && isNextSameSender) {
-                    return message.sender === 'user'
-                      ? 'rounded-r'
-                      : 'rounded-l';
+                    return message.sender === 'user' ? 'rounded-r' : 'rounded-l';
                   }
 
                   // first message in group
                   if (!isPrevSameSender && isNextSameSender) {
-                    return message.sender === 'user'
-                      ? 'rounded-br'
-                      : 'rounded-bl';
+                    return message.sender === 'user' ? 'rounded-br' : 'rounded-bl';
                   }
 
                   // last message in group
                   if (isPrevSameSender && !isNextSameSender) {
-                    return message.sender === 'user'
-                      ? 'rounded-tr'
-                      : 'rounded-tl';
+                    return message.sender === 'user' ? 'rounded-tr' : 'rounded-tl';
                   }
 
                   return '';
@@ -108,30 +100,26 @@ export default function MessageList({ messages }: { messages: Message[] }) {
                   <div
                     key={message.id}
                     className={cn(
-                      message.sender === 'user'
-                        ? 'justify-end'
-                        : 'justify-start',
+                      'flex w-full', // Ensure container takes full width
+                      message.sender === 'user' ? 'justify-end' : 'justify-start'
                     )}
                   >
                     <div
                       className={cn(
                         'flex flex-col',
-                        message.sender === 'user' ? 'items-end' : 'items-start',
+                        message.sender === 'user' ? 'items-end' : 'items-start'
                       )}
                     >
                       <div
                         className={cn(
                           'max-w-md rounded-[20px] px-4 py-3 text-white',
                           getBubbleRadius(),
-                          message.sender !== 'user'
-                            ? 'bg-black-10'
-                            : 'bg-primary',
+                          message.sender !== 'user' ? 'bg-black-10' : 'bg-primary'
                         )}
                       >
                         <p>{message.text}</p>
                       </div>
-                      {dateMessages.indexOf(message) ===
-                        dateMessages.length - 1 && (
+                      {dateMessages.indexOf(message) === dateMessages.length - 1 && (
                         <span className="text-black-8 mt-2 text-xs">
                           {formatTime(message.timestamp)}
                         </span>

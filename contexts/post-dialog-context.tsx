@@ -1,31 +1,34 @@
 'use client';
 
+import { MeContent } from '@/redux/api/authApi';
 import React, { createContext, useContext, useState } from 'react';
 
 interface PostDialogContextType {
   isOpen: boolean;
-  openPostDialog: () => void;
+  initialData?: MeContent | null;
+  openPostDialog: (data?: MeContent) => void;
   closePostDialog: () => void;
 }
 
-const PostDialogContext = createContext<PostDialogContextType | undefined>(
-  undefined,
-);
+const PostDialogContext = createContext<PostDialogContextType | undefined>(undefined);
 
-export function PostDialogProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function PostDialogProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [initialData, setInitialData] = useState<MeContent | null>(null);
 
-  const openPostDialog = () => setIsOpen(true);
-  const closePostDialog = () => setIsOpen(false);
+  const openPostDialog = (data?: MeContent) => {
+    if (data) setInitialData(data);
+    else setInitialData(null);
+    setIsOpen(true);
+  };
+
+  const closePostDialog = () => {
+    setIsOpen(false);
+    setInitialData(null);
+  };
 
   return (
-    <PostDialogContext.Provider
-      value={{ isOpen, openPostDialog, closePostDialog }}
-    >
+    <PostDialogContext.Provider value={{ isOpen, initialData, openPostDialog, closePostDialog }}>
       {children}
     </PostDialogContext.Provider>
   );

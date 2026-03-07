@@ -14,7 +14,7 @@ export function InstructorCard({
     <>
       {view_type === 'GRID' ? (
         <Link
-          href={`/instructor/${instructor.id}`}
+          href={`/instructor/${instructor?.slug}`}
           className="group bg-card relative aspect-342/451 cursor-pointer overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-xl md:rounded-3xl"
         >
           <div className="relative size-full overflow-hidden">

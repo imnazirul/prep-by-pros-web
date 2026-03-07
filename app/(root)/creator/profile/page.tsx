@@ -1,7 +1,7 @@
-import PostList from '@/components/shared/post-list';
+import MyContentList from './_components/my-content-list';
 
 const ProfilePage = () => {
-  return <PostList />;
+  return <MyContentList />;
 };
 
 export default ProfilePage;

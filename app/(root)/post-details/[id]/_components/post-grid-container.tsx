@@ -22,10 +22,10 @@
 
 import PostList from './post-list';
 import PostDetails from './post-details';
-import { PostCardProp } from '@/lib/types';
+// import { PostCardProp } from '@/lib/types';
 import { useHeaderHeight } from '@/hooks/use-header-height';
 
-const PostGridContainer = ({ post }: { post: PostCardProp }) => {
+const PostGridContainer = ({ slug }: { slug: string }) => {
   const headerHeight = useHeaderHeight();
 
   // Only used on lg+ via tailwind class `lg:h-[var(--split-h)]`
@@ -40,7 +40,7 @@ const PostGridContainer = ({ post }: { post: PostCardProp }) => {
     >
       {/* LEFT: scrolls when hovered */}
       <div className="hide-scrollbar min-h-0 lg:h-full lg:overflow-y-auto lg:overscroll-contain">
-        <PostDetails post={post} />
+        <PostDetails slug={slug} />
       </div>
 
       {/* RIGHT: scrolls when hovered */}

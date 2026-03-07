@@ -2,20 +2,8 @@
 
 import Icon from '@/lib/icon';
 import { cn } from '@/lib/utils';
+import { DashboardViews, useGetDashboardViewsQuery } from '@/redux/api/authApi';
 import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts';
-
-const radialData = [
-  {
-    name: 'November',
-    value: 70,
-    fill: '#9AD77C',
-  },
-  {
-    name: 'December',
-    value: 90,
-    fill: '#1D6537',
-  },
-];
 
 const TotalViewsRadial = ({
   className,
@@ -24,6 +12,27 @@ const TotalViewsRadial = ({
   className?: string;
   isDashboard?: boolean;
 }) => {
+  const { data: viewsData, isLoading } = useGetDashboardViewsQuery();
+
+  if (isLoading) {
+    return (
+      <div
+        className={cn(
+          'flex h-122.5 items-center justify-center rounded-2xl bg-[#FFF8C9] p-8 md:rounded-3xl lg:rounded-4xl xl:rounded-[40px]',
+          className
+        )}
+      >
+        Loading...
+      </div>
+    );
+  }
+
+  const radialData = viewsData?.results || [];
+  const totalViews = radialData.reduce((acc: number, curr: DashboardViews) => acc + curr.value, 0);
+
+  // Sorting to match UI usually (e.g. descending)
+  const sortedData = [...radialData].sort((a, b) => b.value - a.value);
+
   return (
     <div
       className={cn(
@@ -45,7 +54,7 @@ const TotalViewsRadial = ({
           </span>
         </div>
 
-        <h2 className="text-[40px] font-medium">19,678</h2>
+        <h2 className="text-[40px] font-medium">{totalViews.toLocaleString()}</h2>
       </div>
 
       <div className="flex-1 space-y-5">
@@ -80,43 +89,44 @@ const TotalViewsRadial = ({
 
           {isDashboard && (
             <div className="inline-block space-y-10">
-              <div>
-                <div className="mb-3 flex items-center gap-1">
-                  <div className="size-4 rounded-full bg-[#1D6537]"></div>
-                  <span className="text-black-8 text-[22px]">December</span>
-                </div>
+              {sortedData.map((item, index) => {
+                // Heuristic for color since the prompt didn't specify mapping in API.
+                // Using the component's original hardcoded colors if possible or generic ones from Item if available.
+                const color = item.fill || (index === 0 ? '#1D6537' : '#9AD77C');
 
-                <div className="mb-2 flex items-baseline gap-2">
-                  <h2 className="text-black-10 text-4xl font-medium">19,678</h2>
-                  <span className="text-black-7 text-base">Views</span>
-                </div>
-                <p className="text-black-7 text-sm">28% higher than last November &apos;25</p>
-              </div>
+                return (
+                  <div key={item.name}>
+                    <div className="mb-3 flex items-center gap-1">
+                      <div className="size-4 rounded-full" style={{ backgroundColor: color }}></div>
+                      <span className="text-black-8 text-[22px]">{item.name}</span>
+                    </div>
 
-              <div>
-                <div className="mb-3 flex items-center gap-1">
-                  <div className="size-4 rounded-full bg-[#9AD77C]"></div>
-                  <span className="text-black-8 text-[22px]">November</span>
-                </div>
-
-                <div className="mb-2 flex items-baseline gap-2">
-                  <h2 className="text-black-10 text-4xl font-medium">12,054</h2>
-                  <span className="text-black-7 text-base">Views</span>
-                </div>
-                <p className="text-black-7 text-sm">28% higher than last October &apos;25</p>
-              </div>
+                    <div className="mb-2 flex items-baseline gap-2">
+                      <h2 className="text-black-10 text-4xl font-medium">
+                        {item.value.toLocaleString()}
+                      </h2>
+                      <span className="text-black-7 text-base">Views</span>
+                    </div>
+                    {/* Placeholder description calculation for now */}
+                    <p className="text-black-7 text-sm">Data for {item.name}</p>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
 
         {!isDashboard && (
           <div className="text-black-7 flex justify-center gap-6 text-sm font-medium">
-            <div className="flex items-center gap-1">
-              <div className="size-2 rounded-full bg-[#1D6537]" /> December
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="size-2 rounded-full bg-[#9AD77C]" /> November
-            </div>
+            {sortedData.map((item, index) => {
+              const color = item.fill || (index === 0 ? '#1D6537' : '#9AD77C');
+              return (
+                <div key={item.name} className="flex items-center gap-1">
+                  <div className="size-2 rounded-full" style={{ backgroundColor: color }} />{' '}
+                  {item.name}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

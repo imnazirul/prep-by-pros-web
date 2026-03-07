@@ -1,6 +1,6 @@
-import { Metadata } from 'next';
-import PageHeader from '@/components/shared/page-header';
 import NavbarHeight from '@/components/shared/navbar-height';
+import PageHeader from '@/components/shared/page-header';
+import { Metadata } from 'next';
 import SubscriptionList from './_components/subscription-list';
 
 export const metadata: Metadata = {
