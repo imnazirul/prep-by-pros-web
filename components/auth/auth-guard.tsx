@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import Circle3DLoader from '../shared/circle-loader';
 
 const protectedRoutes = [
+  '/',
   '/settings',
   '/order-history',
   '/order-tracking',
@@ -33,8 +34,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!mounted) return;
 
-    const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
     const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
+    const isProtected =
+      !isAuthRoute &&
+      (pathname === '/' || protectedRoutes.some((route) => route !== '/' && pathname.startsWith(route)));
 
     if (isProtected && !isAuthenticated && !token) {
       router.push('/login');
@@ -52,7 +55,11 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   // ...
 
   // Prevent flashing of protected content
-  const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
+  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
+  const isProtected =
+    !isAuthRoute &&
+    (pathname === '/' || protectedRoutes.some((route) => route !== '/' && pathname.startsWith(route)));
+
   if (mounted && isProtected && !isAuthenticated && !token) {
     return (
       <div className="flex h-screen w-full items-center justify-center">

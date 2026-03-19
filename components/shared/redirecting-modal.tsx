@@ -126,7 +126,8 @@ const RedirectingModal = () => {
 
   useEffect(() => {
     // Open automaticallly on mount
-    if (!isAuthenticated) {
+    const authRoutes = ['/login', '/signup', '/forgot-password', '/'];
+    if (!isAuthenticated && !authRoutes.includes(window.location.pathname)) {
       setOpen(true);
     }
 
