@@ -8,9 +8,7 @@ type ParamsProps = {
   params: Promise<{ id: string }>;
 };
 
-export async function generateMetadata({
-  params,
-}: ParamsProps): Promise<Metadata> {
+export async function generateMetadata({ params }: ParamsProps): Promise<Metadata> {
   const { id } = await params;
 
   const post = feedPost.find((o) => String(o.id) == id);
@@ -32,7 +30,7 @@ const PostDetailsPage = async ({ params }: ParamsProps) => {
         subTitle="Updates each week on Sunday!"
       />
 
-      <div className="container mb-10">
+      <div className="container">
         <PostGridContainer slug={id} />
       </div>
     </div>

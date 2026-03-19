@@ -25,7 +25,7 @@ const PostImageSlider = ({ images, className }: { images: string[]; className?: 
     <>
       <div
         className={cn(
-          'group relative grid aspect-708/611 overflow-hidden rounded-2xl md:rounded-3xl',
+          'group relative grid aspect-1200/817 overflow-hidden rounded-2xl md:rounded-3xl',
           className
         )}
       >

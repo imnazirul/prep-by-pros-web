@@ -12,7 +12,7 @@ const PageHeader = ({
   return (
     <section className={cn('py-8 md:py-10 lg:py-12', className)}>
       <div className="container">
-        <h2 className="text-black-10 text-2xl font-medium md:text-3xl lg:text-4xl">
+        <h2 className="text-black-10 text-2xl font-medium md:text-3xl lg:text-4xl lg:leading-[140%]">
           {title}
           <span className="text-black-7 block">{subTitle}</span>
         </h2>

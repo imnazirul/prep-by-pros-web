@@ -13,14 +13,14 @@ const PostList = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-[200px] items-center justify-center">
+      <div className="flex h-50 items-center justify-center">
         <Circle3DLoader />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h3 className="text-black-10 text-2xl font-medium md:text-3xl lg:text-4xl">
           Creations you might love

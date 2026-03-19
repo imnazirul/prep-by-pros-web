@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Circle3DLoader from '@/components/shared/circle-loader';
 import PostImageSlider from '@/components/shared/PostImageSlider';
 import VideoPlayer from '@/components/shared/video-player';
@@ -43,7 +44,7 @@ const PostDetails = ({ slug }: { slug: string }) => {
 
   if (isLoading) {
     return (
-      <div className="flex h-[400px] items-center justify-center">
+      <div className="flex h-100 items-center justify-center">
         <Circle3DLoader />
       </div>
     );
@@ -54,10 +55,10 @@ const PostDetails = ({ slug }: { slug: string }) => {
 
     if (is403Error) {
       return (
-        <div className="flex h-[400px] flex-col items-center justify-center space-y-4 px-4 text-center">
+        <div className="flex h-100 flex-col items-center justify-center space-y-4 px-4 text-center">
           <Icon name="lock" height={64} width={64} className="text-black-5" />
           <h2 className="text-2xl font-semibold text-black-10">Premium Content</h2>
-          <p className="max-w-[400px] text-black-8">
+          <p className="max-w-100 text-black-8">
             This content is locked. You do not have permission to view this post. Please subscribe
             to the instructor to gain access.
           </p>
@@ -87,7 +88,7 @@ const PostDetails = ({ slug }: { slug: string }) => {
       style={{
         top: `calc(${headerHeight + 12}px)`,
       }}
-      className={cn('transition-all duration-300')}
+      className={cn('transition-all duration-300 pb-5')}
     >
       <div className="mb-6 flex items-center justify-between">
         <Link href={`/instructor/${post.profile.slug}`} className="flex items-center gap-3">

@@ -1,23 +1,4 @@
-// OLD CODE
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// 'use client';
-
-// import PostList from './post-list';
-// import PostDetails from './post-details';
-// import { PostCardProp } from '@/lib/types';
-
-// const PostGridContainer = ({ post }: { post: PostCardProp }) => {
-//   return (
-//     <div className="grid items-start gap-10 lg:grid-cols-[5fr_7fr]">
-//       <PostDetails post={post} />
-//       <PostList />
-//     </div>
-//   );
-// };
-
-// export default PostGridContainer;
-
 'use client';
 
 import PostList from './post-list';
@@ -30,7 +11,7 @@ const PostGridContainer = ({ slug }: { slug: string }) => {
 
   // Only used on lg+ via tailwind class `lg:h-[var(--split-h)]`
   const style = {
-    ['--split-h' as any]: `calc(100vh - ${headerHeight + 24}px)`,
+    ['--split-h' as any]: `calc(100vh - ${headerHeight + 200}px)`,
   } as React.CSSProperties;
 
   return (

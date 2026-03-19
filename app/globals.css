@@ -173,7 +173,7 @@ body {
   @apply overflow-x-hidden;
 }
 
-html, 
+html,
 body {
   overflow-x: hidden;
   position: relative;
@@ -240,4 +240,9 @@ body {
   outline: none !important;
   box-shadow: none !important;
   border: none !important;
+}
+
+html body[data-scroll-locked] {
+  overflow: visible !important;
+  margin-right: 0 !important;
 }

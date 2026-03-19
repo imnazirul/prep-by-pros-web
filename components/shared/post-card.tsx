@@ -167,7 +167,7 @@ export default function PostCard({
                 </div>
               )}
             </div>
-            <p className="text-black-4 text-sm">
+            <p className="text-black-4 text-sm leading-[160%]">
               {post.description.length > 80 ? (
                 <>
                   {post.description.slice(0, 80) + '...'}
@@ -536,16 +536,10 @@ const OptionButton = ({ post, isCreator }: { post: PostCardProp; isCreator: bool
                 className="bg-black-4 group flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl px-4 py-5"
               >
                 <Icon
-                  name="bookmark"
+                  name={isSaved ? 'bookmark_fill' : 'bookmark'}
                   height={24}
                   width={24}
-                  className={cn('text-black-10', isSaved ? 'hidden' : 'group-hover:hidden')}
-                />
-                <Icon
-                  name="bookmark_fill"
-                  height={24}
-                  width={24}
-                  className={cn('text-black-10 hidden', isSaved ? 'block' : 'group-hover:block')}
+                  className={cn('text-black-10 ')}
                 />
                 <span className="text-black-10 text-base">{isSaved ? 'Saved' : 'Save'}</span>
               </div>

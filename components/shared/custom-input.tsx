@@ -61,7 +61,7 @@ export function CustomInputBox({
         <input
           type={isPassword ? showPass : type}
           className={cn(
-            'text-black-10 placeholder:text-black-10 text-lg outline-0',
+            'text-black-10 placeholder:text-black-7 text-lg outline-0',
             isPassword && 'pr-6'
           )}
           data-slot="input"
@@ -295,7 +295,7 @@ export function CustomTextareaBox({
           )}
         </label>
         <textarea
-          className="text-black-10 placeholder:text-black-10 min-h-40 text-lg outline-0"
+          className="text-black-10 placeholder:text-black-7 min-h-40 text-lg outline-0"
           data-slot="input"
           {...props}
         />
