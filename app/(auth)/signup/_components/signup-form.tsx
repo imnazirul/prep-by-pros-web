@@ -16,6 +16,7 @@ const SignUpForm = () => {
 
   const searchParams = useSearchParams();
   const role = searchParams.get('role') || 'PLAYER';
+  const referral_code = searchParams.get('ref') || '';
 
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -150,6 +151,7 @@ const SignUpForm = () => {
         openPreference={openPreference}
         userData={{ name, email, password }}
         role={role}
+        referral_code={referral_code}
       />
     </>
   );

@@ -106,6 +106,7 @@ export interface Coach {
   is_followed: boolean;
   created_at: string;
   updated_at: string;
+  referral_code?: string;
   // Details
   username?: string;
   description?: string;
