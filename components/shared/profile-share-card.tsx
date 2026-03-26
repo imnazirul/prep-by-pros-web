@@ -3,7 +3,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import Icon, { IconName } from '@/lib/icon';
-import { QrcodeCanvas } from 'react-qrcode-pretty';
+import { QRCodeBranded } from './qr-code-branded';
 
 interface QRCardProps {
   name: string;
@@ -64,11 +64,6 @@ const QRCard = ({
   onReady,
 }: QRCardProps) => {
   const [processedAvatar, setProcessedAvatar] = React.useState(DEFAULT_IMAGE);
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   /**
    * Safe Avatar Loader (CORS and Taint Prevention)
@@ -106,26 +101,12 @@ const QRCard = ({
       {/* Main QR Card - NON-TILTED (Reverted as requested) */}
       <div className="bg-white rounded-[40px] p-6 shadow-2xl relative border border-gray-100">
         <div className="w-[360px] aspect-square flex items-center justify-center rounded-3xl overflow-hidden relative">
-          {mounted && (
-            <QrcodeCanvas
-              value={value}
-              size={340}
-              level="H"
-              padding={10}
-              bgColor="#FFFFFF"
-              color="#000000"
-              variant="dots"
-              image={{
-                src: processedAvatar,
-                width: 80,
-                height: 80,
-                positionX: 145,
-                positionY: 140,
-                overlap: false,
-              }}
-              onReady={onReady}
-            />
-          )}
+          <QRCodeBranded
+            value={value}
+            size={320}
+            logo={processedAvatar}
+            onReady={onReady}
+          />
         </div>
       </div>
 
