@@ -26,11 +26,13 @@ const PreferenceModal = ({
   setOpenPreference,
   userData,
   role,
+  referral_code,
 }: {
   openPreference: boolean;
   setOpenPreference: Dispatch<SetStateAction<boolean>>;
   userData: { name: string; email: string; password: string };
   role: string;
+  referral_code?: string;
 }) => {
   // Use slug arrays for selection
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
@@ -78,6 +80,7 @@ const PreferenceModal = ({
         sport_slug: finalSportSlug,
         playing_style_slug: finalStyleSlug,
         professional_level_slug: finalLevelSlug,
+        referral_code: referral_code || undefined,
       }).unwrap();
 
       console.log('user', res);

@@ -422,6 +422,7 @@ export interface Player {
   country: string;
   created_at: string;
   updated_at: string;
+  referral_code?: string;
 }
 
 export interface CheckoutRequest {
@@ -605,6 +606,7 @@ export const authApi = createApi({
           sport_slug: userData.sport_slug,
           playing_style_slug: userData.playing_style_slug,
           professional_level_slug: userData.professional_level_slug,
+          referral_code: userData.referral_code,
 
           ...getDeviceInfo(),
           location: 'unknown',

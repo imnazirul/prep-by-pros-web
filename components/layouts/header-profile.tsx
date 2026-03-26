@@ -52,6 +52,17 @@ const settingsMenu = [
     showSeparator: true,
   },
   {
+    label: 'My QR',
+    href: '/share-profile',
+    icon: 'my_qr' as IconName,
+  },
+  {
+    label: 'Refer a Friend',
+    href: '/referral',
+    icon: 'refer_friend' as IconName,
+    showSeparator: true,
+  },
+  {
     label: 'About Us',
     href: '/about-us',
     icon: 'help_circle' as IconName,
@@ -64,7 +75,7 @@ const settingsMenu = [
   },
 ];
 
-import { useGetMeMutation, useLogoutMutation } from '@/redux/api/authApi';
+import { useRetrieveMeQuery, useLogoutMutation } from '@/redux/api/authApi';
 import { logout, selectCurrentUser } from '@/redux/features/authSlice';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { useRouter } from 'next/navigation';
@@ -78,15 +89,12 @@ export default function HeaderProfile() {
   const dispatch = useAppDispatch();
   const [logoutApi] = useLogoutMutation();
 
-  const [getMe, { data: userData, isLoading }] = useGetMeMutation();
+  const { data: userData } = useRetrieveMeQuery(undefined, { skip: !token });
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    if (token) {
-      getMe({});
-    }
-  }, [token, getMe]);
+  }, []);
 
   // console.log('me in header', userData);
 
