@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/lib/icon';
 import { useGetMeMutation, usePatchMeMutation } from '@/redux/api/authApi';
+import { useUploadFileMutation } from '@/redux/api/globalApi';
 import {
   useGetClubsQuery,
   useGetPlayingStylesQuery,
@@ -19,13 +20,16 @@ import {
 } from '@/redux/api/globalApi';
 import { selectCurrentUser, setCredentials } from '@/redux/features/authSlice';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const ProfileForm = () => {
   const currentUser = useAppSelector(selectCurrentUser);
   const dispatch = useAppDispatch();
   const [patchMe, { isLoading: isUpdating }] = usePatchMeMutation();
   const [getMe, { data: fetchedUser }] = useGetMeMutation();
+  const [uploadFile, { isLoading: isUploadingFile }] = useUploadFileMutation();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch latest user data on mount
   useEffect(() => {
@@ -63,6 +67,11 @@ const ProfileForm = () => {
   const [nationality, setNationality] = useState('');
   const [address, setAddress] = useState('');
   const [gender, setGender] = useState('');
+  const [description, setDescription] = useState('');
+
+  // Image State
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -73,6 +82,11 @@ const ProfileForm = () => {
       setNationality(user.country || user.nationality || '');
       setAddress(user.address || '');
       setGender(user.gender || '');
+      setDescription(user.description || '');
+
+      if (user.image && !imageFile) {
+        setPreviewUrl(user.image);
+      }
 
       // Populate other fields if available in user object
       const extractSlug = (val: any) => {
@@ -103,37 +117,63 @@ const ProfileForm = () => {
   // Custom wrapper to dispatch update after save
   const token = useAppSelector((state) => state.auth.token);
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
   const onSaveClick = async () => {
     if (!token) return;
     try {
-      const payload: any = {
-        first_name: name,
-        email,
-        username: userName,
-        phone,
-        country: nationality,
-        address,
-        gender,
-        is_currentyly_playing: currentPlaying,
-      };
+      const formData = new FormData();
 
-      // Only include slugs if they have a value and the user is currently playing
-      if (currentPlaying) {
-        if (sport) payload.sport_slug = sport;
-        if (level) payload.professional_level_slug = level;
-        if (playingStyle) payload.playing_style_slug = playingStyle;
-        if (club) payload.club_slug = club;
+      // Append standard fields
+      formData.append('first_name', name);
+      formData.append('name', name); // Compatibility
+      if (user?.last_name) formData.append('last_name', user.last_name);
+      formData.append('email', email);
+      formData.append('username', userName);
+      formData.append('phone', phone);
+      formData.append('phone_number', phone); // Compatibility
+      formData.append('country', nationality);
+      formData.append('address', address);
+      formData.append('gender', gender);
+      formData.append('description', description);
+      formData.append('is_currentyly_playing', String(currentPlaying));
+
+      // Append image if a new one is selected
+      if (imageFile) {
+        console.log('Appending image file to FormData...');
+        formData.append('image', imageFile);
       }
 
-      console.log('PatchMe Payload:', payload);
-      const updatedUser = await patchMe(payload).unwrap();
+      // Append conditional slugs
+      if (currentPlaying) {
+        if (sport) formData.append('sport_slug', sport);
+        if (level) formData.append('professional_level_slug', level);
+        if (playingStyle) formData.append('playing_style_slug', playingStyle);
+        if (club) formData.append('club_slug', club);
+      }
+
+      console.log('Patching profile with FormData...');
+      const updatedUser = await patchMe(formData).unwrap();
+      console.log('Profile updated successfully:', updatedUser);
 
       // Merge with existing token for setCredentials
       dispatch(setCredentials({ ...updatedUser, access: token }));
       alert('Profile updated successfully!');
-    } catch (err) {
-      console.error('Failed to update', JSON.stringify(err, null, 2));
-      alert(`Failed to update profile: ${JSON.stringify(err)}`);
+      setImageFile(null); // Clear selected file after success
+    } catch (err: any) {
+      console.error('Failed to update profile:', err);
+      const errorMsg =
+        err?.data?.detail ||
+        (err?.data && typeof err.data === 'object' ? JSON.stringify(err.data) : err.data) ||
+        JSON.stringify(err);
+      alert(`Failed to update profile: ${errorMsg}`);
     }
   };
 
@@ -142,34 +182,40 @@ const ProfileForm = () => {
       <div className="mb-10 flex items-center justify-between max-md:flex-wrap max-md:gap-4">
         <div className="flex items-center gap-5 max-md:flex-wrap max-md:gap-4">
           <Avatar className="relative size-30">
-            <AvatarImage src={'/images/instructor/1.png'} className="object-cover" />
+            <AvatarImage src={previewUrl} className="object-cover" />
             <AvatarFallback className="bg-primary text-2xl text-white">
               {name ? name.charAt(0).toUpperCase() : 'U'}
             </AvatarFallback>
 
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+
             <Button
               className="border-primary-200! hover:bg-primary! hover:border-primary! text-primary! absolute right-2 bottom-0 z-10 size-7 border bg-white! hover:text-white!"
               size={'icon'}
+              onClick={() => fileInputRef.current?.click()}
             >
               <Icon name="camera" height={14} width={14} />
             </Button>
           </Avatar>
           <div className="grid max-w-119 gap-2">
             <h4 className="text-black-10 text-[22px] font-semibold">{name || 'Your Name'}</h4>
-            <p className="text-black-8 text-lg">
-              From game highlights and training tips, I share my journey to inspire, entertain, and
-              connect with fans ⚽️📊
-            </p>
+            <p className="text-black-8 text-lg">{description || 'No description available'}</p>
           </div>
         </div>
 
         <Button
           className="bg-primary-200 hover:bg-primary-300 hover:text-primary text-primary gap-2.5"
           onClick={onSaveClick}
-          disabled={isUpdating}
+          disabled={isUpdating || isUploadingFile}
         >
           <Icon name="pencil_edit_2" height={20} width={20} />
-          {isUpdating ? 'Saving...' : 'Save Changes'}
+          {isUpdating || isUploadingFile ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
 
@@ -236,6 +282,13 @@ const ProfileForm = () => {
           placeholder="Enter Address"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
+        />
+        <CustomInputBox
+          icon="pencil_edit"
+          label="Bio / Description"
+          placeholder="Enter your professional bio"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         />
       </div>
 
