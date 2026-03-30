@@ -22,7 +22,7 @@ export default function CheckoutSuccessPage() {
           Continue Shopping
         </Button>
         <Button
-          onClick={() => router.push('/account/orders')}
+          onClick={() => router.push('/order-history')}
           className="bg-[#173633] text-white hover:bg-[#245550]"
         >
           View My Orders

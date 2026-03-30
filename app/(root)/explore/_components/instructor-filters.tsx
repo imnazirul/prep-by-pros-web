@@ -3,6 +3,12 @@
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -20,12 +26,14 @@ interface InstructorFiltersProps {
     country?: string;
     gender?: string;
     level?: string;
+    ordering?: string;
   };
   setFilters: Dispatch<
     SetStateAction<{
       country?: string;
       gender?: string;
       level?: string;
+      ordering?: string;
     }>
   >;
 }
@@ -371,17 +379,43 @@ export default function InstructorFilters({ filters, setFilters }: InstructorFil
           </Select>
         </div>
 
-        {(filters.country || filters.gender || filters.level) && (
+        {(filters.country || filters.gender || filters.level || filters.ordering) && (
           <Button variant="ghost" onClick={clearFilters} className="text-red-500">
             Clear Filters
           </Button>
         )}
       </div>
 
-      <Button variant="secondary" className="px-8">
-        <Icon name="filter_vertical" height={24} width={24} className="text-black-8" />
-        Sort by
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="secondary" className="px-8 capitalize">
+            <Icon name="filter_vertical" height={24} width={24} className="text-black-8" />
+            {filters.ordering 
+              ? filters.ordering === '-created_at' 
+                ? 'Newest' 
+                : filters.ordering === 'created_at' 
+                ? 'Oldest' 
+                : filters.ordering === '-total_subscriber' 
+                ? 'Most Popular' 
+                : 'Sort by'
+              : 'Sort by'}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-[160px]">
+          <DropdownMenuItem onClick={() => handleFilterChange('ordering', 'all')}>
+            Default
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterChange('ordering', '-created_at')}>
+            Newest
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterChange('ordering', 'created_at')}>
+            Oldest
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleFilterChange('ordering', '-total_subscriber')}>
+            Most Popular
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

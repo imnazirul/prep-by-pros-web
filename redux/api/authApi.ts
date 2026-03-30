@@ -534,8 +534,7 @@ export const authApi = createApi({
         endpoint === 'login' ||
         endpoint === 'signup' ||
         endpoint === 'sendOtp' ||
-        endpoint === 'verifyOtp' ||
-        endpoint === 'resetPassword'
+        endpoint === 'verifyOtp'
       ) {
         return headers;
       }

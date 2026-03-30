@@ -38,7 +38,7 @@ export default function ShareProfilePage() {
         <div className="w-full md:w-auto order-2 xl:order-1 flex justify-center">
           <QRCard 
             name={user?.first_name ? `${user.first_name} ${user.last_name || ''}` : 'User'} 
-            handle={user?.slug || user?.referral_code || 'user'} 
+            handle={ user?.username ||'user' } 
             avatarUrl={user?.image}
             value={profileUrl}
             onReady={(canvas) => {

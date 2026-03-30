@@ -72,6 +72,10 @@ interface BaseHistoryCard {
     price?: number;
     quantity?: number;
     attributes?: string;
+    product_uid?: string;
+    size_uid?: string;
+    colour_uid?: string;
+    style_uid?: string;
   }[];
   price: number;
   date: Date;

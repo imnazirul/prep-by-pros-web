@@ -58,6 +58,8 @@ const ProfileForm = () => {
     stylesData?.results?.map((item) => ({ label: item.title, value: item.slug })) || [];
 
   const [club, setClub] = useState('');
+  
+  const [isEditing, setIsEditing] = useState(false);
 
   // Form State
   const [name, setName] = useState('');
@@ -126,7 +128,8 @@ const ProfileForm = () => {
     }
   };
 
-  const onSaveClick = async () => {
+  const onSaveSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!token) return;
     try {
       const formData = new FormData();
@@ -178,7 +181,7 @@ const ProfileForm = () => {
   };
 
   return (
-    <div>
+    <form id="profile-form" onSubmit={onSaveSubmit}>
       <div className="mb-10 flex items-center justify-between max-md:flex-wrap max-md:gap-4">
         <div className="flex items-center gap-5 max-md:flex-wrap max-md:gap-4">
           <Avatar className="relative size-30">
@@ -193,15 +196,19 @@ const ProfileForm = () => {
               className="hidden"
               accept="image/*"
               onChange={handleImageChange}
+              disabled={!isEditing}
             />
 
-            <Button
-              className="border-primary-200! hover:bg-primary! hover:border-primary! text-primary! absolute right-2 bottom-0 z-10 size-7 border bg-white! hover:text-white!"
-              size={'icon'}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Icon name="camera" height={14} width={14} />
-            </Button>
+            {isEditing && (
+              <Button
+                type="button"
+                className="border-primary-200! hover:bg-primary! hover:border-primary! text-primary! absolute right-2 bottom-0 z-10 size-7 border bg-white! hover:text-white!"
+                size={'icon'}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Icon name="camera" height={14} width={14} />
+              </Button>
+            )}
           </Avatar>
           <div className="grid max-w-119 gap-2">
             <h4 className="text-black-10 text-[22px] font-semibold">{name || 'Your Name'}</h4>
@@ -210,12 +217,12 @@ const ProfileForm = () => {
         </div>
 
         <Button
+          type="button"
           className="bg-primary-200 hover:bg-primary-300 hover:text-primary text-primary gap-2.5"
-          onClick={onSaveClick}
-          disabled={isUpdating || isUploadingFile}
+          onClick={() => setIsEditing(!isEditing)}
         >
-          <Icon name="pencil_edit_2" height={20} width={20} />
-          {isUpdating || isUploadingFile ? 'Saving...' : 'Save Changes'}
+          <Icon name={isEditing ? 'checkmark_circle' : 'pencil_edit_2'} height={20} width={20} />
+          {isEditing ? 'Finish editing' : 'Edit'}
         </Button>
       </div>
 
@@ -227,6 +234,7 @@ const ProfileForm = () => {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          disabled={!isEditing}
         />
         <CustomInputBox
           icon="email"
@@ -235,6 +243,7 @@ const ProfileForm = () => {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={!isEditing}
         />
         <CustomInputBox
           icon="at"
@@ -243,6 +252,7 @@ const ProfileForm = () => {
           type="text"
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
+          disabled={!isEditing}
         />
         <CustomRadioBox
           icon="fi"
@@ -251,6 +261,7 @@ const ProfileForm = () => {
           name="gender"
           value={gender}
           onChange={(e) => setGender(e.target.value)}
+          disabled={!isEditing}
           options={[
             {
               label: 'Male',
@@ -268,6 +279,7 @@ const ProfileForm = () => {
           placeholder="Enter Name"
           value={phone}
           onChange={setPhone}
+          disabled={!isEditing}
         />
         <CustomCountryBox
           icon="global"
@@ -275,6 +287,7 @@ const ProfileForm = () => {
           placeholder="Enter Nationality"
           value={nationality}
           onChange={(e) => setNationality(e.target.value)}
+          disabled={!isEditing}
         />
         <CustomInputBox
           icon="location"
@@ -282,6 +295,7 @@ const ProfileForm = () => {
           placeholder="Enter Address"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
+          disabled={!isEditing}
         />
         <CustomInputBox
           icon="pencil_edit"
@@ -289,6 +303,7 @@ const ProfileForm = () => {
           placeholder="Enter your professional bio"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          disabled={!isEditing}
         />
       </div>
 
@@ -296,6 +311,7 @@ const ProfileForm = () => {
         <div className="flex items-center gap-1.5">
           <Checkbox
             id="current"
+            disabled={!isEditing}
             onCheckedChange={(checked) => setCurrentPlaying(!!checked)}
             checked={currentPlaying}
             className="cursor-pointer"
@@ -314,7 +330,7 @@ const ProfileForm = () => {
             options={clubOptions}
             value={club}
             setValue={setClub}
-            disabled={!currentPlaying}
+            disabled={!isEditing || !currentPlaying}
           />
           <CustomSelectBox
             icon="award"
@@ -323,7 +339,7 @@ const ProfileForm = () => {
             options={levelOptions}
             value={level}
             setValue={setLevel}
-            disabled={!currentPlaying}
+            disabled={!isEditing || !currentPlaying}
           />
 
           <CustomSelectBox
@@ -333,7 +349,7 @@ const ProfileForm = () => {
             options={sportOptions}
             value={sport}
             setValue={setSport}
-            disabled={!currentPlaying}
+            disabled={!isEditing || !currentPlaying}
           />
 
           <CustomSelectBox
@@ -343,11 +359,11 @@ const ProfileForm = () => {
             options={styleOptions}
             value={playingStyle}
             setValue={setPlayingStyle}
-            disabled={!currentPlaying}
+            disabled={!isEditing || !currentPlaying}
           />
         </div>
       </div>
-    </div>
+    </form>
   );
 };
 
