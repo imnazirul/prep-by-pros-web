@@ -14,14 +14,17 @@ const HistoryCard = ({ history }: { history: HistoryCardProp }) => {
   const [addToCart] = useAddToCartMutation();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
+  const itemsWithProduct = history.items.filter((item) => item.product_uid);
+  const canBuyAgain = itemsWithProduct.length > 0;
+  // Show order-related actions only when there are purchasable items (not subscription payments)
+  const showOrderActions = canBuyAgain || history.type === 'ORDER';
+
   const handleBuyAgain = async () => {
+    if (!canBuyAgain) return;
     try {
-      if (history.type !== 'ORDER') return;
       setIsAddingToCart(true);
 
-      const itemsToAdd = history.items.filter((item) => item.product_uid);
-      
-      for (const item of itemsToAdd) {
+      for (const item of itemsWithProduct) {
         await addToCart({
           product_uid: item.product_uid!,
           product_count: item.quantity || 1,
@@ -34,8 +37,6 @@ const HistoryCard = ({ history }: { history: HistoryCardProp }) => {
       router.push('/checkout');
     } catch (error) {
       console.error('Failed to add items to cart', error);
-      // Still push to checkout if partial items were added or just silently fail depending on requirements.
-      // Usually better to fail gracefully.
     } finally {
       setIsAddingToCart(false);
     }
@@ -105,23 +106,31 @@ const HistoryCard = ({ history }: { history: HistoryCardProp }) => {
             </div>
           )}
 
-          <div className="mt-5 grid grid-cols-[4.5fr_7.5fr] items-center gap-2 text-center pointer-events-auto">
-            <Button
-              asChild
-              className="text-primary hover:bg-primary-100 w-full bg-white font-semibold"
-              variant={'secondary'}
-            >
-              <Link href={`/order/${history.id}/refund`}>Refund</Link>
-            </Button>
+          {showOrderActions ? (
+            <div className="mt-5 grid grid-cols-[4.5fr_7.5fr] items-center gap-2 text-center pointer-events-auto">
+              <Button
+                asChild
+                className="text-primary hover:bg-primary-100 w-full bg-white font-semibold"
+                variant={'secondary'}
+              >
+                <Link href={`/order/${history.id}/refund`}>Refund</Link>
+              </Button>
 
-            <Button 
-              variant={'default'}
-              disabled={isAddingToCart}
-              onClick={handleBuyAgain}
-            >
-              {isAddingToCart ? 'Adding...' : 'Buy Again'}
-            </Button>
-          </div>
+              <Button
+                variant={'default'}
+                disabled={isAddingToCart || !canBuyAgain}
+                onClick={handleBuyAgain}
+              >
+                {isAddingToCart ? 'Adding...' : 'Buy Again'}
+              </Button>
+            </div>
+          ) : history.is_subscription ? (
+            <div className="mt-5 pointer-events-auto">
+              <Button asChild variant={'default'} className="w-full">
+                <Link href="/my-subscriptions">Manage Subscription</Link>
+              </Button>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

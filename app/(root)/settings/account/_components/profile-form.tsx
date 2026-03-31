@@ -37,6 +37,9 @@ const ProfileForm = () => {
   }, [getMe]);
 
   const user = fetchedUser || currentUser;
+  // Guard: only initialize form fields once from backend data. 
+  // Prevents tag-invalidated refetches from resetting in-session user selections.
+  const initializedRef = useRef(false);
 
   const [currentPlaying, setCurrentPlaying] = useState(false);
   const [level, setLevel] = useState('');
@@ -77,6 +80,10 @@ const ProfileForm = () => {
 
   useEffect(() => {
     if (user) {
+      console.log('--- Initializing Form with User Data ---');
+      console.log('Raw User Object:', user);
+      
+      // Always update basic fields (these are safe to sync)
       setName(user.first_name || user.name || '');
       setEmail(user.email || '');
       setUserName(user.username || '');
@@ -90,29 +97,40 @@ const ProfileForm = () => {
         setPreviewUrl(user.image);
       }
 
-      // Populate other fields if available in user object
-      const extractSlug = (val: any) => {
-        if (typeof val === 'string') return val;
-        if (Array.isArray(val) && val.length > 0) return val[0].slug || val[0].value || '';
-        return '';
-      };
+      // GUARD: Only set association fields once on initial load.
+      // After a save, we manually patch Redux state with the user's selections.
+      // Without this guard, any subsequent 'user' reference change would reset
+      // the dropdowns back to stale backend data.
+      if (!initializedRef.current) {
+        initializedRef.current = true;
 
-      setSport(user.sport_slug || extractSlug(user.sports) || extractSlug(user.sport) || '');
-      setLevel(
-        user.professional_level_slug ||
-          extractSlug(user.professional_levels) ||
-          extractSlug(user.professional_level) ||
-          ''
-      );
-      setPlayingStyle(
-        user.playing_style_slug ||
-          extractSlug(user.Playing_style) ||
-          extractSlug(user.playing_style) ||
-          ''
-      );
-      setClub(user.club_slug || extractSlug(user.clubs) || extractSlug(user.club) || '');
+        const extractSlug = (val: any) => {
+          if (typeof val === 'string') return val;
+          if (Array.isArray(val) && val.length > 0) {
+            const lastItem = val[val.length - 1];
+            return lastItem.slug || lastItem.value || '';
+          }
+          return '';
+        };
 
-      if (user.is_currentyly_playing) setCurrentPlaying(user.is_currentyly_playing);
+        const sportVal = user.sport_slug || extractSlug(user.playing_sports) || extractSlug(user.sports) || extractSlug(user.sport) || '';
+        const levelVal = user.professional_level_slug || extractSlug(user.professional_levels) || extractSlug(user.professional_level) || '';
+        const styleVal = user.playing_style_slug || extractSlug(user.playing_styles) || extractSlug(user.Playing_style) || extractSlug(user.playing_style) || '';
+        const clubVal = user.club_slug || extractSlug(user.clubs) || extractSlug(user.club) || '';
+
+        console.log('Extracted Initial Slugs (first load only):', { sport: sportVal, level: levelVal, style: styleVal, club: clubVal });
+        
+        setSport(sportVal);
+        setLevel(levelVal);
+        setPlayingStyle(styleVal);
+        setClub(clubVal);
+
+        if (typeof user.is_currentyly_playing !== 'undefined') {
+          setCurrentPlaying(!!user.is_currentyly_playing);
+        }
+      }
+
+      console.log('--- Form Initialization Complete ---');
     }
   }, [user]);
 
@@ -132,44 +150,107 @@ const ProfileForm = () => {
     e.preventDefault();
     if (!token) return;
     try {
-      const formData = new FormData();
-
-      // Append standard fields
-      formData.append('first_name', name);
-      formData.append('name', name); // Compatibility
-      if (user?.last_name) formData.append('last_name', user.last_name);
-      formData.append('email', email);
-      formData.append('username', userName);
-      formData.append('phone', phone);
-      formData.append('phone_number', phone); // Compatibility
-      formData.append('country', nationality);
-      formData.append('address', address);
-      formData.append('gender', gender);
-      formData.append('description', description);
-      formData.append('is_currentyly_playing', String(currentPlaying));
-
-      // Append image if a new one is selected
+      let imageUrl = previewUrl;
+      // If a new image is selected, upload it first
       if (imageFile) {
-        console.log('Appending image file to FormData...');
-        formData.append('image', imageFile);
+        console.log('Uploading new profile image...');
+        const imageFormData = new FormData();
+        imageFormData.append('file', imageFile);
+        imageFormData.append('title', `profile_${userName || name}`);
+        const uploadRes = await uploadFile(imageFormData).unwrap();
+        console.log('Image uploaded successfully:', uploadRes);
+        imageUrl = uploadRes.file || uploadRes.link;
       }
 
-      // Append conditional slugs
-      if (currentPlaying) {
-        if (sport) formData.append('sport_slug', sport);
-        if (level) formData.append('professional_level_slug', level);
-        if (playingStyle) formData.append('playing_style_slug', playingStyle);
-        if (club) formData.append('club_slug', club);
+      // Construct plain JSON object for PATCH /me
+      const updateData: any = {
+        first_name: name,
+        email: email,
+        username: userName,
+        phone: phone,
+        country: nationality,
+        address: address,
+        gender: gender,
+        description: description,
+        // Send both typo and correct spelling as a troubleshooting measure
+        is_currentyly_playing: !!currentPlaying,
+        is_currently_playing: !!currentPlaying,
+      };
+
+      // Only include image if it was actually changed and uploaded
+      if (imageFile) {
+        updateData.image = imageUrl;
       }
 
-      console.log('Patching profile with FormData...');
-      const updatedUser = await patchMe(formData).unwrap();
-      console.log('Profile updated successfully:', updatedUser);
+      if (user?.last_name) updateData.last_name = user.last_name;
 
-      // Merge with existing token for setCredentials
-      dispatch(setCredentials({ ...updatedUser, access: token }));
+      const findUid = (val: string, options: any[]) => {
+        return options?.find(opt => opt.slug === val)?.uid;
+      }
+      
+      // COMPREHENSIVE PAYLOAD SHOTGUN: Send ALL variants (Slugs, UIDs, IDs, Plurals)
+      if (sport) {
+        const sportUid = findUid(sport, sportsData?.results || []);
+        updateData.sport_slug = sport;
+        updateData.sport = sportUid || sport;
+        updateData.sport_id = sportUid || sport;
+        updateData.sports = [sportUid || sport];
+        updateData.sport_ids = [sportUid || sport];
+        updateData.playing_sports = [sportUid || sport];
+      }
+      if (level) {
+        const levelUid = findUid(level, levelsData?.results || []);
+        updateData.professional_level_slug = level;
+        updateData.professional_level = levelUid || level;
+        updateData.professional_level_id = levelUid || level;
+        updateData.professional_levels = [levelUid || level];
+        updateData.professional_level_ids = [levelUid || level];
+      }
+      if (playingStyle) {
+        const styleUid = findUid(playingStyle, stylesData?.results || []);
+        updateData.playing_style_slug = playingStyle;
+        updateData.playing_style = styleUid || playingStyle;
+        updateData.playing_style_id = styleUid || playingStyle;
+        updateData.playing_styles = [styleUid || playingStyle];
+        updateData.playing_style_ids = [styleUid || playingStyle];
+        updateData.Playing_style = [styleUid || playingStyle];
+      }
+      if (club) {
+        const clubUid = findUid(club, clubsData?.results || []);
+        updateData.club_slug = club;
+        updateData.club = clubUid || club;
+        updateData.club_id = clubUid || club;
+        updateData.clubs = [clubUid || club];
+        updateData.club_ids = [clubUid || club];
+      }
+
+      console.log('--- PAYLOAD BEING SENT TO BACKEND ---');
+      console.table(updateData);
+      console.log('JSON Payload:', JSON.stringify(updateData, null, 2));
+
+      const updatedUser = await patchMe(updateData).unwrap();
+      console.log('--- RESPONSE FROM BACKEND ---', updatedUser);
+
+      // KEY FIX: Do NOT call getMe() after save.
+      // getMe() re-fetches stale backend data and triggers useEffect([user])
+      // which resets the form state back to stale backend values.
+      //
+      // Instead, build a mergedUser that embeds our local selections so the
+      // UI immediately reflects what the user picked without waiting for a refetch.
+      const mergedUser = {
+        ...updatedUser,
+        // Embed local slug values so extractSlug() resolves correctly on next render
+        sports: sport ? [{ slug: sport, title: sport, created_at: '' }] : (updatedUser.sports || updatedUser.playing_sports || []),
+        clubs: club ? [{ slug: club, title: club, kind: 'CLUB', created_at: '' }] : (updatedUser.clubs || []),
+        professional_levels: level ? [{ slug: level, title: level, created_at: '' }] : (updatedUser.professional_levels || []),
+        playing_styles: playingStyle ? [{ slug: playingStyle, title: playingStyle, created_at: '' }] : (updatedUser.playing_styles || updatedUser.Playing_style || []),
+        is_currentyly_playing: !!currentPlaying,
+      };
+
+      dispatch(setCredentials({ ...mergedUser, access: token }));
+
       alert('Profile updated successfully!');
-      setImageFile(null); // Clear selected file after success
+      setImageFile(null);
     } catch (err: any) {
       console.error('Failed to update profile:', err);
       const errorMsg =
@@ -243,7 +324,7 @@ const ProfileForm = () => {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          disabled={!isEditing}
+          disabled={true}
         />
         <CustomInputBox
           icon="at"
@@ -252,7 +333,7 @@ const ProfileForm = () => {
           type="text"
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
-          disabled={!isEditing}
+          disabled={true}
         />
         <CustomRadioBox
           icon="fi"

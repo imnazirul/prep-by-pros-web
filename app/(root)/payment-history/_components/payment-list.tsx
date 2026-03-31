@@ -44,10 +44,14 @@ const PaymentList = () => {
                 title =
                   payment.order.title || `Order #${payment.order.uid || payment.uid.slice(0, 8)}`;
                 items = (payment.order.order_items || []).map((item: any) => ({
-                  image: item.product?.file_items?.[0]?.thumbnail || '/images/fallback.jpeg',
+                  image: item.product?.file_items?.[0]?.thumbnail || item.product?.file_items?.[0]?.file || '/images/fallback.jpeg',
                   name: item.title || item.product?.title || 'Unknown Product',
                   price: parseFloat(item.price),
                   quantity: item.quantity,
+                  product_uid: item.product?.uid,
+                  size_uid: item.size?.uid,
+                  colour_uid: item.colour?.uid,
+                  style_uid: item.style?.uid,
                 }));
               } else if (payment.kind.includes('SUBSCRIPTION')) {
                 title = 'Subscription Payment';
@@ -73,7 +77,8 @@ const PaymentList = () => {
               }
 
               const historyProp: HistoryCardProp = {
-                id: payment.uid,
+                // Use the order uid for ORDER payments so the Refund link resolves to /order/[orderUid]/refund
+                id: payment.kind === 'ORDER' && payment.order?.uid ? payment.order.uid : payment.uid,
                 title: title,
                 price: parseFloat(payment.total),
                 type: 'PAYMENT',
@@ -88,6 +93,7 @@ const PaymentList = () => {
                   payment_method: payment.currency_kind, // Mapping currency as method for now as method is missing
                   trx_id: payment._id || payment.uid,
                 },
+                is_subscription: payment.kind.includes('SUBSCRIPTION'),
               };
 
               return <HistoryCard key={payment.uid} history={historyProp} />;

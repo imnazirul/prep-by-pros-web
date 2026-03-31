@@ -15,23 +15,116 @@ import { Button } from '@/components/ui/button';
 import RangeSlider from 'react-range-slider-input';
 import 'react-range-slider-input/dist/style.css';
 
-const sizes = ['XS', 'S', 'SM', 'M', 'ML', 'L', 'XL', 'XXL'];
-const brands = ['Nike', 'Adidas', 'New Balance', 'Carhartt', 'Asics', 'Gap'];
-const colors = ['Blue', 'Red', 'Burberry', 'purple', 'Brown', 'Pink'];
-const styles = ['Regular', 'Slim', 'Skinny', 'Oversized', 'Relaxed'];
-const shortBy = ['Popularity', 'Rating', 'Best Selling', 'Alphabetically'];
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import {
+  useGetBrandFiltersQuery,
+  useGetColorFiltersQuery,
+  useGetSizeFiltersQuery,
+  useGetStyleFiltersQuery,
+} from '@/redux/api/globalApi';
+import { useEffect } from 'react';
+
+const shortByOptions = [
+  { title: 'Popularity', slug: 'popularity' },
+  { title: 'Rating', slug: 'rating' },
+  { title: 'Best Selling', slug: 'best_selling' },
+  { title: 'Alphabetically', slug: 'title' },
+];
 
 const Filter = () => {
-  const [selectedSize, setSelectedSize] = useState(1);
-  const [selectedBrand, setSelectedBrand] = useState(1);
-  const [selectedColor, setSelectedColor] = useState(1);
-  const [selectedStyle, setSelectedStyle] = useState(2);
-  const [selectedSortBy, setSelectedSortBy] = useState(2);
-  const [range, setRange] = useState<[number, number]>([20, 80]);
+  const [selectedSize, setSelectedSize] = useState(-1);
+  const [selectedBrand, setSelectedBrand] = useState(-1);
+  const [selectedColor, setSelectedColor] = useState(-1);
+  const [selectedStyle, setSelectedStyle] = useState(-1);
+  const [selectedSortBy, setSelectedSortBy] = useState(-1);
+  const [range, setRange] = useState<[number, number]>([0, 200]);
+  const [open, setOpen] = useState(false);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const { data: sizes = [] } = useGetSizeFiltersQuery();
+  const { data: brands = [] } = useGetBrandFiltersQuery();
+  const { data: colors = [] } = useGetColorFiltersQuery();
+  const { data: styles = [] } = useGetStyleFiltersQuery();
+
+  // Initialize selected indices from URL search params when the dialog opens
+  useEffect(() => {
+    if (open) {
+      if (sizes.length) {
+        const urlSize = searchParams.get('size');
+        setSelectedSize(urlSize ? sizes.findIndex((s) => s.slug === urlSize) : -1);
+      }
+      if (brands.length) {
+        const urlBrand = searchParams.get('brand');
+        setSelectedBrand(urlBrand ? brands.findIndex((b) => b.slug === urlBrand) : -1);
+      }
+      if (colors.length) {
+        const urlColor = searchParams.get('color');
+        setSelectedColor(urlColor ? colors.findIndex((c) => c.slug === urlColor) : -1);
+      }
+      if (styles.length) {
+        const urlStyle = searchParams.get('style');
+        setSelectedStyle(urlStyle ? styles.findIndex((s) => s.slug === urlStyle) : -1);
+      }
+      const urlSort = searchParams.get('sort');
+      setSelectedSortBy(urlSort ? shortByOptions.findIndex((s) => s.slug === urlSort) : -1);
+
+      const urlMinPrice = searchParams.get('min_price');
+      const urlMaxPrice = searchParams.get('max_price');
+      if (urlMinPrice && urlMaxPrice) {
+        const min = parseInt(urlMinPrice);
+        const max = parseInt(urlMaxPrice);
+        if (range[0] !== min || range[1] !== max) {
+          setRange([min, max]);
+        }
+      } else {
+        if (range[0] !== 0 || range[1] !== 200) {
+          setRange([0, 200]);
+        }
+      }
+    }
+  }, [open, searchParams, sizes.length, brands.length, colors.length, styles.length]);
+
+  const handleSubmit = (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
+    const params = new URLSearchParams(searchParams.toString());
+
+    const sizeSlug = sizes[selectedSize]?.slug;
+    if (sizeSlug) params.set('size', sizeSlug);
+    else params.delete('size');
+
+    const brandSlug = brands[selectedBrand]?.slug;
+    if (brandSlug) params.set('brand', brandSlug);
+    else params.delete('brand');
+
+    const colorSlug = colors[selectedColor]?.slug;
+    if (colorSlug) params.set('color', colorSlug);
+    else params.delete('color');
+
+    const styleSlug = styles[selectedStyle]?.slug;
+    if (styleSlug) params.set('style', styleSlug);
+    else params.delete('style');
+
+    const sortSlug = shortByOptions[selectedSortBy]?.slug;
+    if (sortSlug) params.set('sort', sortSlug);
+    else params.delete('sort');
+
+    if (range[0] !== 0 || range[1] !== 200) {
+      params.set('min_price', range[0].toString());
+      params.set('max_price', range[1].toString());
+    } else {
+      params.delete('min_price');
+      params.delete('max_price');
+    }
+
+    router.push(`${pathname}?${params.toString()}`);
+    setOpen(false);
+  };
 
   return (
-    <Dialog>
-      <form>
+    <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button variant="secondary" className="px-8">
             <Icon
@@ -54,28 +147,28 @@ const Filter = () => {
 
             <FilterGroup
               title="Size"
-              options={sizes}
+              options={sizes.map((s) => s.title)}
               selectedIndex={selectedSize}
               onSelect={setSelectedSize}
             />
 
             <FilterGroup
               title="Brand"
-              options={brands}
+              options={brands.map((b) => b.title)}
               selectedIndex={selectedBrand}
               onSelect={setSelectedBrand}
             />
 
             <FilterGroup
               title="Color"
-              options={colors}
+              options={colors.map((c) => c.title)}
               selectedIndex={selectedColor}
               onSelect={setSelectedColor}
             />
 
             <FilterGroup
               title="Style"
-              options={styles}
+              options={styles.map((s) => s.title)}
               selectedIndex={selectedStyle}
               onSelect={setSelectedStyle}
             />
@@ -96,7 +189,7 @@ const Filter = () => {
 
                 <RangeSlider
                   min={0}
-                  max={100}
+                  max={300}
                   value={range}
                   onInput={setRange}
                 />
@@ -105,17 +198,16 @@ const Filter = () => {
 
             <FilterGroup
               title="Sort by"
-              options={shortBy}
+              options={shortByOptions.map((s) => s.title)}
               selectedIndex={selectedSortBy}
               onSelect={setSelectedSortBy}
             />
 
-            <Button size={'lg'} className="w-full">
+            <Button type="button" size={'lg'} className="w-full" onClick={handleSubmit}>
               View Items
             </Button>
           </div>
         </DialogContent>
-      </form>
     </Dialog>
   );
 };
@@ -148,7 +240,8 @@ const FilterGroup = <T extends string>({
           return (
             <button
               key={option}
-              onClick={() => onSelect(index)}
+              type="button"
+              onClick={() => onSelect(isActive ? -1 : index)}
               className={cn(
                 'flex h-14 cursor-pointer items-center rounded-full px-8 text-lg transition-colors',
                 isActive

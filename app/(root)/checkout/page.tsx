@@ -11,6 +11,8 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import NavbarHeight from '@/components/shared/navbar-height';
+import PageHeader from '@/components/shared/page-header';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -138,11 +140,13 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#173633]">View your order details here...</h1>
-        <p className="text-gray-500">Everything about this purchase in one place!</p>
-      </div>
+    <>
+      <NavbarHeight />
+      <PageHeader
+        title="View your order details here..."
+        subTitle="Everything about this purchase in one place!"
+      />
+      <div className="container mx-auto max-w-6xl px-4 pb-10">
 
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
         {/* Left Column: Order Summary */}
@@ -252,5 +256,6 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

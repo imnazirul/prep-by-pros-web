@@ -10,6 +10,7 @@ import Link from 'next/link';
 import ProductList from '../../_components/product-list';
 import CateogoryBanner from './cateogory-banner';
 import Filter from './filter';
+import { Suspense } from 'react';
 
 const ShopCategoryContent = ({ slug }: { slug: string }) => {
   // Fetch categories to find the current one and get its title
@@ -68,11 +69,15 @@ const ShopCategoryContent = ({ slug }: { slug: string }) => {
               {displayTitle}
             </h3>
           </div>
-          <Filter />
+          <Suspense fallback={<div>Loading filters...</div>}>
+            <Filter />
+          </Suspense>
         </div>
       </section>
 
-      <ProductList categoryTitle={category?.title || undefined} categorySlug={slug} />
+      <Suspense fallback={<div>Loading products...</div>}>
+        <ProductList categoryTitle={category?.title || undefined} categorySlug={slug} />
+      </Suspense>
     </div>
   );
 };

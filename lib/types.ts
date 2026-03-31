@@ -89,6 +89,7 @@ interface BaseHistoryCard {
     trx_id: string;
   };
   type: 'ORDER' | 'PAYMENT';
+  is_subscription?: boolean;
 }
 
 export type HistoryCardProp = BaseHistoryCard;

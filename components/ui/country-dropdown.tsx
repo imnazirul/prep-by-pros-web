@@ -72,8 +72,11 @@ const CountryDropdownComponent = (
 
   useEffect(() => {
     if (defaultValue) {
+      const defaultValueUpper = defaultValue.toUpperCase();
       const initialCountry = options.find(
-        (country) => country.alpha3 === defaultValue,
+        (country) =>
+          country.alpha3 === defaultValueUpper ||
+          country.alpha2 === defaultValueUpper,
       );
       if (initialCountry) {
         setSelectedCountry(initialCountry);

@@ -37,6 +37,7 @@ type CartContextType = {
   decreaseQuantity: (id: string) => Promise<void>;
   isLoading: boolean;
   isAdding: boolean;
+  loadingProductId: string | null;
   isDeleting: boolean;
   isUpdating: boolean;
 };
@@ -51,6 +52,7 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [isCartOpen, setCartOpen] = useState(false);
+  const [loadingProductId, setLoadingProductId] = useState<string | null>(null);
 
   const { data: cartData, isLoading } = useGetCartItemsQuery({});
   const [addToCart, { isLoading: isAdding }] = useAddToCartMutation();
@@ -72,11 +74,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     })) || [];
 
   const addItem = async (request: AddToCartRequest) => {
+    setLoadingProductId(request.product_uid);
     try {
       await addToCart(request).unwrap();
       // setCartOpen(true);
     } catch (error) {
       console.error('Failed to add to cart:', error);
+    } finally {
+      setLoadingProductId(null);
     }
   };
 
@@ -140,6 +145,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         increaseQuantity,
         isLoading,
         isAdding,
+        loadingProductId,
         isDeleting,
         isUpdating,
       }}

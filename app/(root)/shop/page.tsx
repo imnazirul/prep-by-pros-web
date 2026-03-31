@@ -5,6 +5,7 @@ import ProductList from './_components/product-list';
 import ProductCategory from './_components/product-category';
 import ShopBanner from './_components/shop-banner';
 import Filter from './_components/filter';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'Shop',
@@ -24,11 +25,15 @@ const ShopPage = () => {
       <section className="container">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <ProductCategory />
-          <Filter />
+          <Suspense fallback={<div>Loading filters...</div>}>
+            <Filter />
+          </Suspense>
         </div>
       </section>
 
-      <ProductList />
+      <Suspense fallback={<div>Loading products...</div>}>
+        <ProductList />
+      </Suspense>
     </div>
   );
 };
