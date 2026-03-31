@@ -83,11 +83,10 @@ export default function NotificationForm() {
           <CustomSelectModal
             options={intervals}
             label="Reminder interval"
-            setValue={(val) => {
-              setReminderInterval(val);
-              handleUpdate('reminder_interval', val);
-            }}
+            setValue={setReminderInterval}
             value={reminderInterval}
+            buttonLabel="Save"
+            buttonAction={() => handleUpdate('reminder_interval', reminderInterval)}
           >
             <div className="bg-primary-200 text-primary hover:bg-primary-300 flex h-12 cursor-pointer items-center gap-1 rounded-lg px-6 py-3 text-lg transition-all duration-300">
               {getIntervalLabel(reminderInterval)}
