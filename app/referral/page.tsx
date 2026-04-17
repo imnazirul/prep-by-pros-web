@@ -37,7 +37,7 @@ export default function ReferralPage() {
         {/* QR Card - Left Column */}
         <div className="w-full md:w-auto order-2 xl:order-1 flex justify-center">
           <QRCard 
-            name={user?.first_name ? `${user.first_name} ${user.last_name || ''}` : 'User'} 
+            name={user?.first_name ? `${user.first_name}` : 'User'} 
             handle={user?.referral_code || 'user'} 
             avatarUrl={user?.image}
             value={referralUrl}

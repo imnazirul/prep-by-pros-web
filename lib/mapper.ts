@@ -60,7 +60,7 @@ export const mapContentToPostCard = (content: Content | MeContent): PostCardProp
   if (content.user) {
     console.log('DEBUG: Mapping Content User', {
       contentSlug: content.slug,
-      userSlug: content.user.slug,
+      userSlug: content.user.username || content.user.uid,
       userUid: content.user.uid,
       username: content.user.username,
       userID: (content.user as any).id,
@@ -74,7 +74,7 @@ export const mapContentToPostCard = (content: Content | MeContent): PostCardProp
 
   // Defensive check: If user slug matches content slug, it's likely a backend serialization error (user object IS content object)
   // or a very weird coincidence. We should trust UID or username instead.
-  let finalUserSlug = content.user?.slug || '';
+  let finalUserSlug = content.user?.username || content.user?.uid || '';
   const contentSlug = content.slug;
 
   if (finalUserSlug && finalUserSlug === contentSlug) {
@@ -110,8 +110,7 @@ export const mapContentToPostCard = (content: Content | MeContent): PostCardProp
     media,
     profile: {
       name: content.user
-        ? `${content.user.first_name || ''} ${content.user.last_name || ''}`.trim() ||
-          content.user.username
+        ? content.user.first_name || content.user.username
         : 'Unknown',
       image: getFullUrl(content.user?.image),
       last_active: new Date(content.created_at),

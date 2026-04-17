@@ -101,9 +101,7 @@ export default function HeaderProfile() {
   const currentUser = useAppSelector(selectCurrentUser);
   const user = mounted ? userData || currentUser : null;
 
-  const fullName = user?.first_name
-    ? `${user.first_name} ${user.last_name || ''}`
-    : user?.name || 'User';
+  const fullName = user?.first_name || 'User';
 
   const userName = user?.username ? `@${user.username}` : '';
   const initial = user?.first_name ? user.first_name.charAt(0).toUpperCase() : 'U';

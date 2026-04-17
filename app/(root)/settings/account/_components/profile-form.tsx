@@ -84,11 +84,11 @@ const ProfileForm = () => {
       console.log('Raw User Object:', user);
       
       // Always update basic fields (these are safe to sync)
-      setName(user.first_name || user.name || '');
+      setName(user.first_name || '');
       setEmail(user.email || '');
       setUserName(user.username || '');
-      setPhone(user.phone || user.phone_number || '');
-      setNationality(user.country || user.nationality || '');
+      setPhone(user.phone || '');
+      setNationality(user.country || '');
       setAddress(user.address || '');
       setGender(user.gender || '');
       setDescription(user.description || '');
@@ -182,7 +182,7 @@ const ProfileForm = () => {
         updateData.image = imageUrl;
       }
 
-      if (user?.last_name) updateData.last_name = user.last_name;
+      // if (user?.last_name) updateData.last_name = user.last_name;
 
       const findUid = (val: string, options: any[]) => {
         return options?.find(opt => opt.slug === val)?.uid;

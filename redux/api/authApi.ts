@@ -478,6 +478,18 @@ export interface User {
   referral_code: string;
   subscription_amount: string;
   created_at: string;
+  // Shared fields with Coach for UI compatibility
+  last_name?: string;
+  slug?: string;
+  user_subscription?: any;
+  is_subscribed?: boolean;
+  is_followed?: boolean;
+  total_subscriber?: number;
+  total_post?: number;
+  total_vedios?: number; // Match typo in Coach interface
+  Playing_style?: any[];
+  Playing_in?: any[];
+  club?: any[];
 }
 
 export interface Player {
