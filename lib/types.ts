@@ -72,6 +72,10 @@ interface BaseHistoryCard {
     price?: number;
     quantity?: number;
     attributes?: string;
+    product_uid?: string;
+    size_uid?: string;
+    colour_uid?: string;
+    style_uid?: string;
   }[];
   price: number;
   date: Date;
@@ -85,6 +89,7 @@ interface BaseHistoryCard {
     trx_id: string;
   };
   type: 'ORDER' | 'PAYMENT';
+  is_subscription?: boolean;
 }
 
 export type HistoryCardProp = BaseHistoryCard;

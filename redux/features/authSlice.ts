@@ -1,8 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
+import { User } from '../api/authApi';
 
 interface AuthState {
-  user: any | null; // Replace 'any' with your User type
+  user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   wishlistMap: Record<string, string>; // Maps content_slug to wishlist_uid
@@ -60,6 +61,12 @@ export const authSlice = createSlice({
         localStorage.setItem('user', JSON.stringify(userData));
       }
     },
+    setUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user', JSON.stringify(action.payload));
+      }
+    },
     logout: (state) => {
       state.user = null;
       state.token = null;
@@ -88,6 +95,7 @@ export const authSlice = createSlice({
 
 export const {
   setCredentials,
+  setUser,
   logout,
   rehydrateAuth,
   setWishlist,

@@ -86,7 +86,7 @@ const PreferenceModal = ({
       console.log('user', res);
 
       if (roleSlug === 'COACH') {
-        router.push('/creator/profile');
+        router.push('/creator');
       } else {
         router.push('/login');
       }

@@ -47,7 +47,7 @@ export default function RootLayout({
               </PostDialogProvider>
 
               <CartModal />
-              <RedirectingModal />
+              {/* <RedirectingModal /> */}
             </CartProvider>
           </StoreProvider>
         </Suspense>

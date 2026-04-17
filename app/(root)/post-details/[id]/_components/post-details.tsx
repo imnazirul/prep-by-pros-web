@@ -12,8 +12,12 @@ import { cn } from '@/lib/utils';
 import { useGetMeContentsQuery, useRetrieveMeQuery } from '@/redux/api/authApi';
 import { useGetContentBySlugQuery } from '@/redux/api/globalApi';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 const PostDetails = ({ slug }: { slug: string }) => {
+  const searchParams = useSearchParams();
+  const isLockedViaUrl = searchParams.get('locked') === 'true';
+
   const {
     data: globalContent,
     isLoading: isGlobalLoading,
@@ -30,7 +34,7 @@ const PostDetails = ({ slug }: { slug: string }) => {
   } = useGetMeContentsQuery(undefined, {
     skip: !isGlobalError, // Only run if the global fetch failed
   });
-
+console.log("response",meContentsResponse)
   const meContent = meContentsResponse?.results?.find((c) => c.slug === slug);
   const content = globalContent || meContent;
   const isLoading = isGlobalLoading || (isGlobalError && isMeLoading);
@@ -46,6 +50,19 @@ const PostDetails = ({ slug }: { slug: string }) => {
     return (
       <div className="flex h-100 items-center justify-center">
         <Circle3DLoader />
+      </div>
+    );
+  }
+
+  if (isLockedViaUrl) {
+    return (
+      <div className="flex h-[400px] flex-col items-center justify-center space-y-4 px-4 text-center">
+        <Icon name="lock" height={64} width={64} className="text-black-5" />
+        <h2 className="text-2xl font-semibold text-black-10">Premium Content</h2>
+        <p className="max-w-[400px] text-black-8">
+          This content is locked. You do not have permission to view this post. Please subscribe
+          to the instructor to gain access.
+        </p>
       </div>
     );
   }

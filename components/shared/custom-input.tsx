@@ -66,6 +66,7 @@ export function CustomInputBox({
           )}
           data-slot="input"
           {...props}
+          disabled={disabled}
         />
 
         {isPassword && (
@@ -201,7 +202,7 @@ export function CustomRadioBox({
                   className="peer accent-primary"
                 />
                 <span className="text-black-10 text-lg leading-none font-medium">
-                  {option.value}
+                  {option.label}
                 </span>
               </label>
             </div>
@@ -227,6 +228,7 @@ export function CustomCountryBox({
   icon,
   label,
   disabled,
+  placeholder,
   isRequired = false,
   isOptional = false,
   value,
@@ -250,12 +252,15 @@ export function CustomCountryBox({
           )}
         </label>
         <CountryDropdown
-          placeholder="Select country"
-          defaultValue={value || 'USA'}
-          // Assuming CountryDropdown takes some prop to handle change if we want it controlled?
-          // The previous code essentially ignored it too.
-          // If CountryDropdown supports onChange, we should pass it.
-          // Leaving as is for now but ensuring types are okay.
+          placeholder={placeholder || "Select country"}
+          defaultValue={value}
+          disabled={disabled}
+          onChange={(country) => {
+            if (onChange) {
+               // Simulate an event object for compatibility with (e) => setNationality(e.target.value)
+               onChange({ target: { value: country.alpha2.toLowerCase() } } as any);
+            }
+          }}
         />
       </div>
     </div>
@@ -298,6 +303,7 @@ export function CustomTextareaBox({
           className="text-black-10 placeholder:text-black-7 min-h-40 text-lg outline-0"
           data-slot="input"
           {...props}
+          disabled={disabled}
         />
       </div>
     </div>
@@ -341,7 +347,13 @@ export function CustomNumberBox({
             <span className="text-black-6">({isOptional ? 'Optional' : 'Required'})</span>
           )}
         </label>
-        <PhoneInput value={value} onChange={onChange} international defaultCountry="US" />
+        <PhoneInput
+          value={value}
+          onChange={onChange}
+          international
+          defaultCountry="US"
+          disabled={disabled}
+        />
       </div>
     </div>
   );

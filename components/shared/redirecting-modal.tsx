@@ -23,7 +23,7 @@ import { selectIsAuthenticated } from '@/redux/features/authSlice';
 import { useAppSelector } from '@/redux/hooks';
 
 const RedirectingModal = () => {
-  const [step, setStep] = useState<StepProp>('LOADING');
+  const [step, setStep] = useState<StepProp>('ACCOUNT_TYPE');
   const [open, setOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState(false);
   const [accountType, setAccountType] = useState<'player' | 'coach'>('player');
@@ -126,16 +126,16 @@ const RedirectingModal = () => {
 
   useEffect(() => {
     // Open automaticallly on mount
-    const authRoutes = ['/login', '/signup', '/forgot-password', '/'];
+    const authRoutes = [ '/signup', '/forgot-password', '/'];
     if (!isAuthenticated && !authRoutes.includes(window.location.pathname)) {
       setOpen(true);
     }
 
-    setTimeout(() => {
-      if (step == 'LOADING') {
-        setStep('ACCOUNT_TYPE');
-      }
-    }, 3000);
+    // setTimeout(() => {
+    //   if (step == 'LOADING') {
+    //     setStep('ACCOUNT_TYPE');
+    //   }
+    // }, 3000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 

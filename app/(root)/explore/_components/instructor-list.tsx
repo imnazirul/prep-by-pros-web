@@ -12,12 +12,14 @@ const InstructorList = () => {
     country?: string;
     gender?: string;
     level?: string;
+    ordering?: string;
   }>({});
 
   const { data, isLoading, error } = useGetCoachesQuery({
     country: filters.country || undefined,
     gender: filters.gender || undefined,
     userprofessionallevelconnector__professional_level__slug: filters.level || undefined,
+    ordering: filters.ordering || undefined,
   });
 
   if (isLoading) {

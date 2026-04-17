@@ -11,7 +11,7 @@ import 'swiper/css';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 const ProductDetails = ({ slug }: { slug: string }) => {
-  const { openCart, addItem, isAdding } = useCart();
+  const { openCart, addItem, isAdding, loadingProductId } = useCart();
   const { data: product, isLoading } = useGetProductBySlugQuery(slug);
 
   const [selectedImage, setSelectedImage] = useState(0);
@@ -181,7 +181,7 @@ const ProductDetails = ({ slug }: { slug: string }) => {
                 className="w-full rounded-full py-6 text-base font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={isAdding}
               >
-                {isAdding ? (
+                {loadingProductId === product.uid ? (
                   <Circle3DLoader size={2} radius={10} depth={5} color="#fff" />
                 ) : (
                   'Add to cart'

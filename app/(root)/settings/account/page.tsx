@@ -14,7 +14,7 @@ const AccountSettingsPage = () => {
         title="Profile information"
         subTitle="Keep your profile up to date with accurate information"
       >
-        <Button>Save changes</Button>
+        <Button type="submit" form="profile-form">Save changes</Button>
       </SettingsHeader>
 
       <ProfileForm />

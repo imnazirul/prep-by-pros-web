@@ -20,7 +20,7 @@ export default function TrackingDetails({ trackingUid }: TrackingDetailsProps) {
   const [reason, setReason] = useState('');
   const { data: tracking, isLoading } = useGetOrderTrackingQuery(trackingUid);
   const [cancelOrder, { isLoading: isCancelling }] = useCancelOrderMutation();
-
+console.log("tracking",tracking)
   const cancelButtonAction = () => {
     // This logic might need to be adjusted. The UI shows 'Cancel Order' but we might need to actually call the API.
     // The original code was pushing to a refund page with reason.

@@ -15,10 +15,10 @@ export function ProductCard({
   product: ProductCardProp;
   className?: string;
 }) {
-  const { addItem, items, isAdding } = useCart();
+  const { addItem, items, isAdding, loadingProductId } = useCart();
 
   // Check if this product is already in the cart
-  const isInCart = items.some((item) => item.id === String(product.id));
+  const isInCart = items.some((item) => item.productUid === String(product.id));
   return (
     <Link
       href={`/product-details/${product.slug || product.id}`}
@@ -53,7 +53,7 @@ export function ProductCard({
               isInCart ? 'text-red' : 'text-black-10 hover:text-red'
             }`}
           >
-            {isAdding ? (
+            {loadingProductId === String(product.id) ? (
               <Circle3DLoader size={2} radius={10} depth={5} color="#000" />
             ) : (
               <Icon name="shopping_basket" height={16} width={16} />

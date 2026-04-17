@@ -3,6 +3,7 @@ import { getDeviceInfo } from '@/lib/device-info';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../store';
 import { Coach, GlobalResponse, Option, Product } from './globalApi'; // Importing from globalApi
+import { setUser } from '../features/authSlice';
 
 // Helper interfaces for CartItem nested objects which use 'uid' instead of 'slug'
 export interface CartOption {
@@ -413,6 +414,73 @@ export interface SubscriptionCancelResponse {
   current_period_end: number;
 }
 
+export interface UserRole {
+  uid: string;
+  title: string;
+  created_at: string;
+}
+
+export interface UserSport {
+  slug: string;
+  title: string;
+  created_at: string;
+}
+
+export interface UserClub {
+  slug: string;
+  title: string;
+  kind: string;
+  created_at: string;
+}
+
+export interface UserPlayingStyle {
+  slug: string;
+  title: string;
+  created_at: string;
+}
+
+export interface UserProfessionalLevel {
+  slug: string;
+  title: string;
+  created_at: string;
+}
+
+export interface UserCoachSubscription {
+  uid: string;
+  stripe_product_id: string;
+  stripe_price_id: string;
+  price_amount: string;
+  interval: string;
+  status: string;
+  created_at: string;
+}
+
+export interface User {
+  uid: string;
+  first_name: string;
+  email: string;
+  is_email_verified: boolean;
+  username: string;
+  gender: string;
+  phone: string;
+  country: string;
+  language: string;
+  image: string;
+  role: UserRole;
+  clubs: UserClub[];
+  sports: UserSport[];
+  playing_styles: UserPlayingStyle[];
+  professional_levels: UserProfessionalLevel[];
+  description: string;
+  address: string;
+  is_currentyly_playing: boolean;
+  is_two_factor_enabled: boolean;
+  coach_subscription: UserCoachSubscription | null;
+  referral_code: string;
+  subscription_amount: string;
+  created_at: string;
+}
+
 export interface Player {
   slug: string;
   email: string;
@@ -535,8 +603,7 @@ export const authApi = createApi({
         endpoint === 'login' ||
         endpoint === 'signup' ||
         endpoint === 'sendOtp' ||
-        endpoint === 'verifyOtp' ||
-        endpoint === 'resetPassword'
+        endpoint === 'verifyOtp'
       ) {
         return headers;
       }
@@ -671,12 +738,20 @@ export const authApi = createApi({
       // But getNotificationSettings is query.
       // Let's leave getMe as is for now to avoid breaking other things, but add invalidatesTags to updates.
     }),
-    retrieveMe: builder.query<Coach, void>({
+    retrieveMe: builder.query<User, void>({
       query: () => ({
         url: '/me',
         method: 'GET',
       }),
       providesTags: ['User'],
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setUser(data));
+        } catch (error) {
+          console.error('Failed to fetch user', error);
+        }
+      },
     }),
     updateMe: builder.mutation({
       query: (data) => ({
@@ -1369,6 +1444,7 @@ export const {
   useChangePasswordMutation,
   useGetMeMutation,
   useRetrieveMeQuery,
+  useLazyRetrieveMeQuery,
   useUpdateMeMutation,
   usePatchMeMutation,
   useGetNotificationSettingsQuery,

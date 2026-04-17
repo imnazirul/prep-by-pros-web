@@ -38,10 +38,10 @@ export default function TrackingList({
         };
 
         return (
-          <div key={tracking.uid} onClick={() => onSelect(tracking.uid)}>
+          <div key={tracking.order_uid} onClick={() => onSelect(tracking.order_uid)}>
             <TrackingCard
               className="group cursor-pointer"
-              isActive={selectedTrackingUid === tracking.uid}
+              isActive={selectedTrackingUid === tracking.order_uid}
               {...trackingProp}
             />
           </div>

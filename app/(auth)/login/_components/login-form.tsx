@@ -1,6 +1,7 @@
 'use client';
 
 import { CustomInputBox } from '@/components/shared/custom-input';
+import RedirectingModal from '@/components/shared/redirecting-modal';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/lib/icon';
@@ -33,9 +34,12 @@ const LoginForm = () => {
       console.log('user', userData);
       dispatch(setCredentials({ ...userData }));
 
-      const role = userData.role?.title || userData.role || 'PLAYER';
-      if (role.toUpperCase() === 'COACH') {
-        router.push('/creator/profile');
+      const role =
+        (typeof userData.role === 'object' && userData.role !== null
+          ? userData.role.title
+          : userData.role) || 'PLAYER';
+      if (typeof role === 'string' && role.toUpperCase() === 'COACH') {
+        router.push('/creator');
       } else {
         router.push('/');
       }
@@ -65,7 +69,7 @@ const LoginForm = () => {
         ? userData.role.title
         : userData.role) || 'PLAYER';
     if (role && typeof role === 'string' && role.toUpperCase() === 'COACH') {
-      router.push('/creator/profile');
+      router.push('/creator');
     } else {
       router.push('/');
     }
@@ -100,6 +104,9 @@ const LoginForm = () => {
       // setErrorMessage('Facebook login failed.'); // Uncomment when SDK is real
     }
   };
+
+  const [modalVisible, setModalVisible] = useState(false);
+
   return (
     <>
       <div>
@@ -188,10 +195,11 @@ const LoginForm = () => {
         {/* Sign Up Link */}
         <p className="text-black-7 text-lg">
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-primary font-semibold hover:underline">
+          <Link href="#" onClick={() => setModalVisible(!modalVisible)} className="text-primary font-semibold hover:underline">
             Sign up
           </Link>
         </p>
+       {modalVisible && <RedirectingModal />}
       </div>
     </>
   );

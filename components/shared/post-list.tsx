@@ -6,15 +6,32 @@ import { useState } from 'react';
 import { feedPost } from '@/data';
 import { Button } from '@/components/ui/button';
 import PostCard from '@/components/shared/post-card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const PostList = () => {
   const [tab, setTab] = useState<'ALL' | 'VIDEOS' | 'PHOTOS'>('ALL');
+  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
   const videoList = feedPost.filter((post) => post.media.type === 'video');
   const imageList = feedPost.filter((post) => post.media.type === 'image');
 
-  const filterList =
+  let filterList =
     tab === 'VIDEOS' ? videoList : tab === 'PHOTOS' ? imageList : feedPost;
+
+  if (selectedCategory !== 'ALL') {
+    filterList = filterList.filter((post) => post.category === selectedCategory);
+  }
+
+  // Extract unique categories from feedPost
+  const categories = Array.from(
+    new Set(feedPost.map((post) => post.category).filter(Boolean))
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -49,10 +66,27 @@ const PostList = () => {
           ))}
         </div>
 
-        <Button variant={'secondary'} className="font-normal">
-          <Icon height={24} width={24} name="filter_vertical" />
-          Filter by
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant={'secondary'} className="font-normal capitalize">
+              <Icon height={24} width={24} name="filter_vertical" />
+              {selectedCategory === 'ALL' ? 'Filter by' : selectedCategory}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[160px]">
+            <DropdownMenuItem onClick={() => setSelectedCategory('ALL')}>
+              All Categories
+            </DropdownMenuItem>
+            {categories.map((category) => (
+              <DropdownMenuItem
+                key={category}
+                onClick={() => setSelectedCategory(category || '')}
+              >
+                {category}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="mb-10 gap-4 sm:columns-2 lg:columns-3">

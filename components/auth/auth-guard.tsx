@@ -1,5 +1,6 @@
 'use client';
 
+import { useLazyRetrieveMeQuery } from '@/redux/api/authApi';
 import { useAppSelector } from '@/redux/hooks';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -22,7 +23,8 @@ const protectedRoutes = [
 const authRoutes = ['/login', '/signup', '/forgot-password'];
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, token } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, token, user } = useAppSelector((state) => state.auth);
+  const [triggerMe, { isLoading: isFetchingUser }] = useLazyRetrieveMeQuery();
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -30,6 +32,13 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Fetch user profile if authenticated but user data missing (e.g. on refresh)
+  useEffect(() => {
+    if (mounted && isAuthenticated && token && !user && !isFetchingUser) {
+      triggerMe();
+    }
+  }, [mounted, isAuthenticated, token, user, triggerMe, isFetchingUser]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -41,18 +50,42 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
     if (isProtected && !isAuthenticated && !token) {
       router.push('/login');
+      return;
     }
 
     if (isAuthRoute && isAuthenticated && token) {
-      router.push('/');
+      if (user) {
+        const role = user.role?.title || 'PLAYER';
+        if (role.toUpperCase() === 'COACH') {
+          router.push('/creator');
+        } else {
+          router.push('/');
+        }
+      } else {
+        router.push('/');
+      }
+      return;
     }
-  }, [pathname, isAuthenticated, token, router, mounted]);
 
-  // ... (imports remain the same)
+    // Role-based route protection
+    if (isAuthenticated && user) {
+      const role = user.role?.title || 'PLAYER';
+      const isCoach = role.toUpperCase() === 'COACH';
+      const isPlayer = role.toUpperCase() === 'PLAYER';
 
-  // ... (imports remain the same)
+      // Player trying to access creator pages
+      if (isPlayer && pathname.startsWith('/creator')) {
+        router.push('/');
+        return;
+      }
 
-  // ...
+      // Coach trying to access player specific pages (like root feed)
+      if (isCoach && pathname === '/') {
+        router.push('/creator');
+        return;
+      }
+    }
+  }, [pathname, isAuthenticated, token, user, router, mounted]);
 
   // Prevent flashing of protected content
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
@@ -60,7 +93,8 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     !isAuthRoute &&
     (pathname === '/' || protectedRoutes.some((route) => route !== '/' && pathname.startsWith(route)));
 
-  if (mounted && isProtected && !isAuthenticated && !token) {
+  // Show loader while checking auth or fetching user profile
+  if (mounted && ((isProtected && !isAuthenticated && !token) || (isAuthenticated && !user))) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Circle3DLoader />

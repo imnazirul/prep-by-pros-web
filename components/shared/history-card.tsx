@@ -1,10 +1,47 @@
+'use client';
+
 import { HistoryCardProp } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { Button } from '../ui/button';
+import { useRouter } from 'next/navigation';
+import { useAddToCartMutation } from '@/redux/api/authApi';
+import { useState } from 'react';
 
 const HistoryCard = ({ history }: { history: HistoryCardProp }) => {
+  const router = useRouter();
+  const [addToCart] = useAddToCartMutation();
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+  const itemsWithProduct = history.items.filter((item) => item.product_uid);
+  const canBuyAgain = itemsWithProduct.length > 0;
+  // Show order-related actions only when there are purchasable items (not subscription payments)
+  const showOrderActions = canBuyAgain || history.type === 'ORDER';
+
+  const handleBuyAgain = async () => {
+    if (!canBuyAgain) return;
+    try {
+      setIsAddingToCart(true);
+
+      for (const item of itemsWithProduct) {
+        await addToCart({
+          product_uid: item.product_uid!,
+          product_count: item.quantity || 1,
+          size_uid: item.size_uid,
+          colour_uid: item.colour_uid,
+          style_uid: item.style_uid,
+        }).unwrap();
+      }
+
+      router.push('/checkout');
+    } catch (error) {
+      console.error('Failed to add items to cart', error);
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+
   return (
     <div
       style={{
@@ -69,17 +106,31 @@ const HistoryCard = ({ history }: { history: HistoryCardProp }) => {
             </div>
           )}
 
-          <div className="mt-5 grid grid-cols-[4.5fr_7.5fr] items-center gap-2 text-center pointer-events-auto">
-            <Button
-              asChild
-              className="text-primary hover:bg-primary-100 w-full bg-white font-semibold"
-              variant={'secondary'}
-            >
-              <Link href={`/order/${history.id}/refund`}>Refund</Link>
-            </Button>
+          {showOrderActions ? (
+            <div className="mt-5 grid grid-cols-[4.5fr_7.5fr] items-center gap-2 text-center pointer-events-auto">
+              <Button
+                asChild
+                className="text-primary hover:bg-primary-100 w-full bg-white font-semibold"
+                variant={'secondary'}
+              >
+                <Link href={`/order/${history.id}/refund`}>Refund</Link>
+              </Button>
 
-            <Button variant={'default'}>Buy Again</Button>
-          </div>
+              <Button
+                variant={'default'}
+                disabled={isAddingToCart || !canBuyAgain}
+                onClick={handleBuyAgain}
+              >
+                {isAddingToCart ? 'Adding...' : 'Buy Again'}
+              </Button>
+            </div>
+          ) : history.is_subscription ? (
+            <div className="mt-5 pointer-events-auto">
+              <Button asChild variant={'default'} className="w-full">
+                <Link href="/my-subscriptions">Manage Subscription</Link>
+              </Button>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

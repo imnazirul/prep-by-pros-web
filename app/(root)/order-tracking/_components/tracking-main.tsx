@@ -11,10 +11,10 @@ export default function TrackingMain() {
   const { data: trackingsResponse, isLoading } = useGetAllOrderTrackingQuery();
   const trackings = trackingsResponse?.results || [];
   const [selectedTrackingUid, setSelectedTrackingUid] = useState<string | null>(null);
-
+console.log("trackings",trackings)
   useEffect(() => {
     if (trackings.length > 0 && !selectedTrackingUid) {
-      setSelectedTrackingUid(trackings[0].uid);
+      setSelectedTrackingUid(trackings[0].order_uid);
     }
   }, [trackings, selectedTrackingUid]);
 

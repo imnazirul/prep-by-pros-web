@@ -81,7 +81,10 @@ const CustomSelectModal = ({
 
         {buttonLabel && buttonAction && (
           <Button
-            onClick={buttonAction}
+            onClick={() => {
+              buttonAction();
+              setOpen(false);
+            }}
             size={'lg'}
             className={cn('mt-10 w-full', buttonClass)}
           >

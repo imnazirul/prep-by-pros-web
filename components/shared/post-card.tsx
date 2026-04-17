@@ -73,7 +73,8 @@ export default function PostCard({
   const router = useRouter();
 
   const handleCardClick = () => {
-    const url = isCreator ? `/creator/profile/post/${post.id}` : `/post-details/${post.id}`;
+    const lockParam = post.is_lock ? '?locked=true' : '';
+    const url = isCreator ? `/creator/profile/post/${post.id}${lockParam}` : `/post-details/${post.id}${lockParam}`;
     router.push(url);
   };
 

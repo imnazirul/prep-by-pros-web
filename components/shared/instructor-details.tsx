@@ -114,9 +114,22 @@ export default function InstructorDetails({ slug }: { slug?: string }) {
       if (res.checkout_url) {
         router.push(res.checkout_url);
       }
-    } catch (error) {
-      console.error('Failed to create checkout session', error);
-      alert('Failed to initiate subscription. Please try again.');
+    } catch (err: any) {
+      console.error('Failed to create checkout session', err);
+      if (err.status === 401) {
+        alert('Please login to subscribe');
+        router.push('/login');
+      } else if (err.data?.coach_uid?.[0]) {
+        alert(err.data.coach_uid[0]);
+      } else if (err.data?.non_field_errors?.[0]) {
+        alert(err.data.non_field_errors[0]);
+      } else if (err.data?.detail) {
+        alert(err.data.detail);
+      } else if (err.data) {
+        alert(typeof err.data === 'string' ? err.data : JSON.stringify(err.data));
+      } else {
+        alert('Failed to initiate subscription. Please try again.');
+      }
     }
   };
 

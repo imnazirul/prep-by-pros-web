@@ -61,7 +61,7 @@ const OrderItemsRefund = ({
 
       handleConfirm(); // Show success modal
     } catch (error: any) {
-      console.error('Refund failed', error);
+      console.log('Refund failed', error);
       const errorMessage =
         error?.data?.error ||
         error?.data?.item_issue_reason?.[0] ||
