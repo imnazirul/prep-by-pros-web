@@ -14,7 +14,7 @@ export default function ShareProfilePage() {
 
   const qrRef = React.useRef<HTMLCanvasElement | null>(null);
 
-  const userId = user?.slug || user?.referral_code || 'user';
+  const userId = user?.username || user?.referral_code || 'user';
   const profileUrl = typeof window !== 'undefined' 
     ? `${window.location.origin}/profile/${userId}`
     : `https://prepbypros.com/profile/${userId}`;
@@ -37,7 +37,7 @@ export default function ShareProfilePage() {
         {/* QR Card - Left Column */}
         <div className="w-full md:w-auto order-2 xl:order-1 flex justify-center">
           <QRCard 
-            name={user?.first_name ? `${user.first_name} ${user.last_name || ''}` : 'User'} 
+            name={user?.first_name ? `${user.first_name}` : 'User'} 
             handle={ user?.username ||'user' } 
             avatarUrl={user?.image}
             value={profileUrl}
@@ -79,7 +79,7 @@ export default function ShareProfilePage() {
               <ActionButton 
                 icon="download_qr" 
                 label="Download" 
-                onClick={() => handleQRDownload(qrRef.current, user?.slug || 'profile')}
+                onClick={() => handleQRDownload(qrRef.current, user?.username || 'profile')}
               />
             </div>
           </div>

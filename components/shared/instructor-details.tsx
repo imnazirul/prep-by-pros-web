@@ -66,7 +66,6 @@ export default function InstructorDetails({ slug }: { slug?: string }) {
 
   if (!coach && meCoach) {
     const meSlugMatches =
-      meCoach.slug === slug ||
       meCoach.uid === slug ||
       meCoach.username === slug ||
       meCoach.username?.replace(/^#/, '') === slug;

@@ -53,7 +53,7 @@ export const authSlice = createSlice({
     ) => {
       const { access, ...userData } = action.payload;
       state.token = access;
-      state.user = userData;
+      state.user = userData as any;
       state.isAuthenticated = true;
 
       if (typeof window !== 'undefined') {
