@@ -1,7 +1,6 @@
 'use client';
 
 import { CustomInputBox } from '@/components/shared/custom-input';
-import RedirectingModal from '@/components/shared/redirecting-modal';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/lib/icon';
@@ -105,7 +104,6 @@ const LoginForm = () => {
     }
   };
 
-  const [modalVisible, setModalVisible] = useState(false);
 
   return (
     <>
@@ -195,11 +193,10 @@ const LoginForm = () => {
         {/* Sign Up Link */}
         <p className="text-black-7 text-lg">
           Don&apos;t have an account?{' '}
-          <Link href="#" onClick={() => setModalVisible(!modalVisible)} className="text-primary font-semibold hover:underline">
+          <Link href="/register" className="text-primary font-semibold hover:underline">
             Sign up
           </Link>
         </p>
-       {modalVisible && <RedirectingModal />}
       </div>
     </>
   );

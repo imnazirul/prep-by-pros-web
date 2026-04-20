@@ -126,7 +126,7 @@ const RedirectingModal = () => {
 
   useEffect(() => {
     // Open automaticallly on mount
-    const authRoutes = [ '/signup', '/forgot-password', '/'];
+    const authRoutes = ['/login', '/signup', '/forgot-password', '/'];
     if (!isAuthenticated && !authRoutes.includes(window.location.pathname)) {
       setOpen(true);
     }
@@ -232,7 +232,7 @@ const RedirectingModal = () => {
               <Icon name={'logo'} height={88} width={155} />
               <div className="space-y-8">
                 <div className="space-y-2">
-                  <DialogTitle>Verify before you sign up</DialogTitle>
+                  <DialogTitle>Verify your coach status</DialogTitle>
                   <DialogDescription>
                     Fill the form with required information to continue
                   </DialogDescription>
