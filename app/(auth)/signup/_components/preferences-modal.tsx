@@ -19,6 +19,7 @@ import {
 } from '@/redux/api/globalApi';
 import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
+import RedirectingModal from '@/components/shared/redirecting-modal';
 import 'react-range-slider-input/dist/style.css';
 
 const PreferenceModal = ({
@@ -40,6 +41,7 @@ const PreferenceModal = ({
   const [selectedPlayingStyles, setSelectedPlayingStyles] = useState<string[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [teamSearch, setTeamSearch] = useState('');
+  const [showVerification, setShowVerification] = useState(false);
 
   const router = useRouter();
   const [signup, { isLoading }] = useSignupMutation();
@@ -86,11 +88,11 @@ const PreferenceModal = ({
       console.log('user', res);
 
       if (roleSlug === 'COACH') {
-        router.push('/creator');
+        setShowVerification(true);
       } else {
         router.push('/login');
+        setOpenPreference(false);
       }
-      setOpenPreference(false);
     } catch (err) {
       console.error('Signup failed', err);
     }
@@ -103,6 +105,7 @@ const PreferenceModal = ({
   const teamsOptions = teamsData?.results || [];
 
   return (
+    <>
     <Dialog open={openPreference} onOpenChange={setOpenPreference}>
       <DialogContent className="sm:max-w-170" showCloseButton={false}>
         <div className="flex flex-col gap-10 max-h-[80vh] overflow-y-auto px-1">
@@ -177,6 +180,10 @@ const PreferenceModal = ({
         </div>
       </DialogContent>
     </Dialog>
+    {showVerification && (
+      <RedirectingModal initialOpen={true} initialStep="VERIFY" />
+    )}
+  </>
   );
 };
 

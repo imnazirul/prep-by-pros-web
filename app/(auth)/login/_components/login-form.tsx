@@ -193,7 +193,7 @@ const LoginForm = () => {
         {/* Sign Up Link */}
         <p className="text-black-7 text-lg">
           Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-primary font-semibold hover:underline">
+          <Link href="/select-role" className="text-primary font-semibold hover:underline">
             Sign up
           </Link>
         </p>

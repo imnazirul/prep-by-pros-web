@@ -3,7 +3,7 @@ import RedirectingModal from '@/components/shared/redirecting-modal';
 import AuthHeader from '../_components/auth-header';
 
 export const metadata: Metadata = {
-  title: 'Register',
+  title: 'Select Role',
 };
 
 export default function RegisterPage() {
