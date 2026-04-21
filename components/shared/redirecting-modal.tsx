@@ -22,9 +22,15 @@ type StepProp = 'LOADING' | 'ACCOUNT_TYPE' | 'VERIFY';
 import { selectIsAuthenticated } from '@/redux/features/authSlice';
 import { useAppSelector } from '@/redux/hooks';
 
-const RedirectingModal = () => {
-  const [step, setStep] = useState<StepProp>('ACCOUNT_TYPE');
-  const [open, setOpen] = useState(false);
+const RedirectingModal = ({
+  initialStep,
+  initialOpen = false,
+}: {
+  initialStep?: StepProp;
+  initialOpen?: boolean;
+}) => {
+  const [step, setStep] = useState<StepProp>(initialStep || 'ACCOUNT_TYPE');
+  const [open, setOpen] = useState(initialOpen);
   const [confirmModal, setConfirmModal] = useState(false);
   const [accountType, setAccountType] = useState<'player' | 'coach'>('player');
 
@@ -111,6 +117,9 @@ const RedirectingModal = () => {
         professional_level_slug: professionalLevel,
       };
 
+      // If we are already signed up (from external trigger), we might just want to show success
+      // Or we could call a verification endpoint if it existed.
+      // For now, let's assume we just want to show the success modal.
       const res = await signup(userData).unwrap();
 
       // Persist user data for UI if needed (though global state/cookie should handle auth)
@@ -126,7 +135,7 @@ const RedirectingModal = () => {
 
   useEffect(() => {
     // Open automaticallly on mount
-    const authRoutes = [ '/signup', '/forgot-password', '/'];
+    const authRoutes = ['/login', '/signup', '/forgot-password', '/'];
     if (!isAuthenticated && !authRoutes.includes(window.location.pathname)) {
       setOpen(true);
     }
@@ -212,11 +221,9 @@ const RedirectingModal = () => {
 
               <Button
                 onClick={() => {
-                  if (accountType === 'player') {
+                  if (accountType === 'player' || accountType === 'coach') {
                     setOpen(false);
                     router.push(`/signup?role=${accountType}`);
-                  } else {
-                    setStep('VERIFY');
                   }
                 }}
                 size={'lg'}
@@ -232,7 +239,7 @@ const RedirectingModal = () => {
               <Icon name={'logo'} height={88} width={155} />
               <div className="space-y-8">
                 <div className="space-y-2">
-                  <DialogTitle>Verify before you sign up</DialogTitle>
+                  <DialogTitle>Verify your coach status</DialogTitle>
                   <DialogDescription>
                     Fill the form with required information to continue
                   </DialogDescription>
@@ -419,7 +426,7 @@ const RedirectingModal = () => {
         title="Your details have confirmed!"
         buttonLabel="Go to mail"
         buttonAction={() => {
-          router.push('/signup');
+          router.push('/login');
           setConfirmModal(false);
         }}
         subTitle={
