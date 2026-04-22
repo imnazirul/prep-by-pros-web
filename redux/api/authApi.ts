@@ -506,6 +506,8 @@ export interface Player {
 
 export interface CheckoutRequest {
   coach_uid: string;
+  success_url?: string;
+  cancel_url?: string;
 }
 
 export interface CheckoutResponse {
@@ -679,17 +681,17 @@ export const authApi = createApi({
           first_name: userData.name,
           email: userData.email,
           password: userData.password,
-          role: userData.role || 'PLAYER', // Use provided role or default to PLAYER
-          club_slug: userData.club_slug,
-          sport_slug: userData.sport_slug,
-          playing_style_slug: userData.playing_style_slug,
-          professional_level_slug: userData.professional_level_slug,
-          referral_code: userData.referral_code,
-
-          ...getDeviceInfo(),
+          role: userData.role || 'PLAYER',
+          club_slug: userData.club_slug || '',
+          sport_slug: userData.sport_slug || '',
+          playing_style_slug: userData.playing_style_slug || '',
+          professional_level_slug: userData.professional_level_slug || '',
+          subscription_amount: userData.subscription_amount || '0',
+          ...(userData.referral_code ? { referral_code: userData.referral_code } : {}),
+          device_name: getDeviceInfo().device_name,
+          device_id: getDeviceInfo().device_id,
           location: 'unknown',
           ip_address: '0.0.0.0',
-          push_token: 'none',
         },
       }),
       invalidatesTags: ['User'],

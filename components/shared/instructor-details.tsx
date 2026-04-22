@@ -109,7 +109,13 @@ export default function InstructorDetails({ slug }: { slug?: string }) {
     if (!coach?.uid) return;
 
     try {
-      const res = await createCheckout({ coach_uid: coach.uid }).unwrap();
+      const success_url = `${window.location.origin}/my-subscriptions/success?session_id={CHECKOUT_SESSION_ID}`;
+      const cancel_url = window.location.href;
+      const res = await createCheckout({ 
+        coach_uid: coach.uid,
+        success_url,
+        cancel_url 
+      }).unwrap();
       if (res.checkout_url) {
         router.push(res.checkout_url);
       }

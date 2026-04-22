@@ -41,13 +41,15 @@ export default function RootLayout({
           <StoreProvider>
             <CartProvider>
               <PostDialogProvider>
-                <AuthGuard>{children}</AuthGuard>
+                <AuthGuard>
+                  {children}
+                </AuthGuard>
 
                 <PostDialog />
               </PostDialogProvider>
 
               <CartModal />
-              {/* <RedirectingModal /> */}
+              <RedirectingModal />
             </CartProvider>
           </StoreProvider>
         </Suspense>
