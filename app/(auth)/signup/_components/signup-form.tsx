@@ -7,12 +7,14 @@ import Icon from '@/lib/icon';
 import Link from 'next/link';
 import { useState } from 'react';
 import PreferenceModal from './preferences-modal';
+import RedirectingModal from '@/components/shared/redirecting-modal';
 // import { setCredentials } from '@/redux/features/authSlice';
 // import { useAppDispatch } from '@/redux/hooks';
 import { useSearchParams } from 'next/navigation';
 
 const SignUpForm = () => {
   const [openPreference, setOpenPreference] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
 
   const searchParams = useSearchParams();
   const role = searchParams.get('role') || 'PLAYER';
@@ -152,6 +154,12 @@ const SignUpForm = () => {
         userData={{ name, email, password }}
         role={role}
         referral_code={referral_code}
+        onCoachSignup={() => {
+          // No need to show local verification modal, 
+          // the global VerificationGuard will handle it 
+          // as soon as the user is logged in.
+          setOpenPreference(false);
+        }}
       />
     </>
   );

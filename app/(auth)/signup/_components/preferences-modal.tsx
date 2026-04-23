@@ -10,7 +10,9 @@ import {
 } from '@/components/ui/dialog';
 import Icon from '@/lib/icon';
 import { cn } from '@/lib/utils';
-import { useSignupMutation } from '@/redux/api/authApi';
+import { useSignupMutation, usePatchMeMutation } from '@/redux/api/authApi';
+import { useAppDispatch } from '@/redux/hooks';
+import { setCredentials } from '@/redux/features/authSlice';
 import {
   useGetClubsQuery,
   useGetPlayingStylesQuery,
@@ -22,18 +24,21 @@ import { Dispatch, SetStateAction, useState } from 'react';
 import RedirectingModal from '@/components/shared/redirecting-modal';
 import 'react-range-slider-input/dist/style.css';
 
+// Modal for selecting user preferences post-signup
 const PreferenceModal = ({
   openPreference,
   setOpenPreference,
   userData,
   role,
   referral_code,
+  onCoachSignup,
 }: {
   openPreference: boolean;
   setOpenPreference: Dispatch<SetStateAction<boolean>>;
   userData: { name: string; email: string; password: string };
   role: string;
   referral_code?: string;
+  onCoachSignup?: () => void;
 }) => {
   // Use slug arrays for selection
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
@@ -41,10 +46,12 @@ const PreferenceModal = ({
   const [selectedPlayingStyles, setSelectedPlayingStyles] = useState<string[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [teamSearch, setTeamSearch] = useState('');
-  const [showVerification, setShowVerification] = useState(false);
 
   const router = useRouter();
-  const [signup, { isLoading }] = useSignupMutation();
+  const dispatch = useAppDispatch();
+  const [signup, { isLoading: isSigningUp }] = useSignupMutation();
+  const [patchMe, { isLoading: isPatching }] = usePatchMeMutation();
+  const isLoading = isSigningUp || isPatching;
 
   // Fetch data
   const { data: sportsData } = useGetSportsQuery();
@@ -55,22 +62,17 @@ const PreferenceModal = ({
   // Helper to toggle selection by slug
   const toggleSelection = (
     slug: string,
-    current: string[],
     set: Dispatch<SetStateAction<string[]>>
   ) => {
-    if (current.includes(slug)) {
-      set(current.filter((s) => s !== slug));
-    } else {
-      set([...current, slug]);
-    }
+    set([slug]);
   };
 
   const handleSignup = async () => {
     try {
-      const finalSportSlug = selectedSports.join(',') || 'baseball';
-      const finalLevelSlug = selectedProfessionalLevels.join(',') || 'beginner';
-      const finalStyleSlug = selectedPlayingStyles.join(',') || 'forward';
-      const finalTeamSlug = selectedTeams.join(',') || 'real-madrid';
+      const finalSportSlug = selectedSports[0] || 'baseball';
+      const finalLevelSlug = selectedProfessionalLevels[0] || 'beginner';
+      const finalStyleSlug = selectedPlayingStyles[0] || 'forward';
+      const finalTeamSlug = selectedTeams[0] || 'real-madrid';
 
       const roleSlug = role ? role.toUpperCase() : 'PLAYER';
       // If role is an object in some contexts, ensure we treat it right, but here 'role' comes from prop.
@@ -85,11 +87,21 @@ const PreferenceModal = ({
         referral_code: referral_code || undefined,
       }).unwrap();
 
-      console.log('user', res);
+      // Store credentials (tokens and initial user data)
+      dispatch(setCredentials(res));
 
       if (roleSlug === 'COACH') {
-        setShowVerification(true);
+        onCoachSignup?.();
+        setOpenPreference(false);
       } else {
+        // For Players, update preferences via patchMe
+        const patchData = {
+          club_slug: finalTeamSlug,
+          sport_slug: finalSportSlug,
+          playing_style_slug: [finalStyleSlug], // Array as per report
+          professional_level_slug: finalLevelSlug,
+        };
+        await patchMe(patchData).unwrap();
         router.push('/login');
         setOpenPreference(false);
       }
@@ -118,25 +130,21 @@ const PreferenceModal = ({
             title="Sports"
             options={sportsOptions}
             selectedSlugs={selectedSports}
-            onSelect={(slug) => toggleSelection(slug, selectedSports, setSelectedSports)}
+            onSelect={(slug) => toggleSelection(slug, setSelectedSports)}
           />
 
           <FilterGroup
             title="Professional Level"
             options={levelsOptions}
             selectedSlugs={selectedProfessionalLevels}
-            onSelect={(slug) =>
-              toggleSelection(slug, selectedProfessionalLevels, setSelectedProfessionalLevels)
-            }
+            onSelect={(slug) => toggleSelection(slug, setSelectedProfessionalLevels)}
           />
 
           <FilterGroup
             title="Playing Style"
             options={stylesOptions}
             selectedSlugs={selectedPlayingStyles}
-            onSelect={(slug) =>
-              toggleSelection(slug, selectedPlayingStyles, setSelectedPlayingStyles)
-            }
+            onSelect={(slug) => toggleSelection(slug, setSelectedPlayingStyles)}
           />
 
           <div className="space-y-6">
@@ -159,7 +167,7 @@ const PreferenceModal = ({
                 return (
                   <button
                     key={team.slug}
-                    onClick={() => toggleSelection(team.slug, selectedTeams, setSelectedTeams)}
+                    onClick={() => toggleSelection(team.slug, setSelectedTeams)}
                     className={cn(
                       'flex h-14 cursor-pointer items-center gap-2 rounded-full px-8 text-lg hover:opacity-80 transition-colors',
                       isSelected
@@ -180,9 +188,7 @@ const PreferenceModal = ({
         </div>
       </DialogContent>
     </Dialog>
-    {showVerification && (
-      <RedirectingModal initialOpen={true} initialStep="VERIFY" />
-    )}
+    {/* No longer rendering RedirectingModal here, parent will handle it */}
   </>
   );
 };

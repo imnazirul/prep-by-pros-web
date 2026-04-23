@@ -8,12 +8,14 @@ import {
   useFacebookLoginMutation,
   useGoogleLoginMutation,
   useLoginMutation,
+  useGetMeMutation,
 } from '@/redux/api/authApi';
-import { setCredentials } from '@/redux/features/authSlice';
-import { useAppDispatch } from '@/redux/hooks';
+import { setCredentials, setUser } from '@/redux/features/authSlice';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import RedirectingModal from '@/components/shared/redirecting-modal';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -23,7 +25,9 @@ const LoginForm = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [login, { isLoading }] = useLoginMutation();
+  const [getMe, { isLoading: isFetchingMe }] = useGetMeMutation();
   const [errorMessage, setErrorMessage] = useState('');
+  const [showVerification, setShowVerification] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +41,7 @@ const LoginForm = () => {
         (typeof userData.role === 'object' && userData.role !== null
           ? userData.role.title
           : userData.role) || 'PLAYER';
+
       if (typeof role === 'string' && role.toUpperCase() === 'COACH') {
         router.push('/creator');
       } else {
@@ -183,10 +188,10 @@ const LoginForm = () => {
           onClick={handleSubmit}
           size={'lg'}
           type="submit"
-          disabled={isLoading || isGoogleLoading || isFacebookLoading}
+          disabled={isLoading || isFetchingMe || isGoogleLoading || isFacebookLoading}
           className="w-full justify-between"
         >
-          {isLoading ? 'Logging in...' : 'Log in'}
+          {isLoading || isFetchingMe ? 'Logging in...' : 'Log in'}
           <Icon name="chevron_arrow_right" height={24} width={24} />
         </Button>
 
@@ -198,6 +203,9 @@ const LoginForm = () => {
           </Link>
         </p>
       </div>
+      {showVerification && (
+        <RedirectingModal initialOpen={true} initialStep="VERIFY" />
+      )}
     </>
   );
 };

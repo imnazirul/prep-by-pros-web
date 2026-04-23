@@ -6,6 +6,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  isVerificationRequested: boolean;
   wishlistMap: Record<string, string>; // Maps content_slug to wishlist_uid
 }
 
@@ -19,6 +20,7 @@ const getInitialState = (): AuthState => {
           token,
           user: JSON.parse(user),
           isAuthenticated: true,
+          isVerificationRequested: localStorage.getItem('isVerificationRequested') === 'true',
           wishlistMap: {},
         };
       } catch (error) {
@@ -30,6 +32,7 @@ const getInitialState = (): AuthState => {
     user: null,
     token: null,
     isAuthenticated: false,
+    isVerificationRequested: false,
     wishlistMap: {},
   };
 };
@@ -90,6 +93,12 @@ export const authSlice = createSlice({
     removeWishlistItem: (state, action: PayloadAction<string>) => {
       delete state.wishlistMap[action.payload];
     },
+    setVerificationRequested: (state, action: PayloadAction<boolean>) => {
+      state.isVerificationRequested = action.payload;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('isVerificationRequested', action.payload.toString());
+      }
+    },
   },
 });
 
@@ -101,9 +110,11 @@ export const {
   setWishlist,
   addWishlistItem,
   removeWishlistItem,
+  setVerificationRequested,
 } = authSlice.actions;
 
 export const selectCurrentUser = (state: RootState) => state.auth.user;
 export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
+export const selectIsVerificationRequested = (state: RootState) => state.auth.isVerificationRequested;
 
 export default authSlice.reducer;

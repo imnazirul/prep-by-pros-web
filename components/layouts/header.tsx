@@ -11,6 +11,9 @@ import { Button } from '../ui/button';
 import { NotificationDropdown } from './header-notification';
 import HeaderProfile from './header-profile';
 import HeaderSearch from './header-search';
+import { useRetrieveMeQuery } from '@/redux/api/authApi';
+import { selectCurrentUser } from '@/redux/features/authSlice';
+import { useAppSelector } from '@/redux/hooks';
 
 const playerNavItems = [
   { label: 'Home', href: '/' },
@@ -32,10 +35,16 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
+  const token = useAppSelector((state) => state.auth.token);
+  const { data: userData } = useRetrieveMeQuery(undefined, { skip: !token });
+  const currentUser = useAppSelector(selectCurrentUser);
+  const [mounted, setMounted] = useState(false);
+
   // Logic to check if the user is in the creator section
   const isCreatorSection = pathname.startsWith('/creator');
 
   useEffect(() => {
+    setMounted(true);
     const handleScroll = () => {
       setScrolled(window.scrollY > 0);
     };
@@ -43,7 +52,10 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = isCreatorSection ? creatorNavItems : playerNavItems;
+  const user = mounted ? userData || currentUser : null;
+  const isCoach = user?.role?.title?.toUpperCase() === 'COACH';
+
+  const navItems = isCoach || isCreatorSection ? creatorNavItems : playerNavItems;
 
   return (
     <header
@@ -99,7 +111,7 @@ export function Header() {
         <div className="flex items-center gap-4">
           <HeaderSearch />
 
-          {isCreatorSection && (
+          {(isCoach || isCreatorSection) && (
             <Button onClick={() => openPostDialog()} className="h-13">
               <Icon name="plus_sign" height={24} width={24} />
               Add new post

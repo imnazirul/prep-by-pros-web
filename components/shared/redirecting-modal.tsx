@@ -2,41 +2,54 @@
 'use client';
 
 import Icon from '@/lib/icon';
-import { useSignupMutation } from '@/redux/api/authApi';
+import { useSignupMutation, usePatchMeMutation, useGetMeMutation, useSendOtpMutation, useVerifyOtpMutation } from '@/redux/api/authApi';
 import {
   useGetClubsQuery,
   useGetPlayingStylesQuery,
   useGetProfessionalLevelsQuery,
   useGetSportsQuery,
+  useUploadFileMutation,
 } from '@/redux/api/globalApi';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import Circle3DLoader from './circle-loader';
 import ConfirmModal from './confirm-modal';
 import { CustomInputBox, CustomSelectBox } from './custom-input';
 
-type StepProp = 'LOADING' | 'ACCOUNT_TYPE' | 'VERIFY';
+type StepProp = 'LOADING' | 'ACCOUNT_TYPE' | 'VERIFY' | 'OTP';
 
-import { selectIsAuthenticated } from '@/redux/features/authSlice';
-import { useAppSelector } from '@/redux/hooks';
+import { selectCurrentUser, selectIsAuthenticated, selectIsVerificationRequested, setVerificationRequested, setUser } from '@/redux/features/authSlice';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 
 const RedirectingModal = ({
   initialStep,
   initialOpen = false,
+  isDismissible = true,
 }: {
   initialStep?: StepProp;
   initialOpen?: boolean;
+  isDismissible?: boolean;
 }) => {
   const [step, setStep] = useState<StepProp>(initialStep || 'ACCOUNT_TYPE');
   const [open, setOpen] = useState(initialOpen);
   const [confirmModal, setConfirmModal] = useState(false);
+  const [confirmType, setConfirmType] = useState<'REQUEST_SUCCESS' | 'WAITING' | 'CONFIRMED' | null>(null);
   const [accountType, setAccountType] = useState<'player' | 'coach'>('player');
 
   const router = useRouter();
-  const [signup, { isLoading }] = useSignupMutation();
+  const dispatch = useAppDispatch();
+  const [signup, { isLoading: isSigningUp }] = useSignupMutation();
+  const [patchMe, { isLoading: isPatching }] = usePatchMeMutation();
+  const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation();
+  const [getMe, { isLoading: isFetchingMe }] = useGetMeMutation();
+  const [sendOtp, { isLoading: isSendingOtp }] = useSendOtpMutation();
+  const [verifyOtp, { isLoading: isVerifyingOtp }] = useVerifyOtpMutation();
+  const isLoading = isSigningUp || isPatching || isUploading || isFetchingMe || isSendingOtp || isVerifyingOtp;
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const currentUser = useAppSelector(selectCurrentUser);
+  const isVerificationRequested = useAppSelector(selectIsVerificationRequested);
 
   // Dynamic Data Fetching
   const { data: clubsData } = useGetClubsQuery();
@@ -52,7 +65,16 @@ const RedirectingModal = ({
   const [club, setClub] = useState('');
   const [playingStyle, setPlayingStyle] = useState('');
   const [professionalLevel, setProfessionalLevel] = useState('');
+  const [subscriptionAmount, setSubscriptionAmount] = useState('');
   const [images, setImages] = useState<File[]>([]);
+  const [otp, setOtp] = useState('');
+
+  useEffect(() => {
+    if (currentUser) {
+      setName(currentUser.first_name || '');
+      setEmail(currentUser.email || '');
+    }
+  }, [currentUser]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -111,49 +133,151 @@ const RedirectingModal = ({
         email,
         password,
         role: accountType.toUpperCase(),
-        club_slug: club, // Assuming value matches backend requirement
+        club_slug: club, 
         sport_slug: sport,
         playing_style_slug: playingStyle,
         professional_level_slug: professionalLevel,
+        subscription_amount: subscriptionAmount,
       };
 
-      // If we are already signed up (from external trigger), we might just want to show success
-      // Or we could call a verification endpoint if it existed.
-      // For now, let's assume we just want to show the success modal.
-      const res = await signup(userData).unwrap();
+      if (step === 'VERIFY') {
+        let userUid = currentUser?.uid;
 
-      // Persist user data for UI if needed (though global state/cookie should handle auth)
-      // For now relying on modal state variables for the success message
+        // Fetch user data if UID is missing
+        if (!userUid) {
+          const userRes = await getMe({}).unwrap();
+          userUid = userRes.uid;
+        }
 
-      setOpen(false);
-      setConfirmModal(true);
+        const updateData = {
+          first_name: name,
+          email: email,
+          club_slug: club,
+          sport_slug: sport,
+          playing_style_slug: playingStyle,
+          professional_level_slug: professionalLevel,
+          subscription_amount: subscriptionAmount,
+        };
+        await patchMe(updateData).unwrap();
+
+        // Handle Image Uploads
+        if (images.length > 0) {
+          for (const image of images) {
+            const formData = new FormData();
+            formData.append('file', image);
+            if (userUid) {
+              formData.append('user_uid', userUid);
+            }
+            await uploadFile(formData).unwrap();
+          }
+        }
+        dispatch(setVerificationRequested(true));
+        // Show initial success modal before OTP
+        setConfirmType('REQUEST_SUCCESS');
+        setConfirmModal(true);
+        setOpen(false);
+      } else {
+        const res = (await signup(userData).unwrap()) as any;
+        if (res.requires_otp) {
+          setStep('OTP');
+        } else {
+          setConfirmType('CONFIRMED');
+          setConfirmModal(true);
+          setOpen(false);
+        }
+      }
     } catch (error) {
-      console.error('Signup failed:', error);
+      console.error('Signup/Verification failed:', error);
       setErrorMessage(parseErrorMessage(error));
+    }
+  };
+ 
+  const handleVerifyOtp = async () => {
+    setErrorMessage('');
+    try {
+      await verifyOtp({
+        email,
+        otp,
+        location: 'unknown', // Web fallback
+      }).unwrap();
+ 
+      // Refresh user data after verification
+      await getMe({}).unwrap();
+ 
+      setConfirmType('WAITING');
+      setConfirmModal(true);
+      setOpen(false);
+    } catch (error) {
+      console.error('OTP verification failed:', error);
+      setErrorMessage(parseErrorMessage(error));
+    }
+  };
+ 
+  const handleProceedToOtp = async () => {
+    try {
+      await sendOtp({ email }).unwrap();
+      setConfirmModal(false);
+      setStep('OTP');
+      setOpen(true);
+    } catch (error) {
+      setErrorMessage('Failed to send OTP. Please try again.');
     }
   };
 
   useEffect(() => {
-    // Open automaticallly on mount
-    const authRoutes = ['/login', '/signup', '/forgot-password', '/'];
-    if (!isAuthenticated && !authRoutes.includes(window.location.pathname)) {
-      setOpen(true);
+    // Auto-open for unverified coaches
+    if (isAuthenticated && currentUser) {
+      const roleTitle = typeof currentUser.role === 'object' ? currentUser.role?.title : currentUser.role;
+      const isCoach = roleTitle?.toString().toUpperCase() === 'COACH';
+      const isUnverified = !currentUser.is_email_verified;
+
+      if (isCoach && isUnverified) {
+        setOpen(true);
+        if (isVerificationRequested) {
+          setStep('OTP');
+        } else {
+          setStep('VERIFY');
+        }
+        return; // Don't run other open logic
+      }
     }
 
-    // setTimeout(() => {
-    //   if (step == 'LOADING') {
-    //     setStep('ACCOUNT_TYPE');
-    //   }
-    // }, 3000);
+    if (initialOpen) {
+      setOpen(true);
+    } else if (!isAuthenticated) {
+      const authRoutes = ['/login', '/signup', '/forgot-password', '/'];
+      if (!authRoutes.includes(window.location.pathname)) {
+        setOpen(true);
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
+  }, [isAuthenticated, currentUser]);
 
-  if (isAuthenticated) return null;
+
+  const roleTitle = typeof currentUser?.role === 'object' ? currentUser?.role?.title : currentUser?.role;
+  const isEnforced = 
+    isAuthenticated && 
+    roleTitle?.toString().toUpperCase() === 'COACH' && 
+    !currentUser?.is_email_verified;
+
+  useEffect(() => {
+    if (currentUser?.is_email_verified && isVerificationRequested) {
+      dispatch(setVerificationRequested(false));
+    }
+  }, [currentUser, isVerificationRequested, dispatch]);
+
+  const finalDismissible = isDismissible && !isEnforced;
 
   return (
     <>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent showCloseButton={false} className="w-full gap-0 sm:max-w-170">
+      <Dialog open={open} onOpenChange={(val) => finalDismissible && setOpen(val)}>
+        <DialogContent 
+          showCloseButton={false} 
+          className="w-full gap-0 sm:max-w-170"
+          onPointerDownOutside={(e) => !finalDismissible && e.preventDefault()}
+          onEscapeKeyDown={(e) => !finalDismissible && e.preventDefault()}
+        >
+          <DialogTitle className="hidden">Verification</DialogTitle>
           {step === 'LOADING' ? (
             <div className="flex flex-col items-center justify-center lg:py-6">
               <Icon name={'logo'} height={88} width={155} />
@@ -239,7 +363,7 @@ const RedirectingModal = ({
               <Icon name={'logo'} height={88} width={155} />
               <div className="space-y-8">
                 <div className="space-y-2">
-                  <DialogTitle>Verify your coach status</DialogTitle>
+                  <DialogTitle>Verify before you sign up</DialogTitle>
                   <DialogDescription>
                     Fill the form with required information to continue
                   </DialogDescription>
@@ -261,7 +385,7 @@ const RedirectingModal = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
-                  <CustomInputBox
+                  {/* <CustomInputBox
                     icon="lock_password"
                     label="Password"
                     placeholder="Password"
@@ -269,7 +393,7 @@ const RedirectingModal = ({
                     value={password}
                     isPassword
                     onChange={(e) => setPassword(e.target.value)}
-                  />
+                  /> */}
                   <CustomSelectBox
                     icon="honour_star"
                     label="Club"
@@ -298,12 +422,21 @@ const RedirectingModal = ({
                   />
 
                   <CustomSelectBox
-                    icon="honour_star" // Reusing an icon or need a new one
+                    icon="honour_star"
                     label="Professional Level"
                     placeholder="Select here"
                     options={mapOptions(professionalLevelsData)}
                     value={professionalLevel}
                     setValue={setProfessionalLevel}
+                  />
+
+                  <CustomInputBox
+                    icon="dollar_circle"
+                    label="Subscription Amount (Monthly)"
+                    placeholder="0 USD"
+                    type="text"
+                    value={subscriptionAmount}
+                    onChange={(e) => setSubscriptionAmount(e.target.value)}
                   />
                 </div>
                 <div>
@@ -372,72 +505,113 @@ const RedirectingModal = ({
                 <Icon name="chevron_arrow_right" height={24} width={24} />
               </Button>
             </div>
+          ) : step === 'OTP' ? (
+            <div className="flex flex-col gap-10">
+              <Icon name={'logo'} height={88} width={155} />
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <DialogTitle>Verify your email</DialogTitle>
+                  <DialogDescription>
+                    Enter the 6-digit code we sent to{' '}
+                    <span className="text-black-10 font-medium">{email}</span>
+                  </DialogDescription>
+                </div>
+ 
+                <div className="flex flex-col gap-4">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      maxLength={6}
+                      placeholder="000000"
+                      className="text-black-10 placeholder:text-black-5 h-15 w-full rounded-2xl border border-black-2 bg-transparent px-5 text-center text-2xl font-semibold tracking-widest outline-none focus:border-primary"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
+                    />
+                  </div>
+ 
+                  <div className="flex justify-between text-sm">
+                    <p className="text-black-7">Didn&apos;t get it?</p>
+                    <button
+                      onClick={() => sendOtp({ email })}
+                      className="text-primary font-medium hover:underline"
+                      disabled={isSendingOtp}
+                    >
+                      {isSendingOtp ? 'Sending...' : 'Resend OTP'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+ 
+              {errorMessage && (
+                <div className="rounded-md bg-red-50 p-3 text-sm text-red-500">{errorMessage}</div>
+              )}
+ 
+              <Button
+                onClick={handleVerifyOtp}
+                size={'lg'}
+                className="w-full justify-between"
+                disabled={otp.length !== 6 || isLoading}
+              >
+                {isLoading ? 'Verifying...' : 'Verify Code'}
+                <Icon name="chevron_arrow_right" height={24} width={24} />
+              </Button>
+            </div>
           ) : (
             ''
           )}
         </DialogContent>
       </Dialog>
-
-      {/* Email Sent Modal */}
-      {/* <ConfirmModal
-        icon="happy_image"
-        iconWidth={398}
-        iconHeight={340}
-        open={confirmModal}
-        setOpen={setConfirmModal}
-        title="Request successful!"
-        buttonLabel="Go to mail"
-        buttonAction={() => {
-          router.push('/');
-          setConfirmModal(false);
-        }}
-        subTitle={
-          <>
-            Thank you for your request we’ve sent a mail to{' '}
-            <span className="text-[#38BDF8]">andrewhierholze@gmail.com</span>
-          </>
-        }
-      /> */}
-
-      {/* Email Wating Modal */}
-
-      {/* <ConfirmModal
-        icon="waiting_image"
-        iconWidth={477}
-        iconHeight={343}
-        open={confirmModal}
-        setOpen={setConfirmModal}
-        title="We’re confirming your details!"
-        buttonLabel="Go to mail"
-        buttonAction={() => {
-          router.push('/');
-          setConfirmModal(false);
-        }}
-        subTitle="It usually takes between 5 minutes to 24 hours we’ll send confirmation a mail after verification"
-      /> */}
-
-      {/* Confirmed Modal */}
+ 
       <ConfirmModal
-        icon="confirm_image"
-        iconWidth={480}
-        iconHeight={320}
         open={confirmModal}
         setOpen={setConfirmModal}
-        title="Your details have confirmed!"
-        buttonLabel="Go to mail"
-        buttonAction={() => {
-          router.push('/login');
-          setConfirmModal(false);
-        }}
+        icon={
+          confirmType === 'REQUEST_SUCCESS'
+            ? 'happy_image'
+            : confirmType === 'WAITING'
+              ? 'waiting_image'
+              : 'confirm_image'
+        }
+        iconWidth={
+          confirmType === 'REQUEST_SUCCESS' ? 398 : confirmType === 'WAITING' ? 477 : 480
+        }
+        iconHeight={
+          confirmType === 'REQUEST_SUCCESS' ? 340 : confirmType === 'WAITING' ? 343 : 320
+        }
+        title={
+          confirmType === 'REQUEST_SUCCESS'
+            ? 'Request successful!'
+            : confirmType === 'WAITING'
+              ? 'We’re confirming your details!'
+              : 'Your details have confirmed!'
+        }
+        buttonLabel={confirmType === 'REQUEST_SUCCESS' ? 'Continue to verify' : 'Back to home'}
+        buttonAction={
+          confirmType === 'REQUEST_SUCCESS'
+            ? handleProceedToOtp
+            : () => {
+                router.push('/');
+                setConfirmModal(false);
+              }
+        }
         subTitle={
-          <>
-            Congratulations <span className="text-black-10 font-medium">{name}</span>, we’ve
-            confirmed your details. Now you can go further to sign up
-          </>
+          confirmType === 'REQUEST_SUCCESS' ? (
+            <>
+              Thank you for your request we’ve sent a mail to{' '}
+              <span className="text-[#38BDF8]">{email}</span>
+            </>
+          ) : confirmType === 'WAITING' ? (
+            'It usually takes between 5 minutes to 24 hours we’ll send confirmation a mail after verification'
+          ) : (
+            <>
+              Congratulations <span className="text-black-10 font-medium">{name}</span>, we’ve
+              confirmed your details. Now you can go further to sign up
+            </>
+          )
         }
       />
     </>
   );
 };
-
+ 
 export default RedirectingModal;
