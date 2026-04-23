@@ -231,7 +231,7 @@ const RedirectingModal = ({
       const isCoach = roleTitle?.toString().toUpperCase() === 'COACH';
       const isUnverified = !currentUser.is_email_verified;
 
-      if (isCoach && isUnverified) {
+      if (isCoach && isUnverified && window.location.pathname !== '/select-role') {
         setOpen(true);
         if (isVerificationRequested) {
           setStep('OTP');
@@ -245,7 +245,7 @@ const RedirectingModal = ({
     if (initialOpen) {
       setOpen(true);
     } else if (!isAuthenticated) {
-      const authRoutes = ['/login', '/signup', '/forgot-password', '/'];
+      const authRoutes = ['/login', '/signup', '/forgot-password', '/', '/select-role'];
       if (!authRoutes.includes(window.location.pathname)) {
         setOpen(true);
       }
@@ -565,6 +565,7 @@ const RedirectingModal = ({
       <ConfirmModal
         open={confirmModal}
         setOpen={setConfirmModal}
+        isDismissible={finalDismissible}
         icon={
           confirmType === 'REQUEST_SUCCESS'
             ? 'happy_image'
