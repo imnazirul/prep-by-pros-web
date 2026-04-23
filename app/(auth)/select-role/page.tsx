@@ -13,7 +13,7 @@ export default function RegisterPage() {
         title="Join Prep by Pros"
         subTitle="Select your role to get started with the best sports training platform"
       />
-      <RedirectingModal />
+      <RedirectingModal isDismissible={false} initialOpen={true} />
     </div>
   );
 }

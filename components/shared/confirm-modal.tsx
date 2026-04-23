@@ -19,6 +19,7 @@ const ConfirmModal = ({
   subTitle,
   buttonLabel,
   buttonAction,
+  isDismissible = true,
 }: {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
@@ -29,13 +30,16 @@ const ConfirmModal = ({
   subTitle: string | ReactNode;
   buttonLabel?: string;
   buttonAction?: () => void;
+  isDismissible?: boolean;
 }) => {
   const router = useRouter();
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={isDismissible ? setOpen : undefined}>
       <DialogContent
         showCloseButton={false}
         className="w-full gap-0 sm:max-w-170"
+        onPointerDownOutside={(e) => !isDismissible && e.preventDefault()}
+        onEscapeKeyDown={(e) => !isDismissible && e.preventDefault()}
       >
         <div className="mb-10 flex flex-col items-center justify-center md:mb-15">
           <Icon
