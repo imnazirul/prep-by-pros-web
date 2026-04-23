@@ -13,14 +13,14 @@ import {
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '../ui/dialog';
 import Circle3DLoader from './circle-loader';
 import ConfirmModal from './confirm-modal';
 import { CustomInputBox, CustomSelectBox } from './custom-input';
 
 type StepProp = 'LOADING' | 'ACCOUNT_TYPE' | 'VERIFY' | 'OTP';
 
-import { selectCurrentUser, selectIsAuthenticated, selectIsVerificationRequested, setVerificationRequested, setUser } from '@/redux/features/authSlice';
+import { selectCurrentUser, selectIsAuthenticated, selectIsVerificationRequested, setVerificationRequested } from '@/redux/features/authSlice';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 
 const RedirectingModal = ({
@@ -60,7 +60,7 @@ const RedirectingModal = ({
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
+  const [password] = useState('');
   const [sport, setSport] = useState('');
   const [club, setClub] = useState('');
   const [playingStyle, setPlayingStyle] = useState('');
@@ -219,7 +219,7 @@ const RedirectingModal = ({
       setConfirmModal(false);
       setStep('OTP');
       setOpen(true);
-    } catch (error) {
+    } catch {
       setErrorMessage('Failed to send OTP. Please try again.');
     }
   };
