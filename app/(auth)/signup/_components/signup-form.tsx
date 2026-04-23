@@ -40,8 +40,12 @@ const SignUpForm = () => {
       return;
     }
 
-    // Proceed to preferences
-    setOpenPreference(true);
+    // Proceed to preferences or verification
+    if (role === 'COACH') {
+      setShowVerification(true);
+    } else {
+      setOpenPreference(true);
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -160,6 +164,13 @@ const SignUpForm = () => {
           // as soon as the user is logged in.
           setOpenPreference(false);
         }}
+      />
+
+      <RedirectingModal
+        initialOpen={showVerification}
+        initialStep="VERIFY"
+        isDismissible={true}
+        initialUserData={{ name, email, password }}
       />
     </>
   );

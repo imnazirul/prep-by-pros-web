@@ -27,10 +27,16 @@ const RedirectingModal = ({
   initialStep,
   initialOpen = false,
   isDismissible = true,
+  initialUserData,
 }: {
   initialStep?: StepProp;
   initialOpen?: boolean;
   isDismissible?: boolean;
+  initialUserData?: {
+    name: string;
+    email: string;
+    password?: string;
+  };
 }) => {
   const [step, setStep] = useState<StepProp>(initialStep || 'ACCOUNT_TYPE');
   const [open, setOpen] = useState(initialOpen);
@@ -57,10 +63,10 @@ const RedirectingModal = ({
   const { data: playingStylesData } = useGetPlayingStylesQuery();
   const { data: professionalLevelsData } = useGetProfessionalLevelsQuery();
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(initialUserData?.email || '');
   const [errorMessage, setErrorMessage] = useState('');
-  const [name, setName] = useState('');
-  const [password] = useState('');
+  const [name, setName] = useState(initialUserData?.name || '');
+  const [password] = useState(initialUserData?.password || '');
   const [sport, setSport] = useState('');
   const [club, setClub] = useState('');
   const [playingStyle, setPlayingStyle] = useState('');
@@ -68,6 +74,13 @@ const RedirectingModal = ({
   const [subscriptionAmount, setSubscriptionAmount] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [otp, setOtp] = useState('');
+
+  useEffect(() => {
+    if (initialUserData) {
+      setName(initialUserData.name);
+      setEmail(initialUserData.email);
+    }
+  }, [initialUserData]);
 
   useEffect(() => {
     if (currentUser) {
