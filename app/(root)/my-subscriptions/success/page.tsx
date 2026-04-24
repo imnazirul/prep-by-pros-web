@@ -21,6 +21,15 @@ function SubscriptionVerificationContent() {
         .unwrap()
         .then(() => {
           setStatus('success');
+          if (typeof window !== 'undefined') {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+              // Fallback for browsers that might block the immediate redirect
+              setTimeout(() => {
+                window.location.href = 'prepbypros://subscription/success';
+              }, 100);
+            }
+          }
         })
         .catch((error) => {
           setStatus('error');
