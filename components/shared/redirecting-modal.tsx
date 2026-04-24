@@ -20,23 +20,31 @@ import { CustomInputBox, CustomSelectBox } from './custom-input';
 
 type StepProp = 'LOADING' | 'ACCOUNT_TYPE' | 'VERIFY' | 'OTP';
 
-import { selectCurrentUser, selectIsAuthenticated, selectIsVerificationRequested, setVerificationRequested } from '@/redux/features/authSlice';
+import { selectCurrentUser, selectIsAuthenticated, selectIsVerificationRequested, setVerificationRequested, setCredentials } from '@/redux/features/authSlice';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 
 const RedirectingModal = ({
   initialStep,
   initialOpen = false,
   isDismissible = true,
+  initialUserData,
+  initialAccountType = 'player',
 }: {
   initialStep?: StepProp;
   initialOpen?: boolean;
   isDismissible?: boolean;
+  initialUserData?: {
+    name: string;
+    email: string;
+    password?: string;
+  };
+  initialAccountType?: 'player' | 'coach';
 }) => {
   const [step, setStep] = useState<StepProp>(initialStep || 'ACCOUNT_TYPE');
   const [open, setOpen] = useState(initialOpen);
   const [confirmModal, setConfirmModal] = useState(false);
   const [confirmType, setConfirmType] = useState<'REQUEST_SUCCESS' | 'WAITING' | 'CONFIRMED' | null>(null);
-  const [accountType, setAccountType] = useState<'player' | 'coach'>('player');
+  const [accountType, setAccountType] = useState<'player' | 'coach'>(initialAccountType);
 
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -57,10 +65,10 @@ const RedirectingModal = ({
   const { data: playingStylesData } = useGetPlayingStylesQuery();
   const { data: professionalLevelsData } = useGetProfessionalLevelsQuery();
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(initialUserData?.email || '');
   const [errorMessage, setErrorMessage] = useState('');
-  const [name, setName] = useState('');
-  const [password] = useState('');
+  const [name, setName] = useState(initialUserData?.name || '');
+  const [password] = useState(initialUserData?.password || '');
   const [sport, setSport] = useState('');
   const [club, setClub] = useState('');
   const [playingStyle, setPlayingStyle] = useState('');
@@ -68,6 +76,13 @@ const RedirectingModal = ({
   const [subscriptionAmount, setSubscriptionAmount] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [otp, setOtp] = useState('');
+
+  useEffect(() => {
+    if (initialUserData) {
+      setName(initialUserData.name);
+      setEmail(initialUserData.email);
+    }
+  }, [initialUserData]);
 
   useEffect(() => {
     if (currentUser) {
@@ -128,66 +143,42 @@ const RedirectingModal = ({
   const handleSignUp = async () => {
     setErrorMessage('');
     try {
-      const userData = {
-        name,
-        email,
-        password,
-        role: accountType.toUpperCase(),
-        club_slug: club, 
-        sport_slug: sport,
-        playing_style_slug: playingStyle,
-        professional_level_slug: professionalLevel,
-        subscription_amount: subscriptionAmount,
+      // Fetch user data if UID is missing
+      let userUid = currentUser?.uid;
+      if (!userUid) {
+        const userRes = await getMe({}).unwrap();
+        userUid = userRes.uid;
+      }
+
+      const updateData = {
+        first_name: name,
+        email: email,
+        club_slug: club || 'real-madrid',
+        sport_slug: sport || 'baseball',
+        playing_style_slug: playingStyle || 'forward',
+        professional_level_slug: professionalLevel || 'beginner',
+        subscription_amount: subscriptionAmount || '0',
       };
+      await patchMe(updateData).unwrap();
 
-      if (step === 'VERIFY') {
-        let userUid = currentUser?.uid;
-
-        // Fetch user data if UID is missing
-        if (!userUid) {
-          const userRes = await getMe({}).unwrap();
-          userUid = userRes.uid;
-        }
-
-        const updateData = {
-          first_name: name,
-          email: email,
-          club_slug: club,
-          sport_slug: sport,
-          playing_style_slug: playingStyle,
-          professional_level_slug: professionalLevel,
-          subscription_amount: subscriptionAmount,
-        };
-        await patchMe(updateData).unwrap();
-
-        // Handle Image Uploads
-        if (images.length > 0) {
-          for (const image of images) {
-            const formData = new FormData();
-            formData.append('file', image);
-            if (userUid) {
-              formData.append('user_uid', userUid);
-            }
-            await uploadFile(formData).unwrap();
+      // Handle Image Uploads
+      if (images.length > 0) {
+        for (const image of images) {
+          const formData = new FormData();
+          formData.append('file', image);
+          if (userUid) {
+            formData.append('user_uid', userUid);
           }
-        }
-        dispatch(setVerificationRequested(true));
-        // Show initial success modal before OTP
-        setConfirmType('REQUEST_SUCCESS');
-        setConfirmModal(true);
-        setOpen(false);
-      } else {
-        const res = (await signup(userData).unwrap()) as any;
-        if (res.requires_otp) {
-          setStep('OTP');
-        } else {
-          setConfirmType('CONFIRMED');
-          setConfirmModal(true);
-          setOpen(false);
+          await uploadFile(formData).unwrap();
         }
       }
+      
+      dispatch(setVerificationRequested(true));
+      setConfirmType('REQUEST_SUCCESS');
+      setConfirmModal(true);
+      setOpen(false);
     } catch (error) {
-      console.error('Signup/Verification failed:', error);
+      console.error('Verification failed:', error);
       setErrorMessage(parseErrorMessage(error));
     }
   };
@@ -232,17 +223,19 @@ const RedirectingModal = ({
       const isUnverified = !currentUser.is_email_verified;
 
       if (isCoach && isUnverified && window.location.pathname !== '/select-role') {
-        setOpen(true);
-        if (isVerificationRequested) {
-          setStep('OTP');
-        } else {
-          setStep('VERIFY');
+        if (!confirmModal) {
+          setOpen(true);
+          if (isVerificationRequested) {
+            setStep('OTP');
+          } else {
+            setStep('VERIFY');
+          }
         }
         return; // Don't run other open logic
       }
     }
 
-    if (initialOpen) {
+    if (initialOpen && !confirmModal) {
       setOpen(true);
     } else if (!isAuthenticated) {
       const authRoutes = ['/login', '/signup', '/forgot-password', '/', '/select-role'];
@@ -251,7 +244,7 @@ const RedirectingModal = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, currentUser]);
+  }, [isAuthenticated, currentUser, confirmModal]);
 
 
   const roleTitle = typeof currentUser?.role === 'object' ? currentUser?.role?.title : currentUser?.role;
@@ -363,7 +356,7 @@ const RedirectingModal = ({
               <Icon name={'logo'} height={88} width={155} />
               <div className="space-y-8">
                 <div className="space-y-2">
-                  <DialogTitle>Verify before you sign up</DialogTitle>
+                  <DialogTitle>Verify your coach status</DialogTitle>
                   <DialogDescription>
                     Fill the form with required information to continue
                   </DialogDescription>

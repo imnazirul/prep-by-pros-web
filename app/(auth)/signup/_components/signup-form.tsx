@@ -8,9 +8,10 @@ import Link from 'next/link';
 import { useState } from 'react';
 import PreferenceModal from './preferences-modal';
 import RedirectingModal from '@/components/shared/redirecting-modal';
-// import { setCredentials } from '@/redux/features/authSlice';
-// import { useAppDispatch } from '@/redux/hooks';
-import { useSearchParams } from 'next/navigation';
+import { setCredentials } from '@/redux/features/authSlice';
+import { useAppDispatch } from '@/redux/hooks';
+import { useSignupMutation } from '@/redux/api/authApi';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 const SignUpForm = () => {
   const [openPreference, setOpenPreference] = useState(false);
@@ -26,9 +27,9 @@ const SignUpForm = () => {
   const [rePassword, setRePassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
 
-  // const router = useRouter();
-  // const dispatch = useAppDispatch();
-  // const [signup, { isLoading }] = useSignupMutation();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const [signup, { isLoading }] = useSignupMutation();
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,8 +41,30 @@ const SignUpForm = () => {
       return;
     }
 
-    // Proceed to preferences
-    setOpenPreference(true);
+    // Proceed to preferences or verification
+    if (role.trim().toUpperCase() === 'COACH') {
+      try {
+        const res = await signup({
+          name: name,
+          email: email,
+          password: password,
+          role: 'COACH',
+          club_slug: 'pga-tour',
+          sport_slug: 'basketball-men',
+          playing_style_slug: 'goalkeeper',
+          professional_level_slug: 'current-college',
+          subscription_amount: '0',
+          referral_code: referral_code || undefined,
+        }).unwrap();
+
+        // Signup successful, redirect to login page
+        router.push('/login');
+      } catch (err: any) {
+        setErrorMessage(err?.data?.detail || err?.data?.email?.[0] || 'Signup failed');
+      }
+    } else {
+      setOpenPreference(true);
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -148,19 +171,31 @@ const SignUpForm = () => {
         </p>
       </div>
 
-      <PreferenceModal
-        setOpenPreference={setOpenPreference}
-        openPreference={openPreference}
-        userData={{ name, email, password }}
-        role={role}
-        referral_code={referral_code}
-        onCoachSignup={() => {
-          // No need to show local verification modal, 
-          // the global VerificationGuard will handle it 
-          // as soon as the user is logged in.
-          setOpenPreference(false);
-        }}
-      />
+      {role.trim().toUpperCase() !== 'COACH' && (
+        <PreferenceModal
+          setOpenPreference={setOpenPreference}
+          openPreference={openPreference}
+          userData={{ name, email, password }}
+          role={role}
+          referral_code={referral_code}
+          onCoachSignup={() => {
+            // No need to show local verification modal, 
+            // the global VerificationGuard will handle it 
+            // as soon as the user is logged in.
+            setOpenPreference(false);
+          }}
+        />
+      )}
+
+      {showVerification && (
+        <RedirectingModal
+          initialOpen={true}
+          initialStep="VERIFY"
+          isDismissible={true}
+          initialUserData={{ name, email, password }}
+          initialAccountType="coach"
+        />
+      )}
     </>
   );
 };
